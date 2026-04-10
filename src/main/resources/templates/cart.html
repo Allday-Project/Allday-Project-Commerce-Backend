@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>장바구니</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/cart.css}">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content">
+        <section class="cart-section" id="cart-section">
+            <div class="cart-header">
+                <h1 class="cart-title" id="cart-title">장바구니</h1>
+                <button class="cart-clear-btn" id="cart-clear-btn">장바구니 비우기</button>
+            </div>
+
+            <!-- 장바구니 아이템 목록 -->
+            <div class="cart-items" id="cart-items">
+                <!-- 서버 데이터 반복 -->
+                <div class="cart-item" th:each="item : ${cartItems}" th:id="'cart-item-' + ${item.id}">
+                    <div class="cart-item-inner">
+                        <div class="cart-item-img">
+                            <img th:src="${item.imageUrl}" th:alt="${item.productName}" class="item-img" loading="lazy">
+                            <span th:if="${item.imageUrl == null}" class="item-img-placeholder">상품 이미지</span>
+                        </div>
+                        <div class="cart-item-info">
+                            <h3 class="cart-item-name" th:text="${item.productName}">상품명</h3>
+                            <div class="cart-item-qty">
+                                <button class="qty-btn qty-minus" th:data-id="${item.id}">−</button>
+                                <span class="qty-value" th:text="${item.quantity}">1</span>
+                                <button class="qty-btn qty-plus" th:data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+                        <div class="cart-item-right">
+                            <span class="cart-item-price">금액: <strong th:text="${#numbers.formatInteger(item.totalPrice, 1, 'COMMA')}">0</strong> 원</span>
+                            <button class="cart-item-remove" th:data-id="${item.id}">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 서버 데이터가 없을 때 더미 데이터 -->
+                <th:block th:if="${cartItems == null or #lists.isEmpty(cartItems)}">
+                    <div class="cart-item" id="cart-item-demo-1">
+                        <div class="cart-item-inner">
+                            <div class="cart-item-img">
+                                <span class="item-img-placeholder">상품 이미지</span>
+                            </div>
+                            <div class="cart-item-info">
+                                <h3 class="cart-item-name">올데이프로젝트 응원봉</h3>
+                                <div class="cart-item-qty">
+                                    <button class="qty-btn qty-minus">−</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn qty-plus">+</button>
+                                </div>
+                            </div>
+                            <div class="cart-item-right">
+                                <span class="cart-item-price">금액: <strong>50,000</strong> 원</span>
+                                <button class="cart-item-remove">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cart-item" id="cart-item-demo-2">
+                        <div class="cart-item-inner">
+                            <div class="cart-item-img">
+                                <span class="item-img-placeholder">상품 이미지</span>
+                            </div>
+                            <div class="cart-item-info">
+                                <h3 class="cart-item-name">명서 볼캡</h3>
+                                <div class="cart-item-qty">
+                                    <button class="qty-btn qty-minus">−</button>
+                                    <span class="qty-value">2</span>
+                                    <button class="qty-btn qty-plus">+</button>
+                                </div>
+                            </div>
+                            <div class="cart-item-right">
+                                <span class="cart-item-price">금액: <strong>40,000</strong> 원</span>
+                                <button class="cart-item-remove">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+
+            <!-- 합계 & 주문 -->
+            <div class="cart-summary" id="cart-summary">
+                <div class="cart-total">
+                    <span class="cart-total-label">총 금액:</span>
+                    <span class="cart-total-value" id="cart-total-value">
+                        <span th:if="${totalPrice != null}" th:text="${#numbers.formatInteger(totalPrice, 1, 'COMMA')}">0</span>
+                        <span th:if="${totalPrice == null}">90,000</span>
+                        원
+                    </span>
+                </div>
+                <button class="cart-order-btn" id="cart-order-btn">주문하기</button>
+            </div>
+        </section>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/cart.js}"></script>
+    </th:block>
+</body>
+</html>

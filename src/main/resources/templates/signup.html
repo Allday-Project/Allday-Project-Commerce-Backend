@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ALLDAY PROJECT 회원가입">
+    <title>회원가입 - ADP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/signup.css}">
+</head>
+<body class="signup-body">
+    <div class="signup-container" id="signup-container">
+        <!-- 로고 -->
+        <a th:href="@{/}" class="signup-logo" id="signup-logo">
+            <span class="logo-text logo-text-large">ADP</span>
+        </a>
+
+        <h1 class="signup-title" id="signup-title">회원가입</h1>
+
+        <!-- 에러 메시지 -->
+        <div class="signup-error" id="signup-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- 회원가입 폼 -->
+        <form th:action="@{/signup}" method="post" class="signup-form" id="signup-form">
+            <div class="form-group" id="form-group-email">
+                <label for="email" class="form-label">이메일</label>
+                <div class="form-row">
+                    <input type="email" id="email" name="email" class="form-input" required autocomplete="email">
+                    <button type="button" class="btn-check-duplicate" id="btn-check-duplicate">중복 확인</button>
+                </div>
+                <span class="form-message" id="email-message"></span>
+            </div>
+            <div class="form-group" id="form-group-password">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" id="password" name="password" class="form-input" required autocomplete="new-password">
+            </div>
+            <div class="form-group" id="form-group-password-confirm">
+                <label for="password-confirm" class="form-label">비밀번호 확인</label>
+                <input type="password" id="password-confirm" name="passwordConfirm" class="form-input" required autocomplete="new-password">
+                <span class="form-message" id="password-match-message"></span>
+            </div>
+            <button type="submit" class="signup-btn" id="signup-submit-btn">회원가입</button>
+        </form>
+    </div>
+
+    <script th:src="@{/js/signup.js}"></script>
+</body>
+</html>
