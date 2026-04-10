@@ -28,7 +28,7 @@ public class Refund {
 
     // 환불 상태 (요청/완료/실패)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false,length = 20)
+    @Column(nullable = false)
     private RefundStatus refundStatus;
 
     private LocalDateTime requestedAt;
