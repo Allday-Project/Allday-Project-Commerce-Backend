@@ -3,10 +3,9 @@ package jpa.basic.alldayprojectcommerce.common.security.auth.service;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.security.auth.dto.CreateUserRequest;
 import jpa.basic.alldayprojectcommerce.common.security.jwt.JwtTokenProvider;
-import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import jpa.basic.alldayprojectcommerce.domain.user.exception.DuplicateEmailException;
 import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
-import jpa.basic.alldayprojectcommerce.domain.user.service.UserService;
+import jpa.basic.alldayprojectcommerce.domain.user.service.UserCommandServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserQueryService userQueryService;
-    private final UserService userService;
+    private final UserCommandServiceImpl userCommandServiceImpl;
 
     public String create(CreateUserRequest request) {
         boolean isExists = userQueryService.getUserByEmail(request.email());
