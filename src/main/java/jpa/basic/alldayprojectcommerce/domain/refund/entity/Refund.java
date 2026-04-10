@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.refund.entity;
 
 import jakarta.persistence.*;
+import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "refunds")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Refund {
+public class Refund extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
