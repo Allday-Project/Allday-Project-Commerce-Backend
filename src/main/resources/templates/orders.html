@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>주문내역</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/orders.css}">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content">
+        <section class="orders-section" id="orders-section">
+            <h1 class="orders-title" id="orders-title">주문내역</h1>
+
+            <!-- 주문 그룹 반복 -->
+            <div class="order-groups" id="order-groups">
+
+                <!-- 서버 데이터 반복 -->
+                <div class="order-group" th:each="group : ${orderGroups}" th:id="'order-group-' + ${group.id}">
+                    <div class="order-group-header">
+                        <div class="order-group-carrier">
+                            <span class="carrier-name" th:text="${group.carrierName}">CJ 대한통운</span>
+                        </div>
+                        <button class="btn-shipping-info" th:data-id="${group.id}">배송지 정보</button>
+                        <span class="order-group-tracking">
+                            <a href="#" class="tracking-link" th:if="${group.trackingUrl}" th:href="${group.trackingUrl}">주문 상세보기 ›</a>
+                        </span>
+                    </div>
+
+                    <div class="order-item" th:each="item : ${group.items}" th:id="'order-item-' + ${item.id}">
+                        <div class="order-item-inner">
+                            <div class="order-item-img">
+                                <img th:if="${item.imageUrl}" th:src="${item.imageUrl}" th:alt="${item.productName}" class="item-img" loading="lazy">
+                                <div th:if="${item.imageUrl == null}" class="item-img-placeholder-sm"></div>
+                            </div>
+                            <div class="order-item-info">
+                                <p class="order-date">주문 날짜 : <span th:text="${item.orderDate}">2025-03-19</span></p>
+                                <p class="order-product">주문 상품 : <span th:text="${item.productName}">상품명</span></p>
+                                <p class="order-qty">수량 : <span th:text="${item.quantity}">1</span>개</p>
+                                <p class="order-price">주문 금액 : <span th:text="${#numbers.formatInteger(item.totalPrice, 1, 'COMMA')}">0</span> 원</p>
+                            </div>
+                            <div class="order-item-status">
+                                <span class="delivery-status" th:text="${item.deliveryStatus}">배송 완료</span>
+                                <button class="btn-order-action" th:text="${item.actionLabel}">환불 요청</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 서버 데이터 없을 때 더미 -->
+                <th:block th:if="${orderGroups == null or #lists.isEmpty(orderGroups)}">
+                    <!-- 그룹 1 -->
+                    <div class="order-group" id="order-group-demo-1">
+                        <div class="order-group-header">
+                            <div class="order-group-carrier">
+                                <span class="carrier-name">CJ 대한통운</span>
+                            </div>
+                            <button class="btn-shipping-info">배송지 정보</button>
+                            <span class="order-group-tracking">
+                                <a href="#" class="tracking-link">주문 상세보기 ›</a>
+                            </span>
+                        </div>
+
+                        <div class="order-item" id="order-item-demo-1">
+                            <div class="order-item-inner">
+                                <div class="order-item-img">
+                                    <div class="item-img-placeholder-sm"></div>
+                                </div>
+                                <div class="order-item-info">
+                                    <p class="order-date">주문 날짜 : <span>2025-03-19</span></p>
+                                    <p class="order-product">주문 상품 : <span>명서 볼캡</span></p>
+                                    <p class="order-qty">수량 : <span>2</span>개</p>
+                                    <p class="order-price">주문 금액 : <span>40,000</span> 원</p>
+                                </div>
+                                <div class="order-item-status">
+                                    <span class="delivery-status">배송 완료</span>
+                                    <button class="btn-order-action">환불 요청</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-item" id="order-item-demo-2">
+                            <div class="order-item-inner">
+                                <div class="order-item-img">
+                                    <div class="item-img-placeholder-sm"></div>
+                                </div>
+                                <div class="order-item-info">
+                                    <p class="order-date">주문 날짜 : <span>2025-03-19</span></p>
+                                    <p class="order-product">주문 상품 : <span>올데이프로젝트 응원봉</span></p>
+                                    <p class="order-qty">수량 : <span>1</span>개</p>
+                                    <p class="order-price">주문 금액 : <span>50,000</span> 원</p>
+                                </div>
+                                <div class="order-item-status">
+                                    <span class="delivery-status">배송 완료</span>
+                                    <button class="btn-order-action">리뷰 요청</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 그룹 2 -->
+                    <div class="order-group" id="order-group-demo-2">
+                        <div class="order-group-header">
+                            <div class="order-group-carrier">
+                                <span class="carrier-name">CJ 대한통운</span>
+                            </div>
+                            <button class="btn-shipping-info">배송지 정보</button>
+                            <span class="order-group-tracking">
+                                <a href="#" class="tracking-link">주문 상세보기 ›</a>
+                            </span>
+                        </div>
+
+                        <div class="order-item" id="order-item-demo-3">
+                            <div class="order-item-inner">
+                                <div class="order-item-img">
+                                    <div class="item-img-placeholder-sm"></div>
+                                </div>
+                                <div class="order-item-info">
+                                    <p class="order-date">주문 날짜 : <span>2025-03-17</span></p>
+                                    <p class="order-product">주문 상품 : <span>명서 볼캡</span></p>
+                                    <p class="order-qty">수량 : <span>4</span>개</p>
+                                    <p class="order-price">총 주문 금액 : <span>80,000</span> 원</p>
+                                </div>
+                                <div class="order-item-status">
+                                    <span class="delivery-status status-confirmed">구매 확정</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </section>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/orders.js}"></script>
+    </th:block>
+</body>
+</html>
