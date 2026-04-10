@@ -34,11 +34,11 @@ public class Product extends BaseEntity {
 
     @NotBlank
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Status status;
 
     @NotBlank
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
     private Category category;
 }
