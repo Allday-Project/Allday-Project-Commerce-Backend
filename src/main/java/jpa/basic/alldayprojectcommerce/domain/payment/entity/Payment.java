@@ -2,7 +2,6 @@ package jpa.basic.alldayprojectcommerce.domain.payment.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
