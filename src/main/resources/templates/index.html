@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>ALLDAY PROJECT</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/index.css}">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content">
+        <!-- 타이틀 (로그인 시 표시) -->
+        <section class="hero-section" id="hero-section" th:if="${session.user != null}">
+            <h1 class="hero-title">ALLDAY PROJECT</h1>
+        </section>
+
+        <!-- 상품 목록 영역 -->
+        <section class="product-section" id="product-section">
+            <!-- 카테고리 탭 + 필터 -->
+            <div class="product-toolbar" id="product-toolbar">
+                <nav class="category-tabs" id="category-tabs">
+                    <a href="#" class="tab-item active" data-category="all" id="tab-all">ALL</a>
+                    <span class="tab-divider">|</span>
+                    <a href="#" class="tab-item" data-category="album" id="tab-album">ALBUM</a>
+                    <span class="tab-divider">|</span>
+                    <a href="#" class="tab-item" data-category="merch" id="tab-merch">MERCH</a>
+                    <span class="tab-divider">|</span>
+                    <a href="#" class="tab-item" data-category="event" id="tab-event">EVENT</a>
+                </nav>
+                <div class="product-filters" id="product-filters">
+                    <label class="filter-checkbox" id="filter-on-sale">
+                        <input type="checkbox" id="on-sale-checkbox">
+                        <span class="checkbox-custom"></span>
+                        <span class="filter-label">판매 중</span>
+                    </label>
+                    <div class="sort-dropdown" id="sort-dropdown">
+                        <button class="sort-btn" id="sort-btn">
+                            <span id="sort-label">신상품순</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <ul class="sort-options" id="sort-options">
+                            <li class="sort-option active" data-sort="newest">신상품순</li>
+                            <li class="sort-option" data-sort="price-asc">낮은가격순</li>
+                            <li class="sort-option" data-sort="price-desc">높은가격순</li>
+                            <li class="sort-option" data-sort="popular">인기순</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상품 그리드 -->
+            <div class="product-grid" id="product-grid">
+                <!-- 상품 카드: 서버 데이터 반복 -->
+                <article class="product-card" th:each="product : ${products}" th:id="'product-' + ${product.id}">
+                    <a th:href="@{/product/{id}(id=${product.id})}" class="product-link">
+                        <div class="product-img-wrapper">
+                            <img th:src="${product.imageUrl}" th:alt="${product.name}" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name" th:text="${product.name}">상품명</h3>
+                            <p class="product-price">
+                                <span class="price-currency">₩</span>
+                                <span class="price-value" th:text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">0</span>
+                            </p>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- 서버 데이터가 없을 때 더미 데이터 표시 -->
+                <th:block th:if="${products == null or #lists.isEmpty(products)}">
+                    <article class="product-card" id="product-demo-1">
+                        <a href="#" class="product-link">
+                            <div class="product-img-wrapper">
+                                <div class="product-img-placeholder"></div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">ALLDAY PROJECT 2026 'Be My Valentine' EMBROIDERY CORDUROY BALL CAP</h3>
+                                <p class="product-price"><span class="price-currency">₩</span><span class="price-value">39,000</span></p>
+                            </div>
+                        </a>
+                    </article>
+                    <article class="product-card" id="product-demo-2">
+                        <a href="#" class="product-link">
+                            <div class="product-img-wrapper">
+                                <div class="product-img-placeholder"></div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">ALLDAY PROJECT 2026 'One More Time' SIGNATURE CREWNECK SWEATSHIRT</h3>
+                                <p class="product-price"><span class="price-currency">₩</span><span class="price-value">65,000</span></p>
+                            </div>
+                        </a>
+                    </article>
+                    <article class="product-card" id="product-demo-3">
+                        <a href="#" class="product-link">
+                            <div class="product-img-wrapper">
+                                <div class="product-img-placeholder"></div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">ALLDAY PROJECT 2026 OFFICIAL MERCH – VINTAGE METAL CAT KEYRING (Special Ed.)</h3>
+                                <p class="product-price"><span class="price-currency">₩</span><span class="price-value">20,000</span></p>
+                            </div>
+                        </a>
+                    </article>
+                    <article class="product-card" id="product-demo-4">
+                        <a href="#" class="product-link">
+                            <div class="product-img-wrapper">
+                                <div class="product-img-placeholder"></div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">ALLDAY PROJECT 2026 'The AP Collection' AIRLINE TICKET – EXCLUSIVE ACCESS PASS</h3>
+                                <p class="product-price"><span class="price-currency">₩</span><span class="price-value">60,000</span></p>
+                            </div>
+                        </a>
+                    </article>
+                    <article class="product-card" id="product-demo-5">
+                        <a href="#" class="product-link">
+                            <div class="product-img-wrapper">
+                                <div class="product-img-placeholder"></div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">ALLDAY PROJECT 2026 'The AP Collection' VINYL RECORD & EXCLUSIVE BOOKLET SET</h3>
+                                <p class="product-price"><span class="price-currency">₩</span><span class="price-value">70,000</span></p>
+                            </div>
+                        </a>
+                    </article>
+                </th:block>
+            </div>
+        </section>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/index.js}"></script>
+    </th:block>
+</body>
+</html>

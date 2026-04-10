@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ALLDAY PROJECT - 공식 굿즈 스토어">
+    <title layout:title-pattern="$CONTENT_TITLE - ADP">ADP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="main-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <a th:href="@{/}" class="logo" id="logo-link">
+                    <span class="logo-text">ADP</span>
+                </a>
+                <div class="search-wrapper" id="search-wrapper">
+                    <button class="search-icon-btn" id="search-toggle-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                    <input type="text" class="search-input" id="search-input" placeholder="검색어를 입력하세요" autocomplete="off">
+                    <div class="search-dropdown" id="search-dropdown">
+                        <div class="search-dropdown-title">인기 검색어</div>
+                        <ul class="search-keyword-list" id="search-keyword-list">
+                            <li><span class="keyword-rank">1.</span> 한정판매</li>
+                            <li><span class="keyword-rank">2.</span> look at me</li>
+                            <li><span class="keyword-rank">3.</span> one more time</li>
+                            <li><span class="keyword-rank">4.</span> 리을 신상</li>
+                            <li><span class="keyword-rank">5.</span> 신상 앨범</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- 비로그인 상태 -->
+                <div class="auth-links" id="auth-links-guest" th:if="${session.user == null}">
+                    <a th:href="@{/login}" class="auth-link" id="login-link">로그인</a>
+                    <span class="auth-divider">|</span>
+                    <a th:href="@{/signup}" class="auth-link" id="signup-link">회원가입</a>
+                </div>
+                <!-- 로그인 상태 -->
+                <div class="auth-links logged-in" id="auth-links-user" th:if="${session.user != null}">
+                    <a th:href="@{/cart}" class="header-icon-btn" id="cart-btn">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <path d="M16 10a4 4 0 01-8 0"/>
+                        </svg>
+                        <span class="badge" id="cart-badge">0</span>
+                    </a>
+                    <span class="auth-divider">|</span>
+                    <a th:href="@{/logout}" class="auth-link" id="logout-link">로그아웃</a>
+                </div>
+            </div>
+        </div>
+        <!-- 검색 키워드 바 (로그인 시) -->
+        <div class="search-keywords-bar" id="search-keywords-bar" th:if="${session.user != null}">
+            <div class="keywords-scroll">
+                <span class="keyword-tag">1. 한정판매</span>
+                <span class="keyword-tag">2. look at me</span>
+                <span class="keyword-tag">3. one more time</span>
+                <span class="keyword-tag">4. 리을 신상</span>
+                <span class="keyword-tag">5. 신상 앨범</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" layout:fragment="content">
+    </main>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container" id="chatbot-container">
+        <button class="chatbot-toggle" id="chatbot-toggle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+        </button>
+        <div class="chatbot-panel" id="chatbot-panel">
+            <div class="chatbot-header">
+                <span class="chatbot-title">챗봇 상담</span>
+            </div>
+            <div class="chatbot-body" id="chatbot-body">
+                <div class="chatbot-menu">
+                    <button class="chatbot-menu-btn" id="chatbot-order-btn">주문 내역 조회</button>
+                    <button class="chatbot-menu-btn" id="chatbot-cart-btn">장바구니 조회</button>
+                    <button class="chatbot-menu-btn" id="chatbot-mypage-btn">마이페이지</button>
+                    <button class="chatbot-menu-btn" id="chatbot-agent-btn">상담원 연결</button>
+                    <button class="chatbot-menu-btn chatbot-end-btn" id="chatbot-end-btn">상담 종료</button>
+                </div>
+            </div>
+            <div class="chatbot-footer">
+                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="메시지를 입력하세요">
+                <button class="chatbot-send-btn" id="chatbot-send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/common.js}"></script>
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

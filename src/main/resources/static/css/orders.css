@@ -1,0 +1,196 @@
+/* ===========================
+   ADP Commerce - Orders Page
+   =========================== */
+.orders-section {
+    padding: 32px 0 60px;
+}
+
+.orders-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 32px;
+}
+
+/* Order Groups */
+.order-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.order-group {
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Group Header */
+.order-group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.order-group-carrier {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.carrier-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.btn-shipping-info {
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #1a1a1a;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-shipping-info:hover {
+    background: #333;
+}
+
+.order-group-tracking {
+    margin-left: auto;
+}
+
+.tracking-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.tracking-link:hover {
+    color: #1a1a1a;
+    opacity: 1;
+}
+
+/* Order Item */
+.order-item {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-item-inner {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    gap: 16px;
+}
+
+/* Item Image */
+.order-item-img {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+
+.order-item-img .item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-img-placeholder-sm {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #e0e0e0 0%, #ccc 100%);
+}
+
+/* Item Info */
+.order-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-item-info p {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.7;
+}
+
+.order-item-info p span {
+    font-weight: 500;
+    color: #333;
+}
+
+.order-date span,
+.order-product span {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Item Status */
+.order-item-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.delivery-status {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.status-confirmed {
+    color: #2e7d32;
+}
+
+.btn-order-action {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-order-action:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .order-item-inner {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .order-item-status {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .order-group-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
