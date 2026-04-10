@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.payment.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name="payments")
 public class Payment extends BaseEntity {
@@ -32,7 +33,7 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Long finalAmount;
 
-    @Column(nullable = false,length = 20)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 

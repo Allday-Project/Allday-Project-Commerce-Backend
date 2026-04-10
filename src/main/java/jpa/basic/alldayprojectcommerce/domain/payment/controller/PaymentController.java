@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/orders/{orderUid}/payments")
+@RequestMapping("/api/orders/{orderUid}/payments")
 public class PaymentController {
 
     private final PaymentCommandServiceImpl paymentService;
