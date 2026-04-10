@@ -1,4 +1,4 @@
 package jpa.basic.alldayprojectcommerce.domain.user.dto.request;
 
-public record PatchmeUserRequestDto() {
+public record UpdatemeUserRequestDto() {
 }

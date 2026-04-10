@@ -1,3 +1,3 @@
 package jpa.basic.alldayprojectcommerce.domain.user.dto.response;
 
-public record PatchmeUserResponseDto() {}
+public record UpdatemeUserResponseDto() {}
