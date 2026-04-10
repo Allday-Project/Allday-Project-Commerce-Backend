@@ -20,7 +20,7 @@ public class Payment extends BaseEntity {
     @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-    @Column(name="payment_uid",nullable = false,unique = true)
+    @Column(name="payment_uid",nullable = false,unique = true,length = 100)
     private String paymentUid;
 
     @Column(nullable = false)
@@ -32,7 +32,7 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Long finalAmount;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 20)
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
