@@ -18,9 +18,8 @@ public class Payment extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
     @Column(name="payment_uid",nullable = false,unique = true)
     private String paymentUid;
@@ -44,8 +43,8 @@ public class Payment extends BaseEntity {
     private LocalDateTime paidAt;
 
     @Builder
-    public Payment(Order order, String paymentUid, Long amount, Long deliveryFee, Long finalAmount, PaymentStatus status, LocalDateTime expiresAt) {
-        this.order = order;
+    public Payment(Long orderId, String paymentUid, Long amount, Long deliveryFee, Long finalAmount, PaymentStatus status, LocalDateTime expiresAt) {
+        this.orderId = orderId;
         this.paymentUid = paymentUid;
         this.amount = amount;
         this.deliveryFee = deliveryFee;
