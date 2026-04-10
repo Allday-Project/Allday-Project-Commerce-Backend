@@ -30,9 +30,11 @@ public class Refund extends BaseEntity {
     // 환불 상태 (요청/완료/실패)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RefundStatus refundStatus;
+    private RefundStatus status;
 
+    @Column(nullable = false)
     private LocalDateTime requestedAt;
+
     private LocalDateTime refundedAt;
     private LocalDateTime failedAt;
 
