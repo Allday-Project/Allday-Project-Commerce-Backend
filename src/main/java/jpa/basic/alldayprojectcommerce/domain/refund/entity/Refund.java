@@ -3,6 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.refund.entity;
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -41,8 +42,12 @@ public class Refund extends BaseEntity {
     @Column(length = 100)
     private String failureReason;
 
-
-
-
-
+    @Builder
+    public Refund(Long orderId, String paymentUid, String reason, RefundStatus status, LocalDateTime requestedAt) {
+        this.orderId = orderId;
+        this.paymentUid = paymentUid;
+        this.reason = reason;
+        this.status = status;
+        this.requestedAt = requestedAt;
+    }
 }
