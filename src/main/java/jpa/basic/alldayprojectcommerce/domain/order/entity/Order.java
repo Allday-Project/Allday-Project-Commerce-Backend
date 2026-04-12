@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
+import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,8 +17,9 @@ public class Order extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(nullable = false, length = 100)
     private String orderUid;
@@ -32,8 +34,8 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     @Builder
-    public Order(Long userId, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
-        this.userId = userId;
+    public Order(User user, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
+        this.user = user;
         this.orderUid = orderUid;
         this.orderNumber = orderNumber;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;

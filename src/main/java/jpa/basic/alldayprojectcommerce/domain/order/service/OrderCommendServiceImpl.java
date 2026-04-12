@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class OrderCommendServiceImpl implements OrderCommendService {
+@Transactional(readOnly = true)
+public class OrderCommendServiceImpl implements OrderCommendService{
 
     private final OrderRepository orderRepository;
 }
