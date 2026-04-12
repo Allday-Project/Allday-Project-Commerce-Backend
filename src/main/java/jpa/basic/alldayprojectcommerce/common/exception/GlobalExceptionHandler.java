@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.common.exception;
 
+import jpa.basic.alldayprojectcommerce.common.security.auth.exception.AuthException;
 import jpa.basic.alldayprojectcommerce.domain.user.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,15 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 처리
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleException(UserException exception) {
+        log.error("[API - ERROR] 발생 원인: ", exception);
+        ErrorCode errorCode = exception.getErrorCode();
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResponse.fail(errorCode));
+    }
+
+    // Auth 예외 처리
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthException(AuthException exception) {
         log.error("[API - ERROR] 발생 원인: ", exception);
         ErrorCode errorCode = exception.getErrorCode();
         return ResponseEntity.status(errorCode.getStatus())

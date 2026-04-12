@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class OrderCommendServiceImpl {
+public class OrderCommendServiceImpl implements OrderCommendService {
 
     private final OrderRepository orderRepository;
 }
