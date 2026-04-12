@@ -32,9 +32,21 @@ public class AuthService {
     private final UserCommandService    userCommandService;
     private final CookieUtils           cookieUtils;
 
-    public void signup(CreateUserRequest request) {
+    public void signup(CreateUserRequest request, HttpServletResponse response) {
         String encodedPassword = passwordEncoder.encode(request.password());
-        userCommandService.create(request.email(), encodedPassword);
+        User user = userCommandService.create(request.email(), encodedPassword);
+
+        AuthTokens authTokens = AuthTokens.of(
+                jwtTokenProvider.createAccessToken(user.getId(), user.getRole().name()),
+                jwtTokenProvider.createRefreshToken(user.getId())
+        );
+
+        response.addCookie(cookieUtils.createCookie(
+                AuthConstants.ACCESS_TOKEN, authTokens.accessToken(), 30 * 60
+        ));
+        response.addCookie(cookieUtils.createCookie(
+                AuthConstants.REFRESH_TOKEN, authTokens.refreshToken(), jwtTokenProvider.getRefreshTokenValidityInSeconds()
+        ));
     }
 
     public void login(LoginUserRequest request, HttpServletResponse response) {
