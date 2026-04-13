@@ -1,13 +1,13 @@
-package jpa.basic.alldayprojectcommerce.domain.user.exception;
+package jpa.basic.alldayprojectcommerce.common.security.auth.exception;
 
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter
-public class UserException extends RuntimeException {
+public class AuthException extends RuntimeException {
     private final ErrorCode errorCode;
 
-    public UserException(ErrorCode errorCode) {
+    public AuthException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }

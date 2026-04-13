@@ -9,21 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
-public class UserQueryServiceImpl implements UserQueryService {
+public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
 
     @Override
-    public User getByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    @Override
-    public User getById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public User create(String email, String encodedPassword) {
+        if (userRepository.existsUserByEmail(email)) {
+            throw new CustomException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+        return userRepository.save(User.createUser(email, encodedPassword));
     }
 }
+

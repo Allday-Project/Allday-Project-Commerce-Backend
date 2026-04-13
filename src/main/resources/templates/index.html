@@ -129,6 +129,41 @@
                 </th:block>
             </div>
         </section>
+
+        <!-- 상품 상세 모달 -->
+        <div class="modal-overlay" id="product-detail-modal">
+            <div class="modal-content product-detail-modal" id="product-detail-modal-content">
+                <button class="modal-close" id="product-detail-close">&times;</button>
+                <div class="product-detail-body">
+                    <div class="product-detail-left">
+                        <div class="product-detail-img" id="product-detail-img">
+                            <img id="modal-product-img" src="" alt="" class="detail-img">
+                            <div class="detail-img-placeholder" id="modal-img-placeholder"></div>
+                        </div>
+                    </div>
+                    <div class="product-detail-right">
+                        <p class="detail-label">상품 상세</p>
+                        <div class="detail-description" id="modal-product-description">
+                            <ul class="detail-desc-list">
+                                <li>• PRE-ORDER 선착 입금</li>
+                                <li>• 2026년 2월 12일 10:00 PM ~ 2월 2025 11:11 PM</li>
+                                <li>• 배송 예정일</li>
+                                <li>• 2026년 4월 27일 이후 순차 배송</li>
+                                <li>• OFFICIAL MERCH 기존 판매 제품으로 수량 배정이 순차적으로 진행됩니다. 별도의 배송 안내 메일이 발송됩니다.</li>
+                            </ul>
+                        </div>
+                        <h2 class="detail-product-name" id="modal-product-name">ALLDAY PROJECT 2026 'Be My Valentine' EMBROIDERY CORDUROY BALL CAP</h2>
+                        <p class="detail-product-price" id="modal-product-price">
+                            <span class="price-currency">₩</span><span class="price-value">39,000</span>
+                        </p>
+                        <div class="detail-actions">
+                            <button class="detail-btn detail-btn-cart" id="modal-btn-cart">장바구니</button>
+                            <button class="detail-btn detail-btn-buy" id="modal-btn-buy">구매하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <th:block layout:fragment="scripts">
@@ -136,3 +171,4 @@
     </th:block>
 </body>
 </html>
+
