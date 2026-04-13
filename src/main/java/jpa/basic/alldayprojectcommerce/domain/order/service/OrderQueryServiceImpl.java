@@ -1,5 +1,8 @@
 package jpa.basic.alldayprojectcommerce.domain.order.service;
 
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
+import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,5 +15,14 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
     private final OrderRepository orderRepository;
 
+
+
+    // 소영 추가. Payment에서 사용할 예정. orderUid로 order 찾아오는 메서드
+    @Override
+    public Order getOrderByOrderUid(String orderUid) {
+        return orderRepository.findByOrderUid(orderUid).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+    }
 }
 
