@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -20,10 +20,10 @@ public class User extends BaseEntity {
     private String name;
 
     @Email
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(length = 100)
+    @Column
     private String password;
 
     @Column(length = 100)
@@ -31,5 +31,14 @@ public class User extends BaseEntity {
 
     private String address;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
 
+    public static User createUser(String email, String encodedPassword) {
+        User user = new User();
+        user.email = email;
+        user.password = encodedPassword;
+        return user;
+    }
 }

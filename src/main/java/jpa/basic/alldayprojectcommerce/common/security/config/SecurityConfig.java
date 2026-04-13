@@ -1,6 +1,6 @@
 package jpa.basic.alldayprojectcommerce.common.security.config;
 
-import jpa.basic.alldayprojectcommerce.common.security.JwtAuthenticationFilter;
+import jpa.basic.alldayprojectcommerce.common.security.jwt.JwtAuthenticationFilter;
 import jpa.basic.alldayprojectcommerce.common.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/", "/login", "/signup",
-                        "/cart", "/mypage", "/orders", "/orders/**",
                         "/css/**", "/js/**", "/images/**",
                         "/assets/**", "/img/**", "/error", "/favicon.ico",
                         "/h2-console/**"

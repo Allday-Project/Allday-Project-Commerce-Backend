@@ -2,9 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.user.service;
 
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 
-public interface UserQueryService {
+public interface UserCommandService {
 
-    User getByEmail(String email);
-
-    User getById(Long userId);
+    User create(String email, String encodedPassword);
 }

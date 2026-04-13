@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>주문서</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/checkout.css}">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content">
+        <section class="checkout-section" id="checkout-section">
+            <h1 class="checkout-title" id="checkout-title">주문서</h1>
+
+            <div class="checkout-layout">
+                <!-- 좌측: 주문 정보 -->
+                <div class="checkout-left" id="checkout-left">
+                    <!-- 주문 번호 -->
+                    <div class="checkout-block" id="checkout-order-number">
+                        <div class="checkout-row">
+                            <span class="checkout-label">주문 번호</span>
+                            <span class="checkout-value" id="checkout-order-id" th:text="${order?.orderNumber ?: 'ODN-20250319-a5b2c3d4'}">ODN-20250319-a5b2c3d4</span>
+                        </div>
+                    </div>
+
+                    <!-- 주문 상품 (선택적 표시) -->
+                    <div class="checkout-block" id="checkout-products" th:if="${orderItems != null}">
+                        <h2 class="checkout-block-title">주문 상품</h2>
+                        <div class="checkout-product-item" th:each="item : ${orderItems}">
+                            <div class="checkout-product-img">
+                                <img th:if="${item.imageUrl}" th:src="${item.imageUrl}" class="checkout-img" loading="lazy">
+                                <div th:if="${item.imageUrl == null}" class="checkout-img-placeholder"></div>
+                            </div>
+                            <div class="checkout-product-info">
+                                <span class="checkout-product-name" th:text="${item.productName}">상품명</span>
+                                <span class="checkout-product-qty">수량: <span th:text="${item.quantity}">1</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주문자 -->
+                    <div class="checkout-block" id="checkout-orderer">
+                        <div class="checkout-row">
+                            <span class="checkout-label">주문자</span>
+                        </div>
+                        <div class="checkout-info-content" id="orderer-info">
+                            <!-- 미등록 상태 -->
+                            <div class="checkout-info-empty" id="orderer-empty">
+                                <p class="checkout-info-name" id="orderer-name" th:text="${orderer?.name ?: '박경화'}">박경화</p>
+                                <p class="checkout-info-hint" id="orderer-hint">주문자를 등록해주세요.</p>
+                                <button class="checkout-register-btn" id="btn-register-orderer">등록</button>
+                            </div>
+                            <!-- 등록 완료 상태 (숨김) -->
+                            <div class="checkout-info-filled" id="orderer-filled" style="display:none;">
+                                <p class="checkout-info-name" id="orderer-filled-name">박경화</p>
+                                <p class="checkout-info-detail" id="orderer-filled-email">example@gmail.com</p>
+                                <p class="checkout-info-detail" id="orderer-filled-phone">01012345678</p>
+                                <button class="checkout-change-btn" id="btn-change-orderer">변경</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 배송 주소 -->
+                    <div class="checkout-block" id="checkout-shipping">
+                        <div class="checkout-row">
+                            <span class="checkout-label">배송 주소</span>
+                        </div>
+                        <div class="checkout-info-content" id="shipping-info">
+                            <!-- 미등록 상태 -->
+                            <div class="checkout-info-empty" id="shipping-empty">
+                                <p class="checkout-info-hint">새로운 주소를 등록해주세요.</p>
+                                <button class="checkout-register-btn" id="btn-register-shipping">등록</button>
+                            </div>
+                            <!-- 등록 완료 상태 (숨김) -->
+                            <div class="checkout-info-filled" id="shipping-filled" style="display:none;">
+                                <p class="checkout-info-detail" id="shipping-filled-address">발산로 7번길 13 40368</p>
+                                <button class="checkout-change-btn" id="btn-change-shipping">변경</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 우측: 결제 금액 -->
+                <div class="checkout-right" id="checkout-right">
+                    <div class="payment-box" id="payment-box">
+                        <h2 class="payment-box-title">결제 금액</h2>
+                        <div class="payment-box-row">
+                            <span>상품 금액</span>
+                            <span id="payment-product-price">
+                                <span th:if="${productTotal != null}" th:text="${#numbers.formatInteger(productTotal, 1, 'COMMA')}">0</span>
+                                <span th:if="${productTotal == null}">19,800</span>원
+                            </span>
+                        </div>
+                        <div class="payment-box-row">
+                            <span>배송비</span>
+                            <span id="payment-delivery-fee">
+                                <span th:if="${shippingFee != null}" th:text="${#numbers.formatInteger(shippingFee, 1, 'COMMA')}">0</span>
+                                <span th:if="${shippingFee == null}">5,000</span>원
+                            </span>
+                        </div>
+                        <div class="payment-box-divider"></div>
+                        <div class="payment-box-row payment-box-total">
+                            <span>총 결제 금액</span>
+                            <span id="payment-total-price">
+                                <span th:if="${grandTotal != null}" th:text="${#numbers.formatInteger(grandTotal, 1, 'COMMA')}">0</span>
+                                <span th:if="${grandTotal == null}">19,800</span>원
+                            </span>
+                        </div>
+                        <button class="payment-submit-btn" id="payment-submit-btn">
+                            <span id="payment-submit-amount">19,800</span>원 결제하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 배송 주소 등록 모달 -->
+        <div class="modal-overlay" id="shipping-modal">
+            <div class="modal-content shipping-modal-content" id="shipping-modal-content">
+                <h2 class="modal-title">배송 주소 등록</h2>
+                <form id="shipping-form" class="shipping-form">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">주소</label>
+                        <div class="modal-input-row">
+                            <svg class="modal-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="shipping-address" class="modal-form-input" placeholder="상세입력하기">
+                        </div>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">주소상세</label>
+                        <div class="modal-input-row">
+                            <svg class="modal-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="shipping-address-detail" class="modal-form-input" placeholder="한현면이가">
+                        </div>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">전화번호</label>
+                        <input type="tel" id="shipping-phone" class="modal-form-input" placeholder="01012345678">
+                        <span class="modal-form-hint">( - )를 빼고 전화번호를 여러 수</span>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-checkbox-label">
+                            <input type="checkbox" id="shipping-default" checked>
+                            <span class="modal-checkbox-custom"></span>
+                            <span>기본 배송지로 등록하며 해당 배송 주소를 등록합니다</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="modal-submit-btn" id="shipping-submit-btn">등록</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 주문자 등록 모달 -->
+        <div class="modal-overlay" id="orderer-modal">
+            <div class="modal-content orderer-modal-content" id="orderer-modal-content">
+                <h2 class="modal-title">주문자 정보 등록</h2>
+                <form id="orderer-form" class="shipping-form">
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">이름</label>
+                        <input type="text" id="orderer-input-name" class="modal-form-input" placeholder="이름을 입력하세요">
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">이메일</label>
+                        <input type="email" id="orderer-input-email" class="modal-form-input" placeholder="example@gmail.com">
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="modal-form-label">전화번호</label>
+                        <input type="tel" id="orderer-input-phone" class="modal-form-input" placeholder="01012345678">
+                    </div>
+                    <button type="submit" class="modal-submit-btn" id="orderer-submit-btn">등록</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/checkout.js}"></script>
+    </th:block>
+</body>
+</html>
