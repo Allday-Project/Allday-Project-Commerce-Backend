@@ -1,12 +1,12 @@
-package jpa.basic.alldayprojectcommerce.common.security;
+package jpa.basic.alldayprojectcommerce.common.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.AuthConstants;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
-import jpa.basic.alldayprojectcommerce.common.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 @Slf4j
@@ -56,10 +57,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AuthConstants.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(AuthConstants.BEARER_PREFIX)) {
-            return bearerToken.substring(AuthConstants.BEARER_PREFIX.length());
-        }
-        return null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> AuthConstants.ACCESS_TOKEN.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 }

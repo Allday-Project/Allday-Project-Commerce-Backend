@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.common.exception;
 
-import jpa.basic.alldayprojectcommerce.domain.user.exception.UserException;
+import jpa.basic.alldayprojectcommerce.common.ApiResponse;
+import jpa.basic.alldayprojectcommerce.common.security.auth.exception.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,8 +15,8 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     // 커스텀 예외 처리
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleException(UserException exception) {
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleException(CustomException exception) {
         log.error("[API - ERROR] 발생 원인: ", exception);
         ErrorCode errorCode = exception.getErrorCode();
         return ResponseEntity.status(errorCode.getStatus())

@@ -1,10 +1,10 @@
 package jpa.basic.alldayprojectcommerce.common.security;
 
 import io.micrometer.common.lang.Nullable;
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
-import jpa.basic.alldayprojectcommerce.domain.user.exception.UserException;
 import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -38,7 +38,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         if (authentication == null
                 || authentication.getPrincipal().equals("anonymousUser")
                 || !(authentication.getPrincipal() instanceof LoginUserInfoDto)) {
-            throw new UserException(ErrorCode.UNAUTHORIZED_ACCESS);
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         // JwtAuthenticationFilter에서 Principal에 저장한 LoginUserInfoDto 객체를 그대로 반환
