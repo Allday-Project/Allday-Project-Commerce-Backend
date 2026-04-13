@@ -47,6 +47,9 @@ dependencies {
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    // https://github.com/aventrix/jnanoid
+    implementation "com.aventrix.jnanoid:jnanoid:2.0.0"
 }
 
 tasks.named('test') {
