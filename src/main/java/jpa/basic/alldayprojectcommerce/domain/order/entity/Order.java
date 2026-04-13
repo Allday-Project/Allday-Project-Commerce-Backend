@@ -14,29 +14,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
     @Column(nullable = false, length = 100)
-    private String orderUid;
-
+    private String orderRef;
     @Column(nullable = false, length = 100, unique = true)
     private String orderNumber;
-
     @Column(nullable = false)
     private Long totalAmount;
-
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @Builder
-    public Order(User user, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
+    public Order(User user, String orderRef, String orderNumber, Long totalAmount, OrderStatus status) {
         this.user = user;
-        this.orderUid = orderUid;
+        this.orderRef = orderRef;
         this.orderNumber = orderNumber;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
         this.status = status;
