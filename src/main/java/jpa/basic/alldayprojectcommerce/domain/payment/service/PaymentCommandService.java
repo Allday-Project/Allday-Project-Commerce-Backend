@@ -6,5 +6,5 @@ import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.CreatePayment
 
 @Transactional
 public interface PaymentCommandService {
-    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request);
+    CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request);
 }

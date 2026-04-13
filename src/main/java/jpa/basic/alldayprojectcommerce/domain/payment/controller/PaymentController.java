@@ -1,14 +1,14 @@
 package jpa.basic.alldayprojectcommerce.domain.payment.controller;
 
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
+import jpa.basic.alldayprojectcommerce.domain.payment.dto.request.CreatePaymentRequest;
+import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.CreatePaymentResponse;
+import jpa.basic.alldayprojectcommerce.domain.payment.service.PaymentCommandService;
 import jpa.basic.alldayprojectcommerce.domain.payment.service.PaymentCommandServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -16,14 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/orders/{orderUid}/payments")
 public class PaymentController {
 
-    private final PaymentCommandServiceImpl paymentCommandService;
+    private PaymentCommandService paymentCommandService;
 
-    public ResponseEntity<ApiResponse<Void>> createPayment(
-            @PathVariable String orderUid
-    ){
+    public ResponseEntity<ApiResponse<CreatePaymentResponse>> createPayment(
+            @PathVariable String orderUid,
+            @RequestBody CreatePaymentRequest request
+            ){
+        CreatePaymentResponse response = paymentCommandService.createPayment(orderUid, request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED));
+                .body(ApiResponse.success(HttpStatus.CREATED,response));
     }
 
 }
