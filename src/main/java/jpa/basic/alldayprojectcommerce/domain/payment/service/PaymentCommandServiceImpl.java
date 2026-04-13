@@ -3,6 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.payment.service;
 import groovy.util.logging.Slf4j;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderQueryService;
@@ -27,9 +28,16 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
     private final OrderQueryService orderQueryService;
 
     @Override   // 결제 생성 메서드
-    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request) {
+    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfoDto loginUser) {
         // 주문 정보 조회
         Order order = orderQueryService.getOrderByOrderUid(orderUid);
+
+        // orderUid를 생성한 주문자와 결제 생성한 로그인 유저가 일치하는지 검증
+        Long orderUserId = order.getUser().getId();
+        Long loginUserId = loginUser.id();
+        if(!orderUserId.equals(loginUserId)){
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 결제 금액 받아오기
         Long amount = request.getAmount();
