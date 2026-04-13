@@ -30,7 +30,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/", "/login", "/signup",
-                        "/cart", "/mypage", "/orders", "/orders/**",
                         "/css/**", "/js/**", "/images/**",
                         "/assets/**", "/img/**", "/error", "/favicon.ico",
                         "/h2-console/**"

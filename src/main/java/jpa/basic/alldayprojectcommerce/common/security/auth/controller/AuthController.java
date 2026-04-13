@@ -3,7 +3,7 @@ package jpa.basic.alldayprojectcommerce.common.security.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jpa.basic.alldayprojectcommerce.common.exception.ApiResponse;
+import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.dto.request.CreateUserRequest;
 import jpa.basic.alldayprojectcommerce.common.security.auth.dto.request.LoginUserRequest;
 import jpa.basic.alldayprojectcommerce.common.security.auth.service.AuthService;
