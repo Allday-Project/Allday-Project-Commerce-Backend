@@ -1,7 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.order.dto.response;
 
 public record CreateOrderResponse(
-        String orderRef,
+        String orderUid,
         String orderNumber,
         Long totalAmount
 ) {

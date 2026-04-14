@@ -21,7 +21,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
     @Column(nullable = false, length = 100)
-    private String orderRef;
+    private String orderUid;
     @Column(nullable = false, length = 100, unique = true)
     private String orderNumber;
     @Column(nullable = false)
@@ -30,9 +30,9 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     @Builder
-    public Order(User user, String orderRef, String orderNumber, Long totalAmount, OrderStatus status) {
+    public Order(User user, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
         this.user = user;
-        this.orderRef = orderRef;
+        this.orderUid = orderUid;
         this.orderNumber = orderNumber;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
         this.status = status;

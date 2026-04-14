@@ -56,7 +56,7 @@ public class OrderCommendServiceImpl implements OrderCommendService {
         Order savedOrder = orderRepository.save(order);
 
         return new CreateOrderResponse(
-                savedOrder.getOrderRef(),
+                savedOrder.getOrderUid(),
                 savedOrder.getOrderNumber(),
                 savedOrder.getTotalAmount()
         );

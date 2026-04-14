@@ -5,7 +5,7 @@ import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import java.time.LocalDateTime;
 
 public record OrderSummaryResponse(
-        String orderRef,
+        String orderUid,
         String orderNumber,
         Long totalAmount,
         OrderStatus orderStatus,
