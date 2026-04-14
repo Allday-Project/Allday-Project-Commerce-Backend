@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
+import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,4 +42,7 @@ public class Order extends BaseEntity {
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
         this.status = status;
     }
-}
+
+    public void markPaid(){
+        this.status = OrderStatus.PAID;
+    }}

@@ -24,5 +24,12 @@ public class OrderQueryServiceImpl implements OrderQueryService {
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
     }
+
+    @Override
+    public Order getOrderByOrderUidForUpdate(String orderUid) {
+        return orderRepository.findByOrderUidForUpdate(orderUid).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+    }
 }
 

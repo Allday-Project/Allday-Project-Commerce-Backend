@@ -32,15 +32,15 @@ public enum ErrorCode {
     // 주문 도메인 (O###)
     ORDER_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST,"O001","주문 상태가 결제 대기 상태가 아닙니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND,"O002","주문 정보를 찾을 수 없습니다."),
-
+    ORDER_INVALID_UID(HttpStatus.BAD_REQUEST, "O003", "유효하지 않은 주문 UID 입니다."),
 
 
     // 결제 도메인(PAY###)
     PAYMENT_ALREADY_SUCCESS(HttpStatus.BAD_REQUEST,"PAY001","해당 주문에 대하여 이미 성공한 결제 건이 존재합니다."),
     PAYMENT_INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "PAY002", "올바르지 않은 결제 금액입니다."),
-
-
-
+    PAYMENT_INVALID_UID(HttpStatus.BAD_REQUEST, "PAY003", "유효하지 않은 결제 UID 입니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAY004", "결제 정보를 찾을 수 없습니다."),
+    PAYMENT_ORDER_NOT_MATCHES(HttpStatus.NOT_FOUND, "PAY005", "주문 정보와 결제 정보가 일치하지 않습니다."),
 ;
 
 
