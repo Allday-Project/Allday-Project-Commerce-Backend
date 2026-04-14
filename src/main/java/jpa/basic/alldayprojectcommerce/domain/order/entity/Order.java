@@ -20,20 +20,17 @@ public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-    @Column(nullable = false, length = 100)
+    @Column(unique = true, nullable = false, length = 30)
     private String orderUid;
-    @Column(nullable = false, length = 100, unique = true)
-    private String orderNumber;
     @Column(nullable = false)
     private Long totalAmount;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @Builder
-    public Order(User user, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
+    public Order(User user, String orderUid, Long totalAmount, OrderStatus status) {
         this.user = user;
         this.orderUid = orderUid;
-        this.orderNumber = orderNumber;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
         this.status = status;
     }

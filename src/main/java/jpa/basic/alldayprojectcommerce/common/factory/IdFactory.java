@@ -25,25 +25,6 @@ public class IdFactory {
     private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     /**
-     * prefix와 NanoId를 조합한 ID를 생성합니다.
-     *
-     * @param prefix ID 앞에 붙일 문자열 (예: ORDER, USER)
-     * @param length 생성할 NanoId 길이
-     * @return prefix.nanoId 형태의 문자열
-     *
-     * 예: ORDER.aB3xYz91Qp
-     */
-    public String generate(String prefix, int length) {
-        String nanoId = NanoIdUtils.randomNanoId(
-                random,
-                DEFAULT_ALPHABET,
-                length
-        );
-
-        return String.format("%s-%s", prefix, nanoId);
-    }
-
-    /**
      * prefix + 날짜(yyyyMMdd) + NanoId를 조합한 ID를 생성한다.
      *
      * @param prefix ID 앞에 붙일 문자열 (예: ORDER, USER)

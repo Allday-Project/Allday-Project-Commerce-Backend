@@ -49,15 +49,19 @@ public class OrderCommendServiceImpl implements OrderCommendService {
                 .mapToLong(item -> productMap.get(item.productId()).getPrice() * item.quantity())
                 .sum();
 
-        String orderRef = IdFactory.generate("ORD", 12);
-        String orderNumber = IdFactory.generateWithDate("ODN", 8);
+        String orderUid = IdFactory.generateWithDate("ORD", 8);
 
-        Order order = new Order(user, orderRef, orderNumber, totalAmount, OrderStatus.PENDING);
+        Order order = Order.builder()
+                .user(user)
+                .orderUid(orderUid)
+                .totalAmount(totalAmount)
+                .status(OrderStatus.PENDING)
+                .build();
+
         Order savedOrder = orderRepository.save(order);
 
         return new CreateOrderResponse(
                 savedOrder.getOrderUid(),
-                savedOrder.getOrderNumber(),
                 savedOrder.getTotalAmount()
         );
     }
