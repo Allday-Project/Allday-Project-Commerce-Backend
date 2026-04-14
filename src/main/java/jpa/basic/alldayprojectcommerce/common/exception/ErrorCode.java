@@ -19,10 +19,7 @@ public enum ErrorCode {
     //   사용자 관련 에러 코드 (U###) - 유저 도메인
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U001", "이미 존재하는 이메일입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "해당 유저는 존재하지 않습니다."),
-    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "U003", "프로필을 찾을 수 없습니다."),
 
-    //   파일 관련 에러 코드 (F###)
-    FILE_UPLOAD_FAIL(HttpStatus.BAD_REQUEST, "F001", "파일 업로드를 실패했습니다."),
 
     // 상품 도메인 (P###)
 

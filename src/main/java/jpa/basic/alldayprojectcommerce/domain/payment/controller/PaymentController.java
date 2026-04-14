@@ -1,6 +1,9 @@
 package jpa.basic.alldayprojectcommerce.domain.payment.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
@@ -22,7 +25,11 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreatePaymentResponse>> createPayment(
-            @PathVariable String orderUid,
+            @PathVariable
+            @NotBlank
+            @Size(min = 10, max = 30)
+            @Pattern(regexp = "^[0-9a-zA-Z]+$")
+            String orderUid,
             @Valid @RequestBody CreatePaymentRequest request,
             @LoginUser LoginUserInfoDto loginUser
             ){

@@ -40,8 +40,8 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
         }
 
         // 결제 금액 받아오기
-        Long amount = request.getAmount();
-        Long deliveryFee = request.getDeliveryFee();
+        Long amount = request.amount();
+        Long deliveryFee = request.deliveryFee();
 
         // 주문 상태 검증
         if(order.getStatus()!= OrderStatus.PENDING){

@@ -17,7 +17,6 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
 
 
-    // 소영 추가. Payment에서 사용할 예정. orderUid로 order 찾아오는 메서드
     @Override
     public Order getOrderByOrderUid(String orderUid) {
         return orderRepository.findByOrderUid(orderUid).orElseThrow(
