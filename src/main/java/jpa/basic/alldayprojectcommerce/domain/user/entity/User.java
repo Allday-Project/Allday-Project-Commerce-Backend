@@ -44,7 +44,7 @@ public class User extends BaseEntity {
 
     public void updateProfile(String name, String encodedPassword, String phone, String address) {
         if(name != null) this.name = name;
-        this.password = encodedPassword;
+        if(encodedPassword != null) this.password = encodedPassword;
         if(phone != null)this.phone = phone;
         if(address != null)this.address = address;
     }

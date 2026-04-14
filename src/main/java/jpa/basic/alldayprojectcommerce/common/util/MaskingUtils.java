@@ -24,7 +24,7 @@ public class MaskingUtils {
 
     /*
      * 이름 마스킹 - 첫글자 노출, 나머지 *
-     * "홍길동" -> "홍*동"
+     * "홍길동" -> "홍**"
      * "김사무엘" -> "김***"
      * "이도" -> "이*
      */
@@ -37,7 +37,7 @@ public class MaskingUtils {
     }
 
     /*
-     * 비밀번호 마시킹 - 항상 고정 8자리 *
+     * 비밀번호 마스킹 - 항상 고정 8자리 *
      */
     public static String maskPassword() {
         return "●●●●●●●●";
@@ -50,9 +50,9 @@ public class MaskingUtils {
     public static String maskPhone(String phone) {
         if(phone == null || phone.isBlank()) return null;
 
-        phone = phone.replace("-", "");
-        if(phone.matches("\\d{11}")) {
-            return phone.substring(0, 3) + "****" + phone.substring(7);
+        if (phone.matches("\\d{3}-\\d{3,4}-\\d{4}")) {
+            String[] parts = phone.split("-");
+            return parts[0] + "-****-" + parts[2];
         }
 
         return phone; //예상치 못한 형식은 그대로
