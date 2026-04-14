@@ -29,6 +29,7 @@ public enum ErrorCode {
     // 주문 도메인 (O###)
     ORDER_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST,"O001","주문 상태가 결제 대기 상태가 아닙니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND,"O002","주문 정보를 찾을 수 없습니다."),
+    ORDER_INVALID_UID(HttpStatus.BAD_REQUEST, "O003", "유효하지 않은 주문 UID 입니다."),
 
 
 

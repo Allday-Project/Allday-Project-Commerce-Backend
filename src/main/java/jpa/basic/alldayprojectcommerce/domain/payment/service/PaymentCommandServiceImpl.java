@@ -15,6 +15,7 @@ import jpa.basic.alldayprojectcommerce.domain.payment.repository.PaymentReposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -29,6 +30,12 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
 
     @Override   // 결제 생성 메서드
     public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfoDto loginUser) {
+
+        // orderUid 존재 여부 검증
+        if (!StringUtils.hasText(orderUid)) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_UID);
+        }
+
         // 주문 정보 조회
         Order order = orderQueryService.getOrderByOrderUid(orderUid);
 
@@ -76,6 +83,7 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
     }
 
     private String createPaymentUid() {
+        // TODO : 성현님 코드 머지 되면 nanoid 생성하는 클래스 사용해서 만들기
         return "PAY-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 }
