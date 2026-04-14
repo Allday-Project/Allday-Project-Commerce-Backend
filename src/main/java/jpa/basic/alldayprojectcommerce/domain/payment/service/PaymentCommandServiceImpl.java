@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.payment.service;
 
-import groovy.util.logging.Slf4j;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
@@ -23,7 +22,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class PaymentCommandServiceImpl implements PaymentCommandService{
     private final PaymentRepository paymentRepository;
     private final OrderQueryService orderQueryService;
@@ -61,9 +59,16 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
         }
 
         // 주문금액 검증
-        if (amount == null || amount <0) {
+        if (amount == null || amount < 0) {  // 정책으로 결제금액 0원 가능
             throw new CustomException(ErrorCode.PAYMENT_INVALID_AMOUNT);
         }
+        // 배송비 검증
+        if (deliveryFee == null || deliveryFee < 0) {   // 정책으로 배송비 0원 가능
+            throw new CustomException(ErrorCode.PAYMENT_INVALID_AMOUNT);
+        }
+        // TODO : 주문 금액과 배송비가 모두 0원인 경우가 존재하므로 추후 결제 확정 로직에서 결제 금액 0원이면 포트원 호출하지 않고 검증하도록 구현
+        // TODO : 프론트에서도 결제 금액이 0원인 경우는 포트원 결제 하지 않도록 구현 필요
+
         if(!amount.equals(order.getTotalAmount())){
             throw new CustomException(ErrorCode.PAYMENT_INVALID_AMOUNT);
         }
