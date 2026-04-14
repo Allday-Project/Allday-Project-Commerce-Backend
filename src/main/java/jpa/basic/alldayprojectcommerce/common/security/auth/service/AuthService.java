@@ -38,37 +38,10 @@ public class AuthService {
      * 가입 직후 바로 로그인 상태가 되도록 UX를 고려해 access_token, refresh_token 발급
      *
      * @param request   : 클라이언트가 보낸 이메일/비밀번호 JSON
-     * @param response  : 쿠키를 심기 위한 HttpServletResponse
      */
-    public void signup(CreateUserRequest request, HttpServletResponse response) {
+    public void signup(CreateUserRequest request) {
         String encodedPassword = passwordEncoder.encode(request.password());
-        User user = userCommandService.create(request.email(), encodedPassword);
-
-        /**
-         * access_token과 refresh_token을 발급하고 담기 위한 record DTO
-         */
-        AuthTokens authTokens = AuthTokens.of(
-                jwtTokenProvider.createAccessToken(user.getId(), user.getRole().name()),
-                jwtTokenProvider.createRefreshToken(user.getId())
-        );
-
-        /**
-         * 생성된 access_token을 Cookie에 담기
-         */
-        response.addCookie(cookieUtils.createCookie(
-                AuthConstants.ACCESS_TOKEN,
-                authTokens.accessToken(),
-                30 * 60
-        ));
-
-        /**
-         * 생성된 refresh_token을 Cookie에 담기
-         */
-        response.addCookie(cookieUtils.createCookie(
-                AuthConstants.REFRESH_TOKEN,
-                authTokens.refreshToken(),
-                jwtTokenProvider.getRefreshTokenValidityInSeconds()
-        ));
+        userCommandService.create(request.email(), encodedPassword);
     }
 
     /**
