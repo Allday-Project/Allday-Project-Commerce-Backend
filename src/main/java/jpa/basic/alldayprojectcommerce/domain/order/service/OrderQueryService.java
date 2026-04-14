@@ -6,4 +6,6 @@ public interface OrderQueryService {
 
 
     Order getOrderByOrderUid(String orderUid);
+    Order getOrderByOrderUidForUpdate(String orderUid);
+
 }

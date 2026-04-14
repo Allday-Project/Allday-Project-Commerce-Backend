@@ -36,8 +36,8 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
             throw new CustomException(ErrorCode.ORDER_INVALID_UID);
         }
 
-        // 주문 정보 조회
-        Order order = orderQueryService.getOrderByOrderUid(orderUid);
+        // 주문 정보 조회(비관적 락 사용)
+        Order order = orderQueryService.getOrderByOrderUidForUpdate(orderUid);
 
         // orderUid를 생성한 주문자와 결제 생성한 로그인 유저가 일치하는지 검증
         Long orderUserId = order.getUser().getId();
@@ -50,18 +50,18 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
         Long amount = request.amount();
         Long deliveryFee = request.deliveryFee();
 
-        // 주문 상태 검증
+        // 주문 상태가 PENDING인지 검증
         if(order.getStatus()!= OrderStatus.PENDING){
             throw new CustomException(ErrorCode.ORDER_STATUS_NOT_PENDING);
         }
         // 동일 주문에 대하여 중복 결제 생성은 허용하지만, SUCCESS 상태인 결제가 있으면 결제 생성 막기
-        boolean existence = paymentRepository.existsByOrderIdAndStatus(order.getId(), PaymentStatus.SUCCESS);
-        if (existence) {
+        boolean successPaymentExists = paymentRepository.existsByOrderIdAndStatus(order.getId(), PaymentStatus.SUCCESS);
+        if (successPaymentExists) {
             throw new CustomException(ErrorCode.PAYMENT_ALREADY_SUCCESS);
         }
 
         // 주문금액 검증
-        if (amount == null) {
+        if (amount == null || amount <0) {
             throw new CustomException(ErrorCode.PAYMENT_INVALID_AMOUNT);
         }
         if(!amount.equals(order.getTotalAmount())){
