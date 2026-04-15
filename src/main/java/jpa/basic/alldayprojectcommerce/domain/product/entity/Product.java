@@ -52,50 +52,6 @@ public class Product extends BaseEntity {
         this.category = category;
         this.imageUrl = imageUrl;
     }
-
-
-
-
-    // 재고 차감 로직
-    public void decreaseStock(Long quantity) {
-        validQuantity(quantity);
-        if (this.stock < quantity) {
-            throw new CustomException(ErrorCode.OUT_OF_STOCK);
-        }
-        this.stock -= quantity;
-        closeSales();
-    }
-
-    // 재고 증가 로직
-    public void increaseStock(Long quantity) {
-        validQuantity(quantity);
-        this.stock += quantity;
-        resumeSales();
-    }
-
-
-    private void validQuantity(Long quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
-        }
-    }
-
-    // 재고가 0이 되면 품절 상태로 변경
-    private void closeSales() {
-        if (this.status == ProductStatus.SOLD_OUT) {
-            return;
-        }
-        if (this.stock == 0) {
-            this.status = ProductStatus.SOLD_OUT;
-        }
-    }
-
-    // 재고를 0에서 올렸을 때 판매 중 상태로 변경
-    private void resumeSales() {
-        if (this.status == ProductStatus.SOLD_OUT && this.stock > 0) {
-            this.status = ProductStatus.ON_SALE;
-        }
-    }
 }
 
 
