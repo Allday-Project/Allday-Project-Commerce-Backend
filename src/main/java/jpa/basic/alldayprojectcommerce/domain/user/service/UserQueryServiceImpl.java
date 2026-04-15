@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.user.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.user.dto.response.GetmeUserResponse;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import jpa.basic.alldayprojectcommerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,11 @@ public class UserQueryServiceImpl implements UserQueryService {
     public User getById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public GetmeUserResponse getProfile(Long userId) {
+        User user = getById(userId);
+        return GetmeUserResponse.from(user);
     }
 }
