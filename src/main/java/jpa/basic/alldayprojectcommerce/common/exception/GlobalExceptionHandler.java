@@ -1,7 +1,6 @@
 package jpa.basic.alldayprojectcommerce.common.exception;
 
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
-import jpa.basic.alldayprojectcommerce.common.security.auth.exception.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
