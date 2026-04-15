@@ -104,6 +104,7 @@ public class JwtTokenProvider {
         return (int) (refreshTokenValidityInMilliseconds / 1000);
     }
 
+    /** 토큰 검증 */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
