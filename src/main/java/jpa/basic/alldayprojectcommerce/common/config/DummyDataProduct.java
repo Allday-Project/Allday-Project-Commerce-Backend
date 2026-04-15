@@ -3,7 +3,7 @@ package jpa.basic.alldayprojectcommerce.common.config;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Category;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
-import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
+import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepositoryImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DummyDataProduct implements CommandLineRunner {
 
-    private final ProductRepository productRepository;
+    private final ProductRepositoryImpl productRepositoryImpl;
 
     @Override
     public void run(String... args) {
         // 이미 데이터가 있으면 중복으로 넣지 않기 위해 체크
-        if (productRepository.count() > 0) {
+        if (productRepositoryImpl.count() > 0) {
             return;
         }
 
@@ -29,7 +29,7 @@ public class DummyDataProduct implements CommandLineRunner {
     }
 
     private void create(String name, Long price, int stock, String desc, ProductStatus status, Category category, String img) {
-        productRepository.save(Product.builder()
+        productRepositoryImpl.save(Product.builder()
                 .name("ALLDAY PROJECT " + name)
                 .price(price)
                 .stock(stock)
