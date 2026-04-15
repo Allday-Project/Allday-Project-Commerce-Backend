@@ -33,4 +33,10 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         return productRepository.findAllProducts(pageable)
                 .map(GetAllProductResponse::from);
     }
+
+    @Override
+    public Product getByProductId(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
 }
