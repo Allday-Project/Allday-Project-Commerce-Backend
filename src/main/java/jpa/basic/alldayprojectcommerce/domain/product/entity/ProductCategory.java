@@ -1,13 +1,13 @@
 package jpa.basic.alldayprojectcommerce.domain.product.entity;
 
-public enum Category {
+public enum ProductCategory {
     ALBUM("앨범"),
     MERCHANDISE("굿즈"),
     TICKET("티켓");
 
     private final String displayName;
 
-    Category(String displayName) {
+    ProductCategory(String displayName) {
         this.displayName = displayName;
     }
 
