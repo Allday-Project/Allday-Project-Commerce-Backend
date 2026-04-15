@@ -39,7 +39,11 @@ public class SecurityConfig {
                         "/api/auth/signup",
                         "/api/auth/reissue"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/auth/check-duplicate").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/auth/check-duplicate",
+                        "/api/products",
+                        "/api/products/{productId}"
+                        ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(

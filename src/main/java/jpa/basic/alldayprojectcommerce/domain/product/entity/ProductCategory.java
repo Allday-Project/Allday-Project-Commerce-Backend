@@ -1,13 +1,13 @@
 package jpa.basic.alldayprojectcommerce.domain.product.entity;
 
-public enum Status {
-    ON_SALE("판매중"),
-    SOLD_OUT("품절"),
-    DISCONTINUED("단종");
+public enum ProductCategory {
+    ALBUM("앨범"),
+    MERCHANDISE("굿즈"),
+    TICKET("티켓");
 
     private final String displayName;
 
-    Status(String displayName) {
+    ProductCategory(String displayName) {
         this.displayName = displayName;
     }
 
