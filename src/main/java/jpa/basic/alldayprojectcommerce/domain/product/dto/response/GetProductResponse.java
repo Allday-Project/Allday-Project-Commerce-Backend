@@ -5,7 +5,7 @@ import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 
 public record GetProductResponse(
-        Long productId,
+        Long id,
         String name,
         Long price,
         int stock,

@@ -1,7 +1,7 @@
 package jpa.basic.alldayprojectcommerce.common.config;
 
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
-import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductCategory;
+import jpa.basic.alldayprojectcommerce.domain.product.entity.Category;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +23,12 @@ public class DummyDataProduct implements CommandLineRunner {
         }
 
 
-            create("볼캡", 36000L, 100, "발렌타인 코듀로이 볼캡", ProductStatus.ON_SALE, ProductCategory.MERCHANDISE, "cap.png");
-            create("바이닐", 70000L, 50, "한정판 LP", ProductStatus.ON_SALE, ProductCategory.ALBUM,"vinyl.png");
-            create("슬로건", 15000L, 200, "공식 슬로건", ProductStatus.SOLD_OUT, ProductCategory.MERCHANDISE,"slogan.png");
+            create("볼캡", 36000L, 100, "발렌타인 코듀로이 볼캡", ProductStatus.ON_SALE, Category.MERCHANDISE, "cap.png");
+            create("바이닐", 70000L, 50, "한정판 LP", ProductStatus.ON_SALE, Category.ALBUM,"vinyl.png");
+            create("슬로건", 15000L, 200, "공식 슬로건", ProductStatus.SOLD_OUT, Category.MERCHANDISE,"slogan.png");
     }
 
-    private void create(String name, Long price, int stock, String desc, ProductStatus status, ProductCategory category, String img) {
+    private void create(String name, Long price, int stock, String desc, ProductStatus status, Category category, String img) {
         productRepository.save(Product.builder()
                 .name("ALLDAY PROJECT " + name)
                 .price(price)

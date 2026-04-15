@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductQueryServiceImpl productQueryService;
+    private final ProductQueryServiceImpl productQueryServiceImpl;
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetProductResponse>> getOne (@PathVariable("productId") Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getOneProduct(id)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryServiceImpl.getOneProduct(id)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> getAll(
             @PageableDefault(size =  10, page = 0) Pageable pageable){
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getAll(pageable)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryServiceImpl.getAllProduct(pageable)));
     }
 }

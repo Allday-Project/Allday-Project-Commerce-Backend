@@ -16,7 +16,7 @@ public enum ErrorCode {
 
     //   공통 에러 코드 (A###)
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "A001", "입력값이 올바르지 않습니다."),
-    DATABASE_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "PR003", "서버가 응답하지 않습니다."),
+    DATABASE_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A003", "서버가 응답하지 않습니다."),
 
     //   사용자 관련 에러 코드 (U###)
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U001", "이미 존재하는 이메일입니다."),
@@ -28,7 +28,7 @@ public enum ErrorCode {
     //   프로필 관련 에러 코드 (P###)
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "프로필을 찾을 수 없습니다."),
 
-    //   상품 관련 에러 코드(PR###)
+    //   상품 관련 에러 코드(A###)
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "해당 상품은 존재하지 않습니다."),
     STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "PR002", "현재 요청이 많아 처리가 지연되고 있습니다. 잠시 후 다시 시도해 주세요."),
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "PR003", "품절된 상품입니다."),

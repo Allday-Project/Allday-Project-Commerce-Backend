@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.product.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
@@ -20,9 +21,11 @@ public class Product extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
+    @Min(0)
     private Long price;
 
     @Column(nullable = false)
+    @Min(0)
     private int stock;
 
     @Column(nullable = false)
@@ -34,13 +37,13 @@ public class Product extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductCategory category;
+    private Category category;
 
     private String imageUrl;
 
 
     @Builder
-    private Product(String name, Long price, int stock, String description, ProductStatus status, ProductCategory category, String imageUrl) {
+    private Product(String name, Long price, int stock, String description, ProductStatus status, Category category, String imageUrl) {
         this.name = name;
         this.price = price;
         this.stock = stock;
