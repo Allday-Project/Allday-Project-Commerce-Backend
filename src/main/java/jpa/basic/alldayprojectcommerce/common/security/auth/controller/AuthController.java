@@ -24,10 +24,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(
-            @RequestBody @Valid CreateUserRequest request,
-            HttpServletResponse response
+            @RequestBody @Valid CreateUserRequest request
     ) {
-        authService.signup(request, response);
+        authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(HttpStatus.CREATED));
     }

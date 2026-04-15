@@ -20,11 +20,11 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     // 회원가입
     @Override
-    public User create(String email, String encodedPassword) {
+    public void create(String email, String encodedPassword) {
         if (userRepository.existsUserByEmail(email)) {
             throw new CustomException(ErrorCode.USER_ALREADY_EXISTS);
         }
-        return userRepository.save(User.createUser(email, encodedPassword));
+        userRepository.save(User.createUser(email, encodedPassword));
     }
 
     // 내 정보 수정
