@@ -3,6 +3,7 @@ package jpa.basic.alldayprojectcommerce.common.security.auth.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.security.auth.AuthConstants;
 import jpa.basic.alldayprojectcommerce.common.security.auth.AuthTokens;
@@ -50,7 +51,8 @@ public class AuthService {
     }
 
     public void login(LoginUserRequest request, HttpServletResponse response) {
-        User user = userQueryService.getByEmail(request.email());
+        User user = userQueryService.getByEmail(request.email())
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AuthUnauthenticatedException(ErrorCode.AUTH_UNAUTHENTICATED_USER);
