@@ -1,7 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.product.repository;
 
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
@@ -17,7 +16,7 @@ import static jpa.basic.alldayprojectcommerce.domain.product.entity.QProduct.pro
 
 @Repository
 @RequiredArgsConstructor
-public class ProductRepositoryImpl implements ProductRepositoryCustom {
+public class ProductRepositoryImpl implements ProductRepositoryCustomImpl {
 
     private final JPAQueryFactory queryFactory;
 
