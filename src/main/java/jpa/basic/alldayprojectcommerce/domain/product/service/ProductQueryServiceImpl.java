@@ -6,7 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
-import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepositoryImpl;
+import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ProductQueryServiceImpl implements ProductQueryService {
 
-    private final ProductRepositoryImpl productRepositoryImpl;
+    private final ProductRepository productRepository;
 
     public GetProductResponse getOneProduct(Long productId){
-        Product product = productRepositoryImpl.findById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         return GetProductResponse.getProduct(product);
     }
@@ -30,7 +30,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     // 전체 조회
     public Page<GetAllProductResponse> getAllProduct(Pageable pageable){
-        return productRepositoryImpl.findAllProducts(pageable)
+        return productRepository.findAllProducts(pageable)
                 .map(GetAllProductResponse::from);
     }
 }
