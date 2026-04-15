@@ -7,8 +7,9 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     //   인증 에러 코드 (R###)
-    AUTH_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "로그인 정보가 올바르지 않습니다."),
+    AUTH_USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "R001", "로그인 정보가 올바르지 않습니다."),
     AUTH_UNAUTHENTICATED_USER(HttpStatus.UNAUTHORIZED, "R002", "로그인 정보가 올바르지 않습니다."),
+    AUTH_INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "R003", "유효하지 않은 Refresh Token 입니다."),
 
     //   권한 에러 코드 (E###)
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "E001", "접근 권한이 없습니다."),
