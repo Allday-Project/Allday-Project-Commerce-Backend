@@ -9,5 +9,4 @@ public interface UserCommandService {
 
     // 내 정보 수정
     void updateProfile(Long userId, UpdatemeUserRequest request);
-
 }
