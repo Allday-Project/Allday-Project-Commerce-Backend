@@ -6,7 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.AuthConstants;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,12 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role     = jwtTokenProvider.getRole(token);
 
             // ArgumentResolver에서 authentication.getPrincipal()로 꺼낼 수 있도록 DTO로 감쌈
-            LoginUserInfoDto loginUser = LoginUserInfoDto.builder()
+            LoginUserInfo loginUser = LoginUserInfo.builder()
                     .id(memberId)
                     .build();
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    loginUser,  // Principal = LoginUserInfoDto
+                    loginUser,  // Principal = LoginUserInfo
                     null,
                     Collections.singletonList(
                             new SimpleGrantedAuthority(StringUtils.hasText(role) ? role : "ROLE_USER")
