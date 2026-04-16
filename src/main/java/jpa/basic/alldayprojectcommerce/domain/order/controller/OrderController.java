@@ -3,7 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.controller;
 import jakarta.validation.Valid;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderCommandService;
@@ -26,11 +26,11 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
-            @LoginUser LoginUserInfoDto loginUserInfoDto,
+            @LoginUser LoginUserInfo loginUserInfo,
             @RequestBody @Valid CreateOrderRequest request) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED, orderCommandService.createOrder(loginUserInfoDto, request)));
+                .body(ApiResponse.success(HttpStatus.CREATED, orderCommandService.createOrder(loginUserInfo, request)));
     }
 
 }
