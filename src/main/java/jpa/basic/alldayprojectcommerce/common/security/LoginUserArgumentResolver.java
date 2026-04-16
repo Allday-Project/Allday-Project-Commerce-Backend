@@ -4,7 +4,7 @@ import io.micrometer.common.lang.Nullable;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -21,8 +21,8 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
     @Override
     public boolean supportsParameter(@NonNull MethodParameter parameter) {
         boolean hasAnnotation   = parameter.hasParameterAnnotation(LoginUser.class);
-        // 수정 포인트: LoginUserInfoDto를 프로젝트 실제 인증 DTO 타입으로 교체
-        boolean hasLoginUserType = LoginUserInfoDto.class.isAssignableFrom(parameter.getParameterType());
+        // 수정 포인트: LoginUserInfo를 프로젝트 실제 인증 DTO 타입으로 교체
+        boolean hasLoginUserType = LoginUserInfo.class.isAssignableFrom(parameter.getParameterType());
         return hasAnnotation && hasLoginUserType;
     }
 
@@ -37,11 +37,11 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         // 인증 정보가 없거나 비로그인(anonymous) 상태이면 즉시 예외 발생
         if (authentication == null
                 || authentication.getPrincipal().equals("anonymousUser")
-                || !(authentication.getPrincipal() instanceof LoginUserInfoDto)) {
+                || !(authentication.getPrincipal() instanceof LoginUserInfo)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        // JwtAuthenticationFilter에서 Principal에 저장한 LoginUserInfoDto 객체를 그대로 반환
+        // JwtAuthenticationFilter에서 Principal에 저장한 LoginUserInfo 객체를 그대로 반환
         return authentication.getPrincipal();
     }
 }
