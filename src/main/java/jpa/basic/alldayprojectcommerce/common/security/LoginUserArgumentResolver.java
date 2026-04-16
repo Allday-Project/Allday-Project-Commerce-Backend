@@ -38,7 +38,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         if (authentication == null
                 || authentication.getPrincipal().equals("anonymousUser")
                 || !(authentication.getPrincipal() instanceof LoginUserInfo)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
         // JwtAuthenticationFilter에서 Principal에 저장한 LoginUserInfo 객체를 그대로 반환
