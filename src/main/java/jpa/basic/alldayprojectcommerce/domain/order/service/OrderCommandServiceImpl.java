@@ -61,7 +61,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
             // 재고 확인
             if (product.getStock() < item.quantity()) {
-                throw new CustomException(ErrorCode.OUT_OF_STOCK);
+                throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
             }
 
             totalAmount += product.getPrice() * item.quantity();
