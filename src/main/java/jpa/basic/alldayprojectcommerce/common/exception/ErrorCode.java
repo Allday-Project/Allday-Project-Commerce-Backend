@@ -25,11 +25,18 @@ public enum ErrorCode {
     //   프로필 관련 에러 코드 (P###)
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "프로필을 찾을 수 없습니다."),
 
+    //   주문 관련 에러 코드 (O###)
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다."),
+    ORDER_FORBIDDEN(HttpStatus.FORBIDDEN, "O002", "해당 주문에 접근할 권한이 없습니다."),
+    ORDER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "O003", "현재 주문 상태에서는 해당 작업을 수행할 수 없습니다."),
+    ORDER_USER_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "O004", "이름, 전화번호, 주소를 입력해주세요."),
+
     //   상품 관련 에러 코드(A###)
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "해당 상품은 존재하지 않습니다."),
     STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "PR002", "현재 요청이 많아 처리가 지연되고 있습니다. 잠시 후 다시 시도해 주세요."),
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "PR003", "품절된 상품입니다."),
-    OUT_OF_STOCK(HttpStatus.CONFLICT, "PR004", "재고가 부족합니다.");
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "PR004", "재고가 부족합니다."),
+    PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "PR005", "현재 판매 중인 상품이 아닙니다.");
 
 
 
