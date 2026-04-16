@@ -29,12 +29,14 @@ public class User extends BaseEntity {
     @Column(length = 100)
     private String phone;
 
+    @Column(length = 250)
     private String address;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.USER;
 
+    // 회원가입
     public static User createUser(String email, String encodedPassword) {
         User user = new User();
         user.email = email;
@@ -42,10 +44,15 @@ public class User extends BaseEntity {
         return user;
     }
 
-    public void updateProfile(String name, String encodedPassword, String phone, String address) {
+    // 내 정보 수정
+    public void updateProfile(String name, String phone, String address) {
         if(name != null) this.name = name;
-        if(encodedPassword != null) this.password = encodedPassword;
         if(phone != null)this.phone = phone;
         if(address != null)this.address = address;
+    }
+
+    // 비밀번호 수정
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 }
