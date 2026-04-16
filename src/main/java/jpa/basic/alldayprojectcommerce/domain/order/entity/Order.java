@@ -27,6 +27,7 @@ public class Order extends BaseEntity {
     private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
     @Builder
@@ -34,6 +35,10 @@ public class Order extends BaseEntity {
         this.userId = userId;
         this.orderUid = orderUid;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
+        this.status = status;
+    }
+
+    public void updateStatus(OrderStatus status) {
         this.status = status;
     }
 }
