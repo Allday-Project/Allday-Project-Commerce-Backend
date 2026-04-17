@@ -42,7 +42,7 @@ public class OrderController {
      * cursorId가 없으면 가장 최신 주문부터 출력
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<CursorResponse<GetAllOrdersResponse>>> getOrders(
+    public ResponseEntity<ApiResponse<CursorResponse<GetAllOrdersResponse>>> getAllOrders(
             @LoginUser LoginUserInfo loginUserInfo,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(defaultValue = "10") int size) {
@@ -56,7 +56,7 @@ public class OrderController {
      * 유저 정보(name, phone, address)가 null일 수 있다.
      */
     @GetMapping("/{orderUid}")
-    public ResponseEntity<ApiResponse<GetOneOrderResponse>> getOrder(
+    public ResponseEntity<ApiResponse<GetOneOrderResponse>> getOneOrder(
             @LoginUser LoginUserInfo loginUserInfo,
             @PathVariable String orderUid) {
 
