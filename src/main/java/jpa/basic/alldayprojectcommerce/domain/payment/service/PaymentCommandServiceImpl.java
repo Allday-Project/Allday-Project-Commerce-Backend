@@ -2,7 +2,8 @@ package jpa.basic.alldayprojectcommerce.domain.payment.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
+import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderQueryService;
@@ -12,36 +13,36 @@ import jpa.basic.alldayprojectcommerce.domain.payment.entity.Payment;
 import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
 import jpa.basic.alldayprojectcommerce.domain.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PaymentCommandServiceImpl implements PaymentCommandService{
     private final PaymentRepository paymentRepository;
     private final OrderQueryService orderQueryService;
 
     @Override   // 결제 생성 메서드
-    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfoDto loginUser) {
+    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfo loginUser) {
 
         // orderUid 존재 여부 검증
         if (!StringUtils.hasText(orderUid)) {
             throw new CustomException(ErrorCode.ORDER_INVALID_UID);
         }
-
         // 주문 정보 조회(비관적 락 사용)
         Order order = orderQueryService.getOrderByOrderUidForUpdate(orderUid);
 
         // orderUid를 생성한 주문자와 결제 생성한 로그인 유저가 일치하는지 검증
-        Long orderUserId = order.getUser().getId();
+        Long orderUserId = order.getUserId();
         Long loginUserId = loginUser.id();
         if(!orderUserId.equals(loginUserId)){
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
         }
 
         // 결제 금액 받아오기
@@ -88,7 +89,6 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
     }
 
     private String createPaymentUid() {
-        // TODO : 성현님 코드 머지 되면 nanoid 생성하는 클래스 사용해서 만들기
-        return "PAY-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        return IdFactory.generateWithDate("PAY", 8);
     }
 }

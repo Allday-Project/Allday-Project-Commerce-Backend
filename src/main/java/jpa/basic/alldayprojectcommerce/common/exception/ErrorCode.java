@@ -6,17 +6,15 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-    //   인증 에러 코드 (R###)
-    AUTH_USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "R001", "로그인 정보가 올바르지 않습니다."),
-    AUTH_UNAUTHENTICATED_USER(HttpStatus.UNAUTHORIZED, "R002", "로그인 정보가 올바르지 않습니다."),
-    AUTH_INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "R003", "유효하지 않은 Refresh Token 입니다."),
+    //   인증/인가 에러 코드 (A###)
+    AUTH_USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "A001", "로그인 정보가 올바르지 않습니다."),
+    AUTH_UNAUTHENTICATED_USER(HttpStatus.UNAUTHORIZED, "A002", "로그인 정보가 올바르지 않습니다."),
+    AUTH_INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "유효하지 않은 Refresh Token 입니다."),
+    AUTH_FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "A004", "접근 권한이 없습니다."),
 
-    //   권한 에러 코드 (E###)
-    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "E001", "접근 권한이 없습니다."),
-
-    //   공통 에러 코드 (A###)
-    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "A001", "입력값이 올바르지 않습니다."),
-    DATABASE_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A002", "서버가 응답하지 않습니다."),
+    //   공통 에러 코드 (C###)
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C001", "입력값이 올바르지 않습니다."),
+    DATABASE_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C002", "서버가 응답하지 않습니다."),
 
     //   사용자 관련 에러 코드 (U###)
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U001", "이미 존재하는 이메일입니다."),

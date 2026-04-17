@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.request.CreatePaymentRequest;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.CreatePaymentResponse;
 import jpa.basic.alldayprojectcommerce.domain.payment.service.PaymentCommandService;
@@ -30,10 +30,10 @@ public class PaymentController {
             @PathVariable
             @NotBlank
             @Size(min = 10, max = 30)
-            @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$")    // 성현님께서 사용하신 orderUid 생성 패턴에 맞춰서 검증하도록 구현했습니다.
+            @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$")
             String orderUid,
             @Valid @RequestBody CreatePaymentRequest request,
-            @LoginUser LoginUserInfoDto loginUser
+            @LoginUser LoginUserInfo loginUser
             ){
         CreatePaymentResponse response = paymentCommandService.createPayment(orderUid, request,loginUser);
 
