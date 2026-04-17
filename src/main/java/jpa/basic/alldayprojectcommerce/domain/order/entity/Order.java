@@ -2,7 +2,6 @@ package jpa.basic.alldayprojectcommerce.domain.order.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
-import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,31 +17,28 @@ public class Order extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 30, unique = true)
     private String orderUid;
-
-    @Column(nullable = false, length = 100, unique = true)
-    private String orderNumber;
 
     @Column(nullable = false)
     private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
     @Builder
-    public Order(User user, String orderUid, String orderNumber, Long totalAmount, OrderStatus status) {
-        this.user = user;
+    public Order(Long userId, String orderUid, Long totalAmount, OrderStatus status) {
+        this.userId = userId;
         this.orderUid = orderUid;
-        this.orderNumber = orderNumber;
         this.totalAmount = (totalAmount == null) ? 0L : totalAmount;
         this.status = status;
     }
 
-    public void markPaid(){
-        this.status = OrderStatus.PAID;
-    }}
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
+}
