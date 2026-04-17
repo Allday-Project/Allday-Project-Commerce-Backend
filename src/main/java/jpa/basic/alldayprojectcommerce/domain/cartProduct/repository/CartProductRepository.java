@@ -1,9 +1,9 @@
 package jpa.basic.alldayprojectcommerce.domain.cartProduct.repository;
 
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CartProductRepository extends JpaRepository<OrderItem, Long> {
+public interface CartProductRepository extends JpaRepository<OrderProduct, Long> {
 
     // 유저의 장바구니 목록 전체 조회
     // List<CartProduct> findAllByUserId(Long userId);
