@@ -79,7 +79,6 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
                 .expiresAt(LocalDateTime.now().plusMinutes(5))
                 .build();
 
-
         paymentRepository.save(payment);
         return CreatePaymentResponse.from(payment);
     }

@@ -2,7 +2,6 @@ package jpa.basic.alldayprojectcommerce.domain.payment.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
 
 public record CreatePaymentRequest(
         @NotNull(message = "결제 금액은 필수 값입니다.")
