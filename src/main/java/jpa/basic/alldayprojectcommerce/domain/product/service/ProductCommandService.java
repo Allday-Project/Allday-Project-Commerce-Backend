@@ -1,8 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
-import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
-
 public interface ProductCommandService {
 
 

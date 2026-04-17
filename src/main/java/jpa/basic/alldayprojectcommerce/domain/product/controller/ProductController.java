@@ -8,6 +8,7 @@ import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryServic
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> getAll(
-            @PageableDefault(size =  10, page = 0) Pageable pageable){
+            @PageableDefault(size =  10, page = 0, sort = "id",
+                    direction = Sort.Direction.DESC) Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryServiceImpl.getAllProduct(pageable)));
     }
 }
