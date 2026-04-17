@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.cartProduct.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
