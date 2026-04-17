@@ -21,7 +21,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U002", "해당 유저는 존재하지 않습니다."),
     USER_PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "U003", "현재 비밀번호가 일치하지 않습니다."),
     USER_PASSWORD_SAME_AS_CURRENT(HttpStatus.BAD_REQUEST, "U004", "현재 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
-
+    USER_ORDERER_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "U007", "결제를 위한 유저 정보가 필요합니다."),
     //   주문 관련 에러 코드 (O###)
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다."),
     ORDER_FORBIDDEN(HttpStatus.FORBIDDEN, "O002", "해당 주문에 접근할 권한이 없습니다."),

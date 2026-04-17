@@ -12,4 +12,6 @@ public interface UserQueryService {
     User getById(Long userId);
 
     GetmeUserResponse getProfile(Long userId);
+
+    boolean hasRequiredOrdererInfo(Long userId);
 }

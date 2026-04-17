@@ -55,4 +55,12 @@ public class User extends BaseEntity {
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    public boolean hasRequiredInfo() {
+        return hasText(name) && hasText(phone) && hasText(address);
+    }
+
+    private boolean hasText(String value) {
+        return !(value == null || value.isBlank());
+    }
 }
