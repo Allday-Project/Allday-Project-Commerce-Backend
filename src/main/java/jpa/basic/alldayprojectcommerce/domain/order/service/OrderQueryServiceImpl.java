@@ -6,6 +6,9 @@ import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetAllOrdersRes
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderItemRepository;
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
+import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
 import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
@@ -48,6 +51,20 @@ public class OrderQueryServiceImpl implements OrderQueryService {
                 dto -> orderRepository.findByOrderUid(dto.orderUid())
                         .map(Order::getId)
                         .orElse(null)
+        );
+    }
+
+    @Override
+    public Order getOrderByOrderUid(String orderUid) {
+        return orderRepository.findByOrderUid(orderUid).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+    }
+
+    @Override
+    public Order getOrderByOrderUidForUpdate(String orderUid) {
+        return orderRepository.findByOrderUidForUpdate(orderUid).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
     }
 }

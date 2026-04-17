@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.common.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,4 +39,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode, fieldErrors));
     }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleConstraintViolationException(
+            ConstraintViolationException exception) {
+
+        log.error("[API - ERROR] 발생 원인: ", exception);
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResponse.fail(errorCode));
+    }
+
 }

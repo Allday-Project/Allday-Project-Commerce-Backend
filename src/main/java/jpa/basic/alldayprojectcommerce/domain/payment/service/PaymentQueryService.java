@@ -1,4 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.payment.service;
 
-public interface PaymentQueryService {
-}
+
+
+public interface PaymentQueryService {}
+
