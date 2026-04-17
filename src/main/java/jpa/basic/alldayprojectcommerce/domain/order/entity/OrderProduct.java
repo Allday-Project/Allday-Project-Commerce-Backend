@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "order_items")
+@Table(name = "order_products")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderItem extends BaseEntity {
+public class OrderProduct extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +34,7 @@ public class OrderItem extends BaseEntity {
     private int quantity;
 
     @Builder
-    public OrderItem(Long orderId, Long productId, String productName, Long productPrice, int quantity) {
+    public OrderProduct(Long orderId, Long productId, String productName, Long productPrice, int quantity) {
         this.orderId = orderId;
         this.productId = productId;
         this.productName = productName;
