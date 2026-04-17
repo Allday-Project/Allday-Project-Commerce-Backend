@@ -36,7 +36,7 @@ public enum ErrorCode {
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "P003", "품절된 상품입니다."),
     PRODUCT_OUT_OF_STOCK(HttpStatus.CONFLICT, "P004", "재고가 부족합니다."),
     PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "P005", "현재 판매 중인 상품이 아닙니다."),
-
+    PRODUCT_INVALID_SEARCH_VALUE(HttpStatus.BAD_REQUEST, "P006", "최소 검색어 수는 2글자 이상입니다."),
 
     // 결제 도메인(PAY###)
     PAYMENT_ALREADY_SUCCESS(HttpStatus.BAD_REQUEST,"PAY001","해당 주문에 대하여 이미 성공한 결제 건이 존재합니다."),
