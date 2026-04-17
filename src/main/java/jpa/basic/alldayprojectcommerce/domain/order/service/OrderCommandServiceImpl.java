@@ -2,7 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfoDto;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.OrderItemRequest;
@@ -40,12 +40,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     /**
      * 주문서 생성
      *
-     * @param loginUserInfoDto  : 인증된 사용자
+     * @param loginUserInfo  : 인증된 사용자
      * @param request           : 주문 생성 요청 DTO
      * @return                  : 주문 생성 응답 DTO
      */
     @Override
-    public CreateOrderResponse createOrder(LoginUserInfoDto loginUserInfoDto, CreateOrderRequest request) {
+    public CreateOrderResponse createOrder(LoginUserInfo loginUserInfo, CreateOrderRequest request) {
         long totalAmount = 0L;
 
         List<Product> products = new ArrayList<>();
@@ -61,7 +61,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
             // 재고 확인
             if (product.getStock() < item.quantity()) {
-                throw new CustomException(ErrorCode.OUT_OF_STOCK);
+                throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
             }
 
             totalAmount += product.getPrice() * item.quantity();
@@ -73,7 +73,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         // Order 저장 - orderId 발급
         Order order = Order.builder()
-                .userId(loginUserInfoDto.id())
+                .userId(loginUserInfo.id())
                 .orderUid(orderUid)
                 .totalAmount(totalAmount)
                 .status(OrderStatus.PENDING)
@@ -96,18 +96,18 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         }
 
         log.info("[주문 생성] userId: {}, orderUid: {}, totalAmount: {}",
-                    loginUserInfoDto.id(), orderUid, totalAmount);
+                    loginUserInfo.id(), orderUid, totalAmount);
 
         return new CreateOrderResponse(orderUid, totalAmount);
     }
 
     @Override
-    public void confirmOrder(LoginUserInfoDto loginUserInfoDto, String orderUid) {
+    public void confirmOrder(LoginUserInfo loginUserInfo, String orderUid) {
 
     }
 
     @Override
-    public void cancelOrder(LoginUserInfoDto loginUserInfoDto, String orderUid) {
+    public void cancelOrder(LoginUserInfo loginUserInfo, String orderUid) {
 
     }
 

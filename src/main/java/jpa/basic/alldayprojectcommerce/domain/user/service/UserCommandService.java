@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.user.service;
 
+import jpa.basic.alldayprojectcommerce.domain.user.dto.request.UpdatePasswordRequest;
 import jpa.basic.alldayprojectcommerce.domain.user.dto.request.UpdatemeUserRequest;
 
 public interface UserCommandService {
@@ -9,4 +10,7 @@ public interface UserCommandService {
 
     // 내 정보 수정
     void updateProfile(Long userId, UpdatemeUserRequest request);
+
+    // 비밀번호 수정
+    void updatePassword(Long userId, UpdatePasswordRequest request);
 }
