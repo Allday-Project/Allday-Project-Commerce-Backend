@@ -6,6 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.CursorResponse;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.CreateCartProductRequest;
+import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.UpdateQuantityRequest;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.response.GetAllCartProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.service.CartProductCommandService;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.service.CartProductQueryService;
@@ -32,6 +33,7 @@ public class CartProductController {
                 .body(ApiResponse.success(HttpStatus.CREATED));
     }
 
+    // 장바구니 상품 전체 조회
     @GetMapping
     public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
             @LoginUser LoginUserInfo loginUser,
@@ -41,6 +43,16 @@ public class CartProductController {
         CursorResponse<GetAllCartProductResponse> response =
                 cartProductQueryService.getAllCartProduct(loginUser.id(), cursorId, size);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
+    }
+
+    // 장바구니 상품 수량 변경
+    @PatchMapping("/{cartProductId}")
+    public ResponseEntity<ApiResponse<Void>> updateQuantity (
+            @LoginUser LoginUserInfo loginUser,
+            @PathVariable Long cartProductId,
+            @Valid @RequestBody UpdateQuantityRequest request) {
+        cartProductCommandService.updateQuantity(loginUser.id(), cartProductId, request);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
 }
