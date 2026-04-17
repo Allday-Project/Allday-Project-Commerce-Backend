@@ -3,7 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.product.controller;
 
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
-import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetProductResponse;
+import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ public class ProductController {
     private final ProductQueryServiceImpl productQueryServiceImpl;
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<GetProductResponse>> getOne (@PathVariable("productId") Long id){
+    public ResponseEntity<ApiResponse<GetOneProductResponse>> getOne (@PathVariable("productId") Long id){
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryServiceImpl.getOneProduct(id)));
     }
 
