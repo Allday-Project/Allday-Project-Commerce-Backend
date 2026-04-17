@@ -96,6 +96,11 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProductRepository.delete(cartProduct);
     }
 
+    @Override
+    public void CleanCart(Long userId) {
+        cartProductRepository.deleteAllByUserId(userId);
+    }
+
 
     // ======= 장바구니 공통 검증 로직 ========
 

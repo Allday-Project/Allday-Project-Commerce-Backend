@@ -38,8 +38,7 @@ public class CartProductController {
     public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
             @LoginUser LoginUserInfo loginUser,
             @RequestParam(required = false) Long cursorId,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         CursorResponse<GetAllCartProductResponse> response =
                 cartProductQueryService.getAllCartProduct(loginUser.id(), cursorId, size);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
@@ -63,5 +62,13 @@ public class CartProductController {
         cartProductCommandService.deleteCartProduct(loginUser.id(), cartProductId);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
-    
+
+    // 장바구니 비우기
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> CleanCart(
+            @LoginUser LoginUserInfo loginUser) {
+        cartProductCommandService.CleanCart(loginUser.id());
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
+    }
+
 }

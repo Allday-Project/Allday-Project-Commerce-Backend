@@ -13,4 +13,8 @@ public interface CartProductCommandService {
 
     // 장바구니 상품 단건(개별) 삭제 --> hard delete 적용
     void deleteCartProduct(Long userId, Long cartProductId);
+
+    // 장바구니 비우기
+    void CleanCart(Long userId);
+
 }
