@@ -55,4 +55,13 @@ public class CartProductController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
+    // 장바구니 상품 단건(개별) 삭제
+    @DeleteMapping("/{cartProductId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCartProduct(
+            @LoginUser LoginUserInfo loginUser,
+            @PathVariable Long cartProductId) {
+        cartProductCommandService.deleteCartProduct(loginUser.id(), cartProductId);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
+    }
+    
 }

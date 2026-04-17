@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.cartProduct.service;
 
+import jakarta.validation.Valid;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.CreateCartProductRequest;
@@ -63,14 +64,11 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
     public void updateQuantity(
             Long userId, Long cartProductId, UpdateQuantityRequest request) {
 
-        // 장바구니 상품 유무 검증
-        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CARTPRODUCT_NOT_FOUND));
+        // 장바구니 상품 존재 여부 검증
+        CartProduct cartProduct = getCartProductOrThrow(cartProductId);
 
-        // 해당 장바구니 상품에 접근 권한 여부 검증
-        if (!cartProduct.getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
-        }
+        // 해당 장바구니 접근 권한 검증
+        validateOwner(cartProduct, userId);
 
         // 장바구니에 담긴 상품의 존재 여부 검증
         Product product = productRepository.findById(cartProduct.getProductId())
@@ -85,8 +83,32 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProduct.updateQuantity(request.quantity());
     }
 
+    @Override
+    public void deleteCartProduct(Long userId, Long cartProductId) {
+
+        // 장바구니 상품 존재 여부 검증
+        CartProduct cartProduct = getCartProductOrThrow(cartProductId);
+
+        // 해당 장바구니 접근 권한 검증
+        validateOwner(cartProduct, userId);
+
+        // 해당 장바구니 상품 삭제 (hard delete)
+        cartProductRepository.delete(cartProduct);
+    }
 
 
+    // ======= 장바구니 공통 검증 로직 ========
 
+    // 장바구니에 상품 존재 여부 검증 로직
+    private CartProduct getCartProductOrThrow(Long cartProductId) {
+        return cartProductRepository.findById(cartProductId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CARTPRODUCT_NOT_FOUND));
+    }
 
+    // 해당 장바구니 상품에 접근 권한 여부 검증
+    private void validateOwner(CartProduct cartProduct, Long userId) {
+        if (!cartProduct.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
+        }
+    }
 }
