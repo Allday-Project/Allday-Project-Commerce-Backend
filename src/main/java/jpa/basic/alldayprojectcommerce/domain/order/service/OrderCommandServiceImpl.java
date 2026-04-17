@@ -40,12 +40,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     /**
      * 주문서 생성
      *
-     * @param loginUserInfo  : 인증된 사용자
+     * @param loginId           : 인증된 사용자
      * @param request           : 주문 생성 요청 DTO
      * @return                  : 주문 생성 응답 DTO
      */
     @Override
-    public CreateOrderResponse createOrder(LoginUserInfo loginUserInfo, CreateOrderRequest request) {
+    public CreateOrderResponse createOrder(Long loginId, CreateOrderRequest request) {
         long totalAmount = 0L;
 
         List<Product> products = new ArrayList<>();
@@ -73,7 +73,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         // Order 저장 - orderId 발급
         Order order = Order.builder()
-                .userId(loginUserInfo.id())
+                .userId(loginId)
                 .orderUid(orderUid)
                 .totalAmount(totalAmount)
                 .status(OrderStatus.PENDING)
@@ -96,18 +96,18 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         }
 
         log.info("[주문 생성] userId: {}, orderUid: {}, totalAmount: {}",
-                    loginUserInfo.id(), orderUid, totalAmount);
+                    loginId, orderUid, totalAmount);
 
         return new CreateOrderResponse(orderUid, totalAmount);
     }
 
     @Override
-    public void confirmOrder(LoginUserInfo loginUserInfo, String orderUid) {
+    public void confirmOrder(Long loginId, String orderUid) {
 
     }
 
     @Override
-    public void cancelOrder(LoginUserInfo loginUserInfo, String orderUid) {
+    public void cancelOrder(Long loginId, String orderUid) {
 
     }
 

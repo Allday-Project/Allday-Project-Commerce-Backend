@@ -12,9 +12,6 @@ public record GetOneOrderResponse(
         Long totalAmount,
         Long deliveryFee,
         Long finalAmount,   // 상품 금액 + 배송비
-        String userName,
-        String userPhone,
-        String userAddress,
         List<OrderItemInfo> items
 ) {
 
@@ -29,7 +26,7 @@ public record GetOneOrderResponse(
             Long itemAmount
     ) {}
 
-    public static GetOneOrderResponse from(Order order, User user, List<OrderItem> items) {
+    public static GetOneOrderResponse from(Order order, List<OrderItem> items) {
         List<OrderItemInfo> info = items.stream()
                 .map(item -> new OrderItemInfo(
                         item.getProductId(),
@@ -44,9 +41,6 @@ public record GetOneOrderResponse(
                 order.getTotalAmount(),
                 DELIVERY_FEE,
                 order.getTotalAmount() + DELIVERY_FEE,
-                user.getName(),
-                user.getPhone(),
-                user.getAddress(),
                 info
         );
     }
