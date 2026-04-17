@@ -1,8 +1,8 @@
 package jpa.basic.alldayprojectcommerce.domain.order.service;
 
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 
 public interface OrderCommandService {
 
@@ -25,5 +25,5 @@ public interface OrderCommandService {
      * 결제 완료 시 Order 상태를 PAID로 변경
      * Payment 도메인의 서비스에서 호출
      */
-    void markOrderPaid(String orderUid);
+    void markOrderPaid(Order order);
 }

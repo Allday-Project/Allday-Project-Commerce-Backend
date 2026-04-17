@@ -1,8 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.order.dto.response;
 
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +11,7 @@ public record GetAllOrdersResponse(
         Long orderId,       // 다음 커서값
         String orderUid,    // 주문 상세 진입용
         LocalDateTime orderDate,
-        OrderStatus status,
+        String status,
         Long totalAmount,
         List<OrderItemSummary> items
 ) {
@@ -22,7 +21,7 @@ public record GetAllOrdersResponse(
             Long itemAmount
     ) {}
 
-    public static GetAllOrdersResponse from(Order order, List<OrderItem> items) {
+    public static GetAllOrdersResponse from(Order order, List<OrderProduct> items) {
         List<OrderItemSummary> summary = items.stream()
                 .map(item -> new OrderItemSummary(
                         item.getProductName(),
@@ -34,7 +33,7 @@ public record GetAllOrdersResponse(
                 order.getId(),
                 order.getOrderUid(),
                 order.getCreatedAt(),
-                order.getStatus(),
+                order.getStatus().getDescription(),
                 order.getTotalAmount(),
                 summary
         );

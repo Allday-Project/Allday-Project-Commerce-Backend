@@ -42,13 +42,13 @@ public class OrderController {
      * cursorId가 없으면 가장 최신 주문부터 출력
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<CursorResponse<GetAllOrdersResponse>>> getAllOrders(
+    public ResponseEntity<ApiResponse<CursorResponse<GetAllOrdersResponse>>> getAllOrder(
             @LoginUser LoginUserInfo loginUserInfo,
             @RequestParam(required = false) Long cursorId,
             @RequestParam(defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(HttpStatus.OK, orderQueryService.getAllOrders(loginUserInfo.id(), cursorId, size)));
+                .body(ApiResponse.success(HttpStatus.OK, orderQueryService.getAllOrder(loginUserInfo.id(), cursorId, size)));
     }
 
     /**
@@ -69,12 +69,11 @@ public class OrderController {
      * OrderUser 스냅샷 기반으로 주문 당시 고객 정보 반환
      */
     @GetMapping("/{orderUid}/details")
-    public ResponseEntity<ApiResponse<GetOrderDetailsResponse>> getOrderDetails(
+    public ResponseEntity<ApiResponse<GetOrderDetailsResponse>> getOneOrderDetail(
             @LoginUser LoginUserInfo loginUserInfo,
             @PathVariable String orderUid) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(HttpStatus.OK, orderQueryService.getOrderDetails(loginUserInfo.id(), orderUid)));
+                .body(ApiResponse.success(HttpStatus.OK, orderQueryService.getOneOrderDetail(loginUserInfo.id(), orderUid)));
     }
-
 }

@@ -1,8 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.order.dto.response;
 
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
-import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 
 import java.util.List;
 
@@ -26,7 +25,7 @@ public record GetOneOrderResponse(
             Long itemAmount
     ) {}
 
-    public static GetOneOrderResponse from(Order order, List<OrderItem> items) {
+    public static GetOneOrderResponse from(Order order, List<OrderProduct> items) {
         List<OrderItemInfo> info = items.stream()
                 .map(item -> new OrderItemInfo(
                         item.getProductId(),

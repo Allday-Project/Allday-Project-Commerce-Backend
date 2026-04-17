@@ -2,15 +2,14 @@ package jpa.basic.alldayprojectcommerce.domain.order.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.OrderItemRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
-import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderItemRepository;
+import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
@@ -32,7 +31,7 @@ import java.util.List;
 public class OrderCommandServiceImpl implements OrderCommandService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final OrderProductRepository orderProductRepository;
     private final OrderUserRepository orderUserRepository;
     private final ProductQueryService productQueryService;
     private final UserQueryService userQueryService;
@@ -86,7 +85,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             OrderItemRequest itemRequest = request.orderItems().get(i);
             Product product = products.get(i);
 
-            orderItemRepository.save(OrderItem.builder()
+            orderProductRepository.save(OrderProduct.builder()
                     .orderId(savedOrder.getId())
                     .productId(product.getId())
                     .productName(product.getName())
@@ -117,7 +116,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     }
 
     @Override
-    public void markOrderPaid(String orderUid) {
+    public void markOrderPaid(Order order) {
 
     }
 }
