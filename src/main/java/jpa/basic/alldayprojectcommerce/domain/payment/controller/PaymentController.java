@@ -29,8 +29,9 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<CreatePaymentResponse>> createPayment(
             @PathVariable
             @NotBlank
-            @Size(min = 10, max = 30)
-            @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$")
+            @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$",
+                    message = "orderUid는 ORD-YYYYMMDD-XXXXXXXX 형식이어야 합니다."
+            )
             String orderUid,
             @Valid @RequestBody CreatePaymentRequest request,
             @LoginUser LoginUserInfo loginUser

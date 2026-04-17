@@ -31,10 +31,6 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
     @Override   // 결제 생성 메서드
     public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfo loginUser) {
 
-        // orderUid 존재 여부 검증
-        if (!StringUtils.hasText(orderUid)) {
-            throw new CustomException(ErrorCode.ORDER_INVALID_UID);
-        }
         // 주문 정보 조회(비관적 락 사용)
         Order order = orderQueryService.getOrderByOrderUidForUpdate(orderUid);
 
