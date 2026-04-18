@@ -1,8 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.order.dto.response;
 
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderUser;
 
 import java.time.LocalDateTime;
@@ -12,7 +11,7 @@ import java.util.List;
 public record GetOrderDetailsResponse(
         String orderUid,
         LocalDateTime orderDate,
-        OrderStatus status,
+        String status,
         Long totalAmount,
         Long deliveryFee,
         Long finalAmount,
@@ -35,7 +34,7 @@ public record GetOrderDetailsResponse(
             Long itemAmount
     ) {}
 
-    public static GetOrderDetailsResponse from(Order order, OrderUser orderUser, List<OrderItem> items) {
+    public static GetOrderDetailsResponse from(Order order, OrderUser orderUser, List<OrderProduct> items) {
         OrdererInfo ordererInfo = new OrdererInfo(
                 orderUser.getName(),
                 orderUser.getPhone(),
@@ -53,7 +52,7 @@ public record GetOrderDetailsResponse(
         return new GetOrderDetailsResponse(
                 order.getOrderUid(),
                 order.getCreatedAt(),
-                order.getStatus(),
+                order.getStatus().getDescription(),
                 order.getTotalAmount(),
                 DELIVERY_FEE,
                 order.getTotalAmount() + DELIVERY_FEE,

@@ -12,6 +12,7 @@ import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.CreatePayment
 import jpa.basic.alldayprojectcommerce.domain.payment.entity.Payment;
 import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
 import jpa.basic.alldayprojectcommerce.domain.payment.repository.PaymentRepository;
+import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 public class PaymentCommandServiceImpl implements PaymentCommandService{
     private final PaymentRepository paymentRepository;
     private final OrderQueryService orderQueryService;
+    private final UserQueryService userQueryService;
 
     @Override   // 결제 생성 메서드
     public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfo loginUser) {
@@ -38,6 +40,14 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
         Long loginUserId = loginUser.id();
         if(!orderUserId.equals(loginUserId)){
             throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
+        }
+
+        // 주문자 정보 존재 여부 검증
+
+        boolean hasRequiredOrdererInfo = userQueryService.hasRequiredOrdererInfo(orderUserId);
+
+        if (!hasRequiredOrdererInfo) {
+            throw new CustomException(ErrorCode.USER_ORDERER_INFO_REQUIRED);
         }
 
         // 결제 금액 받아오기

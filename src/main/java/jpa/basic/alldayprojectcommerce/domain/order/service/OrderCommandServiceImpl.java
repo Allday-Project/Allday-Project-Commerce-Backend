@@ -2,15 +2,14 @@ package jpa.basic.alldayprojectcommerce.domain.order.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.OrderItemRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
-import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderItem;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
-import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderItemRepository;
+import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
@@ -32,7 +31,7 @@ import java.util.List;
 public class OrderCommandServiceImpl implements OrderCommandService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final OrderProductRepository orderProductRepository;
     private final OrderUserRepository orderUserRepository;
     private final ProductQueryService productQueryService;
     private final UserQueryService userQueryService;
@@ -40,12 +39,12 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     /**
      * 주문서 생성
      *
-     * @param loginUserInfo  : 인증된 사용자
+     * @param loginId           : 인증된 사용자
      * @param request           : 주문 생성 요청 DTO
      * @return                  : 주문 생성 응답 DTO
      */
     @Override
-    public CreateOrderResponse createOrder(LoginUserInfo loginUserInfo, CreateOrderRequest request) {
+    public CreateOrderResponse createOrder(Long loginId, CreateOrderRequest request) {
         long totalAmount = 0L;
 
         List<Product> products = new ArrayList<>();
@@ -73,7 +72,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
         // Order 저장 - orderId 발급
         Order order = Order.builder()
-                .userId(loginUserInfo.id())
+                .userId(loginId)
                 .orderUid(orderUid)
                 .totalAmount(totalAmount)
                 .status(OrderStatus.PENDING)
@@ -86,7 +85,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
             OrderItemRequest itemRequest = request.orderItems().get(i);
             Product product = products.get(i);
 
-            orderItemRepository.save(OrderItem.builder()
+            orderProductRepository.save(OrderProduct.builder()
                     .orderId(savedOrder.getId())
                     .productId(product.getId())
                     .productName(product.getName())
@@ -96,18 +95,18 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         }
 
         log.info("[주문 생성] userId: {}, orderUid: {}, totalAmount: {}",
-                    loginUserInfo.id(), orderUid, totalAmount);
+                    loginId, orderUid, totalAmount);
 
         return new CreateOrderResponse(orderUid, totalAmount);
     }
 
     @Override
-    public void confirmOrder(LoginUserInfo loginUserInfo, String orderUid) {
+    public void confirmOrder(Long loginId, String orderUid) {
 
     }
 
     @Override
-    public void cancelOrder(LoginUserInfo loginUserInfo, String orderUid) {
+    public void cancelOrder(Long loginId, String orderUid) {
 
     }
 
@@ -117,7 +116,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     }
 
     @Override
-    public void markOrderPaid(String orderUid) {
+    public void markOrderPaid(Order order) {
 
     }
 }
