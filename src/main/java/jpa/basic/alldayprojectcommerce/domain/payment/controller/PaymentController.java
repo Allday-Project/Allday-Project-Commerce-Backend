@@ -40,7 +40,7 @@ public class PaymentController {
             @Valid @RequestBody CreatePaymentRequest request,
             @LoginUser LoginUserInfo loginUser
             ){
-        CreatePaymentResponse response = paymentCommandService.createPayment(orderUid, request,loginUser);
+        CreatePaymentResponse response = paymentCommandService.createPayment(orderUid, request,loginUser.id());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(HttpStatus.CREATED,response));
@@ -49,10 +49,15 @@ public class PaymentController {
 
     @PostMapping("/{paymentUid}/confirm")
     public ResponseEntity<ApiResponse<ConfirmPaymentResponse>> confirmPayment(
-            @PathVariable String orderUid,
+            @PathVariable
+            @NotBlank
+            @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$",
+                    message = "orderUid는 ORD-YYYYMMDD-XXXXXXXX 형식이어야 합니다."
+            )
+            String orderUid,
             @PathVariable String paymentUid,
             @LoginUser LoginUserInfo loginUser){
-        ConfirmPaymentResponse response = orderPaymentFacade.confirmOrderPayment(orderUid,paymentUid,loginUser);
+        ConfirmPaymentResponse response = orderPaymentFacade.confirmOrderPayment(orderUid,paymentUid,loginUser.id());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(HttpStatus.OK,response));
     }

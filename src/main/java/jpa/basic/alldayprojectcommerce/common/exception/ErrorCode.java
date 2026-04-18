@@ -41,7 +41,15 @@ public enum ErrorCode {
 
     // 결제 도메인(PAY###)
     PAYMENT_ALREADY_SUCCESS(HttpStatus.BAD_REQUEST,"PAY001","해당 주문에 대하여 이미 성공한 결제 건이 존재합니다."),
-    PAYMENT_INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "PAY002", "올바르지 않은 결제 금액입니다.");
+    PAYMENT_INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "PAY002", "올바르지 않은 결제 금액입니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "PAY003", "해당 결제 건을 찾을 수 없습니다."),
+    PAYMENT_ORDER_NOT_MATCHES(HttpStatus.BAD_REQUEST, "PAY004", "입력한 주문에 대하여 생성된 결제 건이 아닙니다."),
+    PAYMENT_INVALID_UID(HttpStatus.BAD_REQUEST, "PAY005", "유효하지 않은 결제 UID 입니다."),
+
+
+        ;
+
+
 
     private final HttpStatus status;
     private final String code;
