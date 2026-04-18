@@ -41,4 +41,10 @@ public class UserQueryServiceImpl implements UserQueryService {
         User user = getById(userId);
         return GetmeUserResponse.from(user);
     }
+
+    @Override
+    public boolean hasRequiredOrdererInfo(Long userId) {
+        User user = getById(userId);
+        return user.hasRequiredInfo();
+    }
 }
