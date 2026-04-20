@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
+import jpa.basic.alldayprojectcommerce.common.util.RedisKeyUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,10 +21,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     // 한글, 영문, 숫자, 공백만 허용 (특수문자 전부 제거)
     private static final Pattern SPECIAL_CHAR = Pattern.compile("[^가-힣a-zA-Z0-9\\s]");
 
-    /**
-     * Redis ZSet 키 형식: "search:rank:<현재 날짜>"
-     * 스케쥴러가 특정 날짜 키만 골라서 삭제할 수 있도록 설계
-     */
+
     private String todayRankKey() {
         return "search:rank:" + LocalDate.now()
                 .format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -48,14 +46,16 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         // 공백 기준으로 단어 분리
         String[] keywords = cleaned.split("\\s+");
 
-        String key = todayRankKey();
-
         /**
-         * Redis Set 키 형식: 오늘 날짜별 유저 검색 기록
-         * "userId:keyword" 형태로 기록을 남겨서 중복 검색 여부 확인
+         * Redis ZSet 키 형식: "search:rank:<현재 날짜>"
+         * 스케쥴러가 특정 날짜 키만 골라서 삭제할 수 있도록 설계
          */
-        String userLogKey = "search:user:" + LocalDate.now()
-                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String rankKey = RedisKeyUtils.todayRankKey();
+        /**
+         * Redis Set 키 형식: "search:user:<현재 날짜>"
+         * 고객의 특정 날짜 중복 검색 여부 확인
+         */
+        String userLogKey = RedisKeyUtils.todayUserLogKey();
 
         for (String keyword : keywords) {
             // 1글자 이하는 의미없는 검색어로 간주하고 제외
@@ -66,20 +66,19 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             // "userId:keyword" 조합으로 오늘 이 고객이 이 키워드를 검색했는지 확인
             String memberValue = loginId + ":" + keyword;
 
-            Boolean alreadySearched = redisTemplate.opsForSet()
-                    .isMember(userLogKey, memberValue);
+            /**
+             * SADD - 추가 + 중복 여부 확인을 원자적으로 한 번에 처리
+             * 반환값: 새로 추가(1), 이미 존재(0)
+             */
+            Long added = redisTemplate.opsForSet().add(userLogKey, memberValue);
 
-            if (Boolean.TRUE.equals(alreadySearched)) {
+            if (added == null || added == 0) {
                 log.debug("[중복 검색 제외] userId: {}, keyword: {}", loginId, keyword);
                 continue;
             }
 
-            // 키워드가 처음이면 score = 1 새로 생성
-            // 이미 있으면 기존 score에 1을 더함
-            redisTemplate.opsForZSet().incrementScore(key, keyword, 1);
-            // Set에 이 고객을 등록해서 중복 방지
-            redisTemplate.opsForSet().add(userLogKey, memberValue);
-
+            // 처음 검색한 키워드만 ZSet score + 1
+            redisTemplate.opsForZSet().incrementScore(rankKey, keyword, 1);
             log.debug("[검색어 기록] userId: {}, keyword: {}", loginId, keyword);
         }
     }
