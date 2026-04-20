@@ -31,7 +31,6 @@ public class OrderQueryServiceImpl implements OrderQueryService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final OrderUserRepository orderUserRepository;
-    private final UserQueryService userQueryService;
 
     /**
      * 주문 목록 조회

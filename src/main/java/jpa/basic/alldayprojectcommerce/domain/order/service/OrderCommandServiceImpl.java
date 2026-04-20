@@ -9,6 +9,7 @@ import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResp
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderUser;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
@@ -39,9 +40,9 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     /**
      * 주문서 생성
      *
-     * @param loginId           : 인증된 사용자
-     * @param request           : 주문 생성 요청 DTO
-     * @return                  : 주문 생성 응답 DTO
+     * @param loginId : 인증된 사용자
+     * @param request : 주문 생성 요청 DTO
+     * @return : 주문 생성 응답 DTO
      */
     @Override
     public CreateOrderResponse createOrder(Long loginId, CreateOrderRequest request) {
@@ -95,7 +96,7 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         }
 
         log.info("[주문 생성] userId: {}, orderUid: {}, totalAmount: {}",
-                    loginId, orderUid, totalAmount);
+                loginId, orderUid, totalAmount);
 
         return new CreateOrderResponse(orderUid, totalAmount);
     }
@@ -112,11 +113,44 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     @Override
     public void saveOrderUser(Long orderId, String name, String phone, String address) {
+        // 결제 재시도로 이미 저장된 데이터가 있다면 중복 저장 방지
+        if (orderUserRepository.findByOrderId(orderId).isPresent()) {
+            log.info("[OrderUser] 이미 저장된 스냅샷 존재 orderId: {}", orderId);
+            return;
+        }
 
+        orderUserRepository.save(
+                OrderUser.builder()
+                        .orderId(orderId)
+                        .name(name)
+                        .phone(phone)
+                        .address(address)
+                        .build()
+        );
+
+        log.info("[OrderUser] 스냅샷 저장 완료 orderId: {}", orderId);
     }
 
     @Override
-    public void markOrderPaid(Order order) {
+    public void markOrderComplete(Order order) {
+        order.updateStatus(OrderStatus.COMPLETED);
+        log.info("[주문 상태 변경] orderUid: {}, orderStatus: {}", order.getOrderUid(), order.getStatus());
+    }
 
+    @Override
+    public void markOrderDelivered(Order order) {
+        order.updateStatus(OrderStatus.DELIVERY_COMPLETED);
+        log.info("[주문 상태 변경] orderUid: {}, orderStatus: {}", order.getOrderUid(), order.getStatus());
+    }
+
+    private Order findOrderWithOwnerCheck(Long loginId, String orderUid) {
+        Order order = orderRepository.findByOrderUid(orderUid)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (!order.getUserId().equals(loginId)) {
+            throw new CustomException(ErrorCode.ORDER_FORBIDDEN);
+        }
+
+        return order;
     }
 }
