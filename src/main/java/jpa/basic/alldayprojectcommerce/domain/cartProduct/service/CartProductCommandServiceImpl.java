@@ -97,7 +97,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
     }
 
     @Override
-    public void CleanCart(Long userId) {
+    public void cleanCart(Long userId) {
         cartProductRepository.deleteAllByUserId(userId);
     }
 

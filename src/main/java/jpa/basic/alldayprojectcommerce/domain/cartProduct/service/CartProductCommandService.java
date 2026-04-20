@@ -15,6 +15,6 @@ public interface CartProductCommandService {
     void deleteCartProduct(Long userId, Long cartProductId);
 
     // 장바구니 비우기
-    void CleanCart(Long userId);
+    void cleanCart(Long userId);
 
 }

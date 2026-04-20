@@ -65,9 +65,9 @@ public class CartProductController {
 
     // 장바구니 비우기
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> CleanCart(
+    public ResponseEntity<ApiResponse<Void>> cleanCart(
             @LoginUser LoginUserInfo loginUser) {
-        cartProductCommandService.CleanCart(loginUser.id());
+        cartProductCommandService.cleanCart(loginUser.id());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
