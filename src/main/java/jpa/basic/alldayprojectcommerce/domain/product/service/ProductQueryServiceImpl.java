@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +40,10 @@ public class ProductQueryServiceImpl implements ProductQueryService {
     public Product getByProductId(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Override
+    public List<Product> findAllByIds(List<Long> productIds) {
+        return productRepository.findAllById(productIds);
     }
 }

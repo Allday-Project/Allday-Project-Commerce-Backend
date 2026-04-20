@@ -6,6 +6,9 @@ import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+import java.util.Map;
+
 public interface ProductQueryService {
 
     GetProductResponse getOneProduct(Long productId);
@@ -13,4 +16,6 @@ public interface ProductQueryService {
 
     // 상품 단건 조회 - 주문 생성에서 사용
     Product getByProductId(Long productId);
+
+    List<Product> findAllByIds(List<Long> productIds);
 }
