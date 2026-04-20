@@ -1,14 +1,17 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.controller;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
+import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
+import jpa.basic.alldayprojectcommerce.domain.keyword.dto.request.SearchRequest;
 import jpa.basic.alldayprojectcommerce.domain.keyword.service.KeywordCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,9 +27,10 @@ public class KeywordController {
      */
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<Void>> createRecordSearch(
-            @RequestParam @NotBlank(message = "검색어를 입력해주세요.") String query) {
+            @LoginUser LoginUserInfo loginUserInfo,
+            @RequestBody @Valid SearchRequest request) {
 
-        keywordCommandService.createRecordSearch(query);
+        keywordCommandService.createRecordSearch(loginUserInfo.id(), request.query());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 }
