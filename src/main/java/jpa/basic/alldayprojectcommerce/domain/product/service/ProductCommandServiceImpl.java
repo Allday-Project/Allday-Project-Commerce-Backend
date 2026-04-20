@@ -26,7 +26,6 @@ public class ProductCommandServiceImpl implements ProductCommandService{
 
     // 재고를 차감 한다.
     @Override
-    @Transactional
     public void decreaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -35,7 +34,6 @@ public class ProductCommandServiceImpl implements ProductCommandService{
 
     // 재고를 증가시킨다.
     @Override
-    @Transactional
     public void increaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -44,7 +42,6 @@ public class ProductCommandServiceImpl implements ProductCommandService{
 
     // 재고를 재고 관리 테이블에 기록한다.
     @Override
-    @Transactional
     public void saveStockHistory(Long productId, Long orderId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
