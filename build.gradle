@@ -58,6 +58,9 @@ dependencies {
 
     // Nano Id Util
     implementation "com.aventrix.jnanoid:jnanoid:2.0.0"
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {
