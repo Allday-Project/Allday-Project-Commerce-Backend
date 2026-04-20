@@ -1,6 +1,10 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
 import jakarta.transaction.Transactional;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
@@ -12,7 +16,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductCommandServiceImpl implements ProductCommandService{
+    @Override
+    public void decreaseStock(Order order) {
+
+    }
 
     private final ProductRepository productRepository;
     private final StockRepository stockRepository;
