@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: soyoung7509
+      MYSQL_DATABASE: allday_project_commerce
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - allday-project-net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    restart: always
+    build: .
+    container_name: allday-project-commerce-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: root
+      DB_PASSWORD: soyoung7509
+      JWT_SECRET_KEY: j8cyDNUdPGhlkPxX9QuyRpGpCHxwwJ1B2jvITUreN4n/EyP94W3ORlxRr6dRG+wheCpD1ZseWF54oeFX3D+6aA==
+    ports:
+      - "8090:8090"
+    networks:
+      - allday-project-net
+
+volumes:
+  mysql_data:
+
+networks:
+  allday-project-net:
