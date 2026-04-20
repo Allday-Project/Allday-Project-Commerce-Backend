@@ -21,12 +21,6 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     // 한글, 영문, 숫자, 공백만 허용 (특수문자 전부 제거)
     private static final Pattern SPECIAL_CHAR = Pattern.compile("[^가-힣a-zA-Z0-9\\s]");
 
-
-    private String todayRankKey() {
-        return "search:rank:" + LocalDate.now()
-                .format(DateTimeFormatter.ISO_LOCAL_DATE);
-    }
-
     /**
      * 검색어 기록
      *
