@@ -52,6 +52,48 @@ public class Product extends BaseEntity {
         this.category = category;
         this.imageUrl = imageUrl;
     }
+
+
+    // 재고 차감 로직
+    public void decreaseStock(int quantity) {
+        validQuantity(quantity);
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+        }
+        this.stock -= quantity;
+        closeSales();
+    }
+
+    // 재고 증가 로직
+    public void increaseStock(int quantity) {
+        validQuantity(quantity);
+        this.stock += quantity;
+        resumeSales();
+    }
+
+    // 재고가 null 이거나 입력 수량이 0보다 작거나 같을 때 에러 날림
+    private void validQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+    }
+
+    // 재고가 0이 되면 품절 상태로 변경
+    private void closeSales() {
+        if (this.status == ProductStatus.SOLD_OUT) {
+            return;
+        }
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+    }
+
+    // 재고를 0에서 올렸을 때 판매 중 상태로 변경
+    private void resumeSales() {
+        if (this.status == ProductStatus.SOLD_OUT && this.stock > 0) {
+            this.status = ProductStatus.ON_SALE;
+        }
+    }
 }
 
 
