@@ -38,7 +38,7 @@ public class ProductCommandServiceImplTest {
     // ✅ 1. 정상 차감
     @Test
     @DisplayName("결제 시 재고가 정상적으로 차감되어야 한다")
-    void decreaseStockOnPayment_Success() {
+    void decreaseStock_Success() {
         // given
         Long productId = 1L;
         int decreaseQuantity = 5;
@@ -53,7 +53,7 @@ public class ProductCommandServiceImplTest {
 //        when(productRepository.save(any(Product.class))).thenReturn(mockProduct); // save 스터빙
 
         // when
-        productCommandService.decreaseStockOnPayment(productId, decreaseQuantity);
+        productCommandService.decreaseStock(productId, decreaseQuantity);
 
         // then
         assertEquals(5, mockProduct.getStock());
@@ -77,7 +77,7 @@ public class ProductCommandServiceImplTest {
 
         // ✅ CustomException으로 변경
         CustomException ex = assertThrows(CustomException.class, () ->
-                productCommandService.decreaseStockOnPayment(productId, 15)
+                productCommandService.decreaseStock(productId, 15)
         );
 
         // ✅ ErrorCode까지 검증하면 더 정확함
@@ -88,14 +88,14 @@ public class ProductCommandServiceImplTest {
     // 3. 상품 미존재 예외
     @Test
     @DisplayName("존재하지 않는 상품이면 예외가 발생해야 한다")
-    void decreaseStockOnPayment_ProductNotFound() {
+    void decreaseStock_ProductNotFound() {
         Long productId = 999L;
 
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         // ✅ CustomException으로 변경
         CustomException ex = assertThrows(CustomException.class, () ->
-                productCommandService.decreaseStockOnPayment(productId, 5)
+                productCommandService.decreaseStock(productId, 5)
         );
 
         assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
@@ -105,7 +105,7 @@ public class ProductCommandServiceImplTest {
     // 4. ✅ 보너스 - 재고가 0이 되면 SOLD_OUT 상태로 변경되는지 검증
     @Test
     @DisplayName("재고가 0이 되면 품절 상태로 변경되어야 한다")
-    void decreaseStockOnPayment_SoldOut() {
+    void decreaseStock_SoldOut() {
         Long productId = 1L;
 
         Product mockProduct = Product.builder()
@@ -116,7 +116,7 @@ public class ProductCommandServiceImplTest {
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
 
-        productCommandService.decreaseStockOnPayment(productId, 5); // 재고 전부 소진
+        productCommandService.decreaseStock(productId, 5); // 재고 전부 소진
 
         assertEquals(0, mockProduct.getStock());
         assertEquals(ProductStatus.SOLD_OUT, mockProduct.getStatus()); // ✅ 품절 상태 검증
@@ -126,7 +126,7 @@ public class ProductCommandServiceImplTest {
     // ✅ 재고 증가 - 정상
     @Test
     @DisplayName("취소 시 재고가 정상적으로 증가되어야 한다")
-    void increaseStockOnCancel_Success() {
+    void increaseStock_Success() {
         // given
         Long productId = 1L;
         int increaseQuantity = 5;
@@ -139,7 +139,7 @@ public class ProductCommandServiceImplTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
 
         // when
-        productCommandService.increaseStockOnCancel(productId, increaseQuantity);
+        productCommandService.increaseStock(productId, increaseQuantity);
 
         // then
         assertEquals(15, mockProduct.getStock()); // 10 + 5 = 15
@@ -150,7 +150,7 @@ public class ProductCommandServiceImplTest {
     // ✅ 재고 증가 - 상품 미존재 예외
     @Test
     @DisplayName("취소 시 존재하지 않는 상품이면 예외가 발생해야 한다")
-    void increaseStockOnCancel_ProductNotFound() {
+    void increaseStock_ProductNotFound() {
         // given
         Long productId = 999L;
 
@@ -158,7 +158,7 @@ public class ProductCommandServiceImplTest {
 
         // when & then
         CustomException ex = assertThrows(CustomException.class, () ->
-                productCommandService.increaseStockOnCancel(productId, 5)
+                productCommandService.increaseStock(productId, 5)
         );
 
         assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());

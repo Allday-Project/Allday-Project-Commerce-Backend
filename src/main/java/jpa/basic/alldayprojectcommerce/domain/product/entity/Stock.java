@@ -3,16 +3,16 @@ package jpa.basic.alldayprojectcommerce.domain.product.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "stocks")
-@NoArgsConstructor
+@Table(name = "Product_stock_logs")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Stock extends BaseEntity {
 
     @Id
@@ -31,23 +31,14 @@ public class Stock extends BaseEntity {
 
     private Long orderId;
 
-    @Column(length = 20)
-    @Size(max = 20)
-    private String adminId;
-
-    @Column(length = 255)
-    private String reasonCode;
-
 
     @Builder
-    public Stock(Long id, Long productId, int changeStock, int stock, Long orderId, String adminId, String reasonCode) {
+    public Stock(Long id, Long productId, int changeStock, int stock, Long orderId) {
         this.id = id;
         this.productId = productId;
         this.changeStock = changeStock;
         this.stock = stock;
         this.orderId = orderId;
-        this.adminId = adminId;
-        this.reasonCode = reasonCode;
     }
 }
 

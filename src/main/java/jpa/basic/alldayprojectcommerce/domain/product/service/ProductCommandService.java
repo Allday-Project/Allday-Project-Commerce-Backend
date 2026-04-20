@@ -6,7 +6,7 @@ public interface ProductCommandService {
     void decreaseStock(Order order);
 
 
-    void decreaseStockOnPayment(Long productId, int quantity);
-    void increaseStockOnCancel(Long productId, int quantity);
+    void decreaseStock(Long productId, int quantity);
+    void increaseStock(Long productId, int quantity);
     void saveStockHistory(Long productId, Long orderId, int quantity);
 }
