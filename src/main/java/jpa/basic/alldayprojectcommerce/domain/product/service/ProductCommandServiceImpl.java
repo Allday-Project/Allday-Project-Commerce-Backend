@@ -1,27 +1,32 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
 import jakarta.transaction.Transactional;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Stock;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.StockRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductCommandServiceImpl implements ProductCommandService{
+    @Override
+    public void decreaseStock(Order order) {
+
+    }
 
     private final ProductRepository productRepository;
     private final StockRepository stockRepository;
-    // 결재가 완료 되면 재고 차감
+
 
     // 재고를 차감 한다.
     @Override
-    @Transactional
-    public void decreaseStockOnPayment(Long productId, int quantity) {
+    public void decreaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.decreaseStock(quantity);
@@ -29,8 +34,7 @@ public class ProductCommandServiceImpl implements ProductCommandService{
 
     // 재고를 증가시킨다.
     @Override
-    @Transactional
-    public void increaseStockOnCancel(Long productId, int quantity) {
+    public void increaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.increaseStock(quantity);
