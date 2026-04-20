@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: soyoung7509
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: allday_project_commerce
       TZ: Asia/Seoul
     ports:
@@ -19,27 +19,65 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--appendonly", "yes" ]
+    volumes:
+      - redis_data:/data
+    networks:
+      - allday-project-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
 
   app:
-    restart: always
     build: .
     container_name: allday-project-commerce-app
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       DB_URL: jdbc:mysql://mysql:3306/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      DB_USERNAME: root
-      DB_PASSWORD: soyoung7509
-      JWT_SECRET_KEY: j8cyDNUdPGhlkPxX9QuyRpGpCHxwwJ1B2jvITUreN4n/EyP94W3ORlxRr6dRG+wheCpD1ZseWF54oeFX3D+6aA==
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     ports:
       - "8090:8090"
     networks:
       - allday-project-net
+    restart: always
+
+  k6:
+    image: grafana/k6:latest
+    container_name: k6-load-test
+    profiles: ["test"]
+    working_dir: /scripts
+    volumes:
+      - ./k6:/scripts
+    networks:
+      - allday-project-net
+    depends_on:
+      app:
+        condition: service_started
 
 volumes:
   mysql_data:
+  redis_data:
+
 
 networks:
   allday-project-net:
