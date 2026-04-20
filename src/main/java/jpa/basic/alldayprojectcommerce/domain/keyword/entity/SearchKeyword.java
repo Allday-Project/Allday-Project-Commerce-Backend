@@ -36,8 +36,8 @@ public class SearchKeyword extends BaseEntity {
         this.searchDate = searchDate;
     }
 
-    // Write-back 시 Redis 카운트를 DB에 누적 합산
-    public void addCount(Long count) {
-        this.searchCount += count;
+    // Write-back 시 Redis 카운트를 DB에 덮어쓰기
+    public void setCount(Long count) {
+        this.searchCount = count;
     }
 }
