@@ -32,7 +32,7 @@ public enum ErrorCode {
     ORDER_INVALID_UID(HttpStatus.BAD_REQUEST, "O005", "유효하지 않은 주문 UID 입니다."),
     ORDER_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST,"O006","주문 상태가 결제 대기 상태가 아닙니다."),
     ORDER_STATUS_NOT_COMPLETED(HttpStatus.BAD_REQUEST,"O007","주문 상태가 결제 완료 상태가 아닙니다."),
-
+    ORDER_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "O008", "주문 상품이 존재하지 않습니다."),
     //   상품 관련 에러 코드(P###)
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "해당 상품은 존재하지 않습니다."),
     PRODUCT_STOCK_LOCK_FAILED(HttpStatus.CONFLICT, "P002", "현재 요청이 많아 처리가 지연되고 있습니다. 잠시 후 다시 시도해 주세요."),

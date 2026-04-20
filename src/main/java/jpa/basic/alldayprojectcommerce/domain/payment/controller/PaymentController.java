@@ -52,10 +52,13 @@ public class PaymentController {
             @PathVariable
             @NotBlank
             @Pattern(regexp = "^ORD-\\d{8}-[0-9a-zA-Z]{8}$",
-                    message = "orderUid는 ORD-YYYYMMDD-XXXXXXXX 형식이어야 합니다."
-            )
+                    message = "orderUid는 ORD-YYYYMMDD-XXXXXXXX 형식이어야 합니다.")
             String orderUid,
-            @PathVariable String paymentUid,
+            @PathVariable
+            @NotBlank
+            @Pattern(regexp = "^PAY-\\d{8}-[0-9a-zA-Z]{8}$",
+                    message = "paymentUid는 PAY-YYYYMMDD-XXXXXXXX 형식이어야 합니다.")
+            String paymentUid,
             @LoginUser LoginUserInfo loginUser){
         ConfirmPaymentResponse response = orderPaymentFacade.confirmOrderPayment(orderUid,paymentUid,loginUser.id());
         return ResponseEntity.status(HttpStatus.OK)

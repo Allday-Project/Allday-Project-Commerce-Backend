@@ -6,6 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetAllOrdersResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOneOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOrderDetailsResponse;
+import jpa.basic.alldayprojectcommerce.domain.order.dto.response.OrderProductInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
@@ -13,8 +14,6 @@ import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderUser;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
-import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
-import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -111,18 +110,28 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         return order;
     }
 
-    @Override
-    public Order getOrderByOrderUid(String orderUid) {
-        return orderRepository.findByOrderUid(orderUid).orElseThrow(
-                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
-        );
-    }
 
     @Override
     public Order getOrderByOrderUidForUpdate(String orderUid) {
         return orderRepository.findByOrderUidForUpdate(orderUid).orElseThrow(
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
+    }
+
+    @Override
+    public List<OrderProductInfo> getOrderProducts(Long orderId) {
+        List<OrderProduct> orderProducts = orderProductRepository.findByOrderId(orderId);
+
+        if (orderProducts.isEmpty()) {
+            throw new CustomException(ErrorCode.ORDER_PRODUCT_NOT_FOUND);
+        }
+
+        return orderProducts.stream()
+                .map(orderProduct -> new OrderProductInfo(
+                        orderProduct.getProductId(),
+                        orderProduct.getQuantity()
+                ))
+                .toList();
     }
 }
 

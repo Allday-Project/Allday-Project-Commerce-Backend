@@ -2,14 +2,12 @@ package jpa.basic.alldayprojectcommerce.application;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.order.dto.response.OrderProductInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderCommandService;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderQueryService;
-import jpa.basic.alldayprojectcommerce.domain.order.service.OrderUserCommandService;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.ConfirmPaymentResponse;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.ConfirmPaymentResult;
-import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
-import jpa.basic.alldayprojectcommerce.domain.payment.repository.PaymentRepository;
 import jpa.basic.alldayprojectcommerce.domain.payment.service.PaymentCommandService;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductCommandService;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
@@ -19,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrderPaymentFacade {
@@ -27,7 +27,6 @@ public class OrderPaymentFacade {
     private final PaymentCommandService paymentCommandService;
     private final UserQueryService userQueryService;
     private final OrderCommandService orderCommandService;
-    private final OrderUserCommandService orderUserCommandService;
     private final ProductCommandService productCommandService;
 
     @Transactional
@@ -52,21 +51,25 @@ public class OrderPaymentFacade {
         if (result.newlyConfirmed()) {
             User user = userQueryService.getById(loginUserId);
 
-            // TODO : 주문자 정보 최종 검증 필요 시 여기서 다시 수행
-            if (!userQueryService.hasRequiredOrdererInfo(loginUserId)) {
+            if (!user.hasRequiredInfo()) {
                 throw new CustomException(ErrorCode.USER_ORDERER_INFO_REQUIRED);
             }
 
-            // 1. 주문 완료 처리
-            orderCommandService.markOrderPaid(order);
+            // 1. 재고 차감
+            List<OrderProductInfo> orderProducts = orderQueryService.getOrderProducts(order.getId());
 
+            for (OrderProductInfo orderProduct : orderProducts) {
+                productCommandService.decreaseStock(orderProduct.productId(), orderProduct.quantity(), order.getId());
+            }
 
-            // 2. 재고 차감
-            productCommandService.decreaseStock(order);
+            // 2. OrderUser 스냅샷 저장
+            orderCommandService.saveOrderUser(order.getId(), user.getName(), user.getPhone(), user.getAddress());
 
-            // 3. OrderUser 스냅샷 저장
-            orderUserCommandService.createSnapshot(order, user);
+            // 3. 주문 완료 처리
+            orderCommandService.markOrderComplete(order);
 
+            // 4. 배송 완료 처리
+            orderCommandService.markOrderDelivered(order);
         }
         return ConfirmPaymentResponse.of(orderUid, result.paymentStatus());
 
