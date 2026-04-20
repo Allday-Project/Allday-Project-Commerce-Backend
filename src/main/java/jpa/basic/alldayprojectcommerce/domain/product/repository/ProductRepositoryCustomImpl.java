@@ -1,7 +1,10 @@
 package jpa.basic.alldayprojectcommerce.domain.product.repository;
 
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
@@ -32,18 +36,21 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     public Page<Product> findAllProducts(
             FilterProductRequest filterRequest,
             Pageable pageable) {
+        pageable.getSort().forEach(order ->
+                System.out.println("Sort Property: " + order.getProperty() + ", Direction: " + order.getDirection())
+        );
 
-        // 1. 콘텐츠 조회 쿼리
+        // 콘텐츠 조회 쿼리
         List<Product> content = queryFactory
                 .selectFrom(product)
                 .where(categoryEq(filterRequest.category()),
                         statusEq(filterRequest.status()))
-                .orderBy(product.createdAt.asc())
+                .orderBy(getOrderSpecifiers(pageable.getSort()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 2. 카운트 쿼리
+        // 카운트 쿼리
         JPAQuery<Long> countQuery = queryFactory
                 .select(product.count())
                 .from(product);
@@ -60,7 +67,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         List<Product> content = queryFactory
                 .selectFrom(product)
                 .where(keywordContains(searchRequest.keyword()))
-                .orderBy(product.createdAt.asc())
+                .orderBy(getOrderSpecifiers(pageable.getSort()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -88,6 +95,18 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     private BooleanExpression statusEq(ProductStatus status) {
         return status != null ? product.status.eq(status) : null;
+    }
+
+
+    private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
+        return sort.stream()
+                .map(order -> {
+                    Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+                    String property = order.getProperty();
+                    PathBuilder<Product> pathBuilder = new PathBuilder<>(Product.class, "product");
+                    return new OrderSpecifier<>(direction, pathBuilder.getComparable(property, Comparable.class));
+                })
+                .toArray(OrderSpecifier[]::new);
     }
 
 }

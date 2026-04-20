@@ -50,7 +50,6 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int page,
             Pageable pageable) {
 
-        // 1페이지부터 조회
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
         Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
