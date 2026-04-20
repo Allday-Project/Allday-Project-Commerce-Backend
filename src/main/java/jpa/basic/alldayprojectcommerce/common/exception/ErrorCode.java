@@ -28,7 +28,6 @@ public enum ErrorCode {
     ORDER_FORBIDDEN(HttpStatus.FORBIDDEN, "O002", "해당 주문에 접근할 권한이 없습니다."),
     ORDER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "O003", "현재 주문 상태에서는 해당 작업을 수행할 수 없습니다."),
     ORDER_USER_INFO_REQUIRED(HttpStatus.BAD_REQUEST, "O004", "이름, 전화번호, 주소를 입력해주세요."),
-    ORDER_USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "O005", "주문자 정보를 찾을 수 없습니다."),
     ORDER_INVALID_UID(HttpStatus.BAD_REQUEST, "O005", "유효하지 않은 주문 UID 입니다."),
     ORDER_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST,"O006","주문 상태가 결제 대기 상태가 아닙니다."),
     ORDER_STATUS_NOT_COMPLETED(HttpStatus.BAD_REQUEST,"O007","주문 상태가 결제 완료 상태가 아닙니다."),
