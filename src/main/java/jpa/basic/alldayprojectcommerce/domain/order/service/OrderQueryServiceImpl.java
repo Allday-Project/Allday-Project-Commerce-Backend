@@ -13,6 +13,7 @@ import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderUser;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
+import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,14 @@ public class OrderQueryServiceImpl implements OrderQueryService {
     public GetOneOrderResponse getOneOrder(Long loginId, String orderUid) {
         Order order = findOrderWithOwnerCheck(loginId, orderUid);
 
+        // 주문서는 PENDING 상태일 때만 접근 가능
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS);
+        }
 
-        return null;
+        List<OrderProduct> products = orderProductRepository.findByOrderId(order.getId());
+
+        return GetOneOrderResponse.from(order, products);
     }
 
     /**
