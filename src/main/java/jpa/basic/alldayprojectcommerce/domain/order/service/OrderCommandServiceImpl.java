@@ -133,12 +133,20 @@ public class OrderCommandServiceImpl implements OrderCommandService {
 
     @Override
     public void markOrderComplete(Order order) {
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_STATUS_NOT_PENDING);
+        }
+
         order.updateStatus(OrderStatus.COMPLETED);
         log.info("[주문 상태 변경] orderUid: {}, orderStatus: {}", order.getOrderUid(), order.getStatus());
     }
 
     @Override
     public void markOrderDelivered(Order order) {
+        if (order.getStatus() != OrderStatus.COMPLETED) {
+            throw new CustomException(ErrorCode.ORDER_STATUS_NOT_COMPLETED);
+        }
+
         order.updateStatus(OrderStatus.DELIVERY_COMPLETED);
         log.info("[주문 상태 변경] orderUid: {}, orderStatus: {}", order.getOrderUid(), order.getStatus());
     }
