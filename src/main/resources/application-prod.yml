@@ -8,18 +8,23 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: false
         show_sql: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 logging:
   level:
     root: info
     com:
       example:
-        instagramclone: info
+        alldayproject: info
     org:
       hibernate:
         SQL: info
