@@ -70,8 +70,8 @@ public class Product extends BaseEntity {
     }
 
     public void checkAvailability(int quantity) {
-        validQuantity(quantity);
         verifyStock(quantity);
+        validQuantity(quantity);
     }
 
     // 입력 수량이 재고보다 클 때 에러 날림
