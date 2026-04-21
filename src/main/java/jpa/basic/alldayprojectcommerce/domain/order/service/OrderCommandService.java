@@ -22,8 +22,14 @@ public interface OrderCommandService {
     void saveOrderUser(Long orderId, String name, String phone, String address);
 
     /**
-     * 결제 완료 시 Order 상태를 PAID로 변경
+     * 결제 완료 시 Order 상태를 COMPLETED로 변경
      * Payment 도메인의 서비스에서 호출
      */
-    void markOrderPaid(Order order);
+    void markOrderComplete(Order order);
+
+    /**
+     * 결제 완료 시 Order 상태를 DELIVERY_COMPLETED로 변경
+     * Payment 도메인의 서비스에서 호출
+     */
+    void markOrderDelivered(Order order);
 }
