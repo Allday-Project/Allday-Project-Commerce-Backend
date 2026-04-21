@@ -78,6 +78,12 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProductRepository.delete(cartProduct);
     }
 
+    // 장바구니 비우기
+    @Override
+    public void cleanCart(Long userId) {
+        cartProductRepository.deleteAllByUserId(userId);
+    }
+
 
     // ======= 장바구니 공통 검증 로직 ========
 

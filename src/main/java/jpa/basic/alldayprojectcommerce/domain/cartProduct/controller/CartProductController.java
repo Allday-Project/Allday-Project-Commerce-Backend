@@ -33,13 +33,12 @@ public class CartProductController {
                 .body(ApiResponse.success(HttpStatus.CREATED));
     }
 
-    // 장바구니 조회
+    // 장바구니 상품 전체 조회
     @GetMapping
     public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
             @LoginUser LoginUserInfo loginUser,
             @RequestParam(required = false) Long cursorId,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         CursorResponse<GetAllCartProductResponse> response =
                 cartProductQueryService.getAllCartProduct(loginUser.id(), cursorId, size);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
@@ -61,6 +60,14 @@ public class CartProductController {
             @LoginUser LoginUserInfo loginUser,
             @PathVariable Long cartProductId) {
         cartProductCommandService.deleteCartProduct(loginUser.id(), cartProductId);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
+    }
+
+    // 장바구니 비우기
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> cleanCart(
+            @LoginUser LoginUserInfo loginUser) {
+        cartProductCommandService.cleanCart(loginUser.id());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
