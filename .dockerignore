@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Build outputs
+build/*
+!build/libs/
+!build/libs/*.jar
+out/
+.gradle/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Env
+.env
+.env.*
+
+# Docker 관련
+docker-compose.yml
+docker-compose.override.yml
+
+# Docs
+README.md
+
+# Test files (선택)
+src/test/
+
+# K6 (이미지 빌드에는 필요 없음)
+k6/
