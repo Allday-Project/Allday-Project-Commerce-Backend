@@ -8,15 +8,14 @@ import jpa.basic.alldayprojectcommerce.domain.cartProduct.entity.CartProduct;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.repository.CartProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
-import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartProductCommandServiceImpl implements CartProductCommandService {
 
     private final ProductQueryService productQueryService;
@@ -33,17 +32,12 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
-        // 재고 검증
-        product.checkAvailability(request.quantity());
-
         // 이미 담긴 상품이면 수량 합산
         cartProductRepository.findByUserIdAndProductId(userId, request.productId())
                 .ifPresentOrElse(
                         existing -> {
                             // 기존수량 + 신규 수량 합산
                             int totalQuantity = existing.getQuantity() + request.quantity();
-                            // 합산된 수량이 재고를 초과하는지 체크
-                            product.checkAvailability(totalQuantity);
                             existing.updateQuantity(totalQuantity);
                         },
                         () -> cartProductRepository.save(
@@ -56,27 +50,47 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                 );
     }
 
-    // 장바구니 상품 수량 업데이트
+    // 수량 변경
     @Override
-    public void updateQuantity(
-            Long userId, Long cartProductId, UpdateQuantityRequest request) {
+    public void updateQuantity(Long userId, Long cartProductId, UpdateQuantityRequest request) {
 
-        // 장바구니 상품 유무 검증
-        CartProduct cartProduct = cartProductRepository.findById(cartProductId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CARTPRODUCT_NOT_FOUND));
+        // 장바구니 상품 존재 여부 검증
+        CartProduct cartProduct = getCartProductOrThrow(cartProductId);
 
-        // 해당 장바구니 상품에 접근 권한 여부 검증
-        if (!cartProduct.getUserId().equals(userId)) {
-            throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
-        }
-
-        // 장바구니에 담긴 상품의 존재 여부 검증
-        Product product = productQueryService.getByProductId(cartProduct.getProductId());
-
-        // 재고 확인
-        product.checkAvailability(request.quantity());
+        // 해당 장바구니 접근 권한 검증
+        validateOwner(cartProduct, userId);
 
         // @Transactional -> dirty checking으로 자동저장
         cartProduct.updateQuantity(request.quantity());
+    }
+
+    // 장바구니 상품 단건 삭제
+    @Override
+    public void deleteCartProduct(Long userId, Long cartProductId) {
+
+        // 장바구니 상품 존재 여부 검증
+        CartProduct cartProduct = getCartProductOrThrow(cartProductId);
+
+        // 해당 장바구니 접근 권한 검증
+        validateOwner(cartProduct, userId);
+
+        // 해당 장바구니 상품 삭제 (hard delete)
+        cartProductRepository.delete(cartProduct);
+    }
+
+
+    // ======= 장바구니 공통 검증 로직 ========
+
+    // 장바구니에 상품 존재 여부 검증 로직
+    private CartProduct getCartProductOrThrow(Long cartProductId) {
+        return cartProductRepository.findById(cartProductId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CARTPRODUCT_NOT_FOUND));
+    }
+
+    // 해당 장바구니 상품에 접근 권한 여부 검증
+    private void validateOwner(CartProduct cartProduct, Long userId) {
+        if (!cartProduct.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
+        }
     }
 }
