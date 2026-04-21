@@ -4,7 +4,7 @@ package jpa.basic.alldayprojectcommerce.domain.product.service;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
-import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetProductResponse;
+import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +23,15 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     private final ProductRepository productRepository;
 
-    public GetProductResponse getOneProduct(Long productId){
+    @Override
+    public GetOneProductResponse getOneProduct(Long productId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        return GetProductResponse.getProduct(product);
+        return GetOneProductResponse.getProduct(product);
     }
 
-
     // 전체 조회
+    @Override
     public Page<GetAllProductResponse> getAllProduct(Pageable pageable){
         return productRepository.findAllProducts(pageable)
                 .map(GetAllProductResponse::from);
