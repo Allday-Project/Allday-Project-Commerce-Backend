@@ -23,18 +23,17 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
     // 장바구니 상품 추가
     @Override
     public void createCartProduct(Long userId, CreateCartProductRequest request) {
+        // 상품 존재 여부 검증
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 판매 불가 상품 검증
+        // 판매 상태 검증
         if (product.getStatus() != ProductStatus.ON_SALE) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
         // 재고 검증
-        if (product.getStock() < request.quantity()) {
-            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-        }
+        product.checkAvailability(request.quantity());
 
         // 이미 담긴 상품이면 수량 합산
         cartProductRepository.findByUserIdAndProductId(userId, request.productId())
@@ -43,9 +42,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                             // 기존수량 + 신규 수량 합산
                             int totalQuantity = existing.getQuantity() + request.quantity();
                             // 합산된 수량이 재고를 초과하는지 체크
-                            if (product.getStock() < totalQuantity) {
-                                throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-                            }
+                            product.checkAvailability(totalQuantity);
                             existing.updateQuantity(totalQuantity);
                         },
                         () -> cartProductRepository.save(
@@ -56,7 +53,5 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                                         .build()
                         )
                 );
-
-
     }
 }
