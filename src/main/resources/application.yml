@@ -44,3 +44,12 @@ jwt:
 
 oauth2:
   redirect-uri: http://localhost:3000/oauth2/callback
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
