@@ -54,4 +54,11 @@ public class ProductCommandServiceImpl implements ProductCommandService{
         stockRepository.save(stock);
     }
 
+    @Override
+    public void checkStock(Long productId, int quantity){
+        Product product =  productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.checkAvailability(quantity);
+    }
+
 }
