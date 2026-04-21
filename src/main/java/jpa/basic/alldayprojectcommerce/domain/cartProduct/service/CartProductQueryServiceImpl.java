@@ -48,6 +48,7 @@ public class CartProductQueryServiceImpl implements CartProductQueryService{
                         p -> p,
                         (existing, replacement) -> existing
                 ));
+
         // 4. DTO 변환
         List<GetAllCartProductResponse> responseList = cartProducts.stream()
                 .map(cartProduct -> {
@@ -58,6 +59,7 @@ public class CartProductQueryServiceImpl implements CartProductQueryService{
                     }
                     return GetAllCartProductResponse.from(cartProduct, product);
                 }).toList();
+
         // 3. 응답 생성
         return CursorResponse.of(
                 responseList,
