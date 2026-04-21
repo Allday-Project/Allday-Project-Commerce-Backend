@@ -11,9 +11,6 @@ public interface CartProductCommandService {
     // 장바구니 상품 수량 변경
     void updateQuantity(Long userId, Long productId, UpdateQuantityRequest request);
 
-    // 장바구니 상품 수량 변경
-    void updateQuantity(Long userId, Long productId, UpdateQuantityRequest request);
-
     // 장바구니 상품 단건(개별) 삭제 --> hard delete 적용
     void deleteCartProduct(Long userId, Long cartProductId);
 }

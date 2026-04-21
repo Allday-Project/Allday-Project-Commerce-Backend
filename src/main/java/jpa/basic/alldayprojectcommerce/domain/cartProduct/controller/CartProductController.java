@@ -55,28 +55,6 @@ public class CartProductController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
-    // 장바구니 상품 전체 조회
-    @GetMapping
-    public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
-            @LoginUser LoginUserInfo loginUser,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        CursorResponse<GetAllCartProductResponse> response =
-                cartProductQueryService.getAllCartProduct(loginUser.id(), cursorId, size);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
-    }
-
-    // 장바구니 상품 수량 변경
-    @PatchMapping("/{cartProductId}")
-    public ResponseEntity<ApiResponse<Void>> updateQuantity (
-            @LoginUser LoginUserInfo loginUser,
-            @PathVariable Long cartProductId,
-            @Valid @RequestBody UpdateQuantityRequest request) {
-        cartProductCommandService.updateQuantity(loginUser.id(), cartProductId, request);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
-    }
-
     // 장바구니 상품 단건(개별) 삭제
     @DeleteMapping("/{cartProductId}")
     public ResponseEntity<ApiResponse<Void>> deleteCartProduct(

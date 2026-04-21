@@ -57,9 +57,9 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                 );
     }
 
+    // 수량 변경
     @Override
-    public void updateQuantity(
-            Long userId, Long cartProductId, UpdateQuantityRequest request) {
+    public void updateQuantity(Long userId, Long cartProductId, UpdateQuantityRequest request) {
 
         // 장바구니 상품 존재 여부 검증
         CartProduct cartProduct = getCartProductOrThrow(cartProductId);
@@ -68,8 +68,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         validateOwner(cartProduct, userId);
 
         // 장바구니에 담긴 상품의 존재 여부 검증
-        Product product = productRepository.findById(cartProduct.getProductId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productQueryService.getByProductId(cartProduct.getProductId());
 
         // 재고 확인
         if (product.getStock() < request.quantity()) {
@@ -80,6 +79,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProduct.updateQuantity(request.quantity());
     }
 
+    // 장바구니 상품 단건 삭제
     @Override
     public void deleteCartProduct(Long userId, Long cartProductId) {
 
@@ -93,8 +93,6 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProductRepository.delete(cartProduct);
     }
 
-        // 장바구니에 담긴 상품의 존재 여부 검증
-        Product product = productQueryService.getByProductId(cartProduct.getProductId());
 
     // ======= 장바구니 공통 검증 로직 ========
 
