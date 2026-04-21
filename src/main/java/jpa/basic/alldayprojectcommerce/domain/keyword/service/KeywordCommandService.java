@@ -8,4 +8,9 @@ public interface KeywordCommandService {
     // 비회원용 - IP 기반 중복 방지
     void recordSearchByIp(String ip, String query);
 
+    /**
+     * Redis -> DB Write-back
+     * 1시간마다 스케쥴러가 호출
+     */
+    void writeBack();
 }

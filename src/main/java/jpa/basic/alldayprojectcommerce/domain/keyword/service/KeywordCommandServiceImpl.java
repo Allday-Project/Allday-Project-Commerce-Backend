@@ -1,16 +1,18 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
 import jpa.basic.alldayprojectcommerce.common.util.RedisKeyUtils;
+import jpa.basic.alldayprojectcommerce.domain.keyword.entity.SearchKeyword;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordRepository;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -97,5 +99,59 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
         redisTemplate.opsForZSet().incrementScore(rankKey, keyword, 1);
         log.debug("[검색어 기록] keyword: {}", keyword);
+    }
+
+    /**
+     * Redis ZSet 전체 데이터를 꺼내서 SearchKeyword DB에 반영
+     *
+     * TypedTuple {value: "Allday", score: 10000.0} 형태
+     * DB에 오늘 날짜로 해당 키워드가 있으면 searchCount 업데이트
+     * DB에 없으면 새로 INSERT
+     */
+    @Override
+    @Transactional
+    public void writeBack() {
+        LocalDate today = LocalDate.now();
+        String rankKey = RedisKeyUtils.todayRankKey();
+
+        Set<ZSetOperations.TypedTuple<String>> allData =
+                redisTemplate.opsForZSet().rangeWithScores(rankKey, 0, -1);
+
+        if (allData == null || allData.isEmpty()) {
+            log.info("[Write-back] 동기화할 데이터 없음");
+            return;
+        }
+
+        for (ZSetOperations.TypedTuple<String> tuple : allData) {
+            String keyword = tuple.getValue();
+            long count = tuple.getScore() == null ? 0L : tuple.getScore().longValue();
+
+            if (keyword == null || keyword.isBlank()) continue;
+
+            // 오늘 날짜 + 키워드로 기존 레코드 조회
+            searchKeywordRepository
+                    .findByKeywordAndSearchDate(keyword, today)
+                    .ifPresentOrElse(
+                            existing -> {
+                                /**
+                                 * 이미 있으면 Redis 현재값으로 덮어씌우기
+                                 * Redis에는 오늘 누적 전체가 담겨있어서 그냥 덮어쓰기
+                                 */
+                                existing.setCount(count);
+                            },
+                            () -> {
+                                // 없으면 새로 INSERT
+                                searchKeywordRepository.save(
+                                        SearchKeyword.builder()
+                                                .keyword(keyword)
+                                                .searchCount(count)
+                                                .searchDate(today)
+                                                .build()
+                                );
+                            }
+                    );
+        }
+
+        log.info("[Write-back] {}건 DB 동기화 완료", allData.size());
     }
 }
