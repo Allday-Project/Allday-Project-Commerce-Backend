@@ -2,9 +2,10 @@ package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
 public interface KeywordCommandService {
 
-    /**
-     * 검색어 기록
-     * 고객이 검색창에 입력한 문장을 받아서 Redis ZSet에 카운트 + 1
-     */
-    void createRecordSearch(Long loginId, String query);
+    // 회원용   - userId 기반 중복 방지
+    void recordSearch(Long userId, String query);
+
+    // 비회원용 - IP 기반 중복 방지
+    void recordSearchByIp(String ip, String query);
+
 }
