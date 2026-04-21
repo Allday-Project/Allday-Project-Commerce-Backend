@@ -19,7 +19,6 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class KeywordQueryServiceImpl implements KeywordQueryService {
 
@@ -32,6 +31,7 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
      * 2. Redis가 비어있거나 장애 시 DB fallback
      */
     @Override
+    @Transactional(readOnly = true)
     public List<Top5KeywordResponse> getTop5() {
 
         // Redis에서 Top5 조회 시도
