@@ -20,7 +20,7 @@ public class PopularKeyword extends BaseEntity {
     @Column(nullable = false)
     private String keyword;         // 인기검색어 단어
 
-    @Column(nullable = false)
+    @Column(name = "keyword_rank", nullable = false)
     private Integer rank;               // 순위
 
     @Column(nullable = false)
