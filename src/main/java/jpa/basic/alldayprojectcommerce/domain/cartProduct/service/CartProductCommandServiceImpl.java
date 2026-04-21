@@ -10,6 +10,7 @@ import jpa.basic.alldayprojectcommerce.domain.cartProduct.repository.CartProduct
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
+import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,24 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CartProductCommandServiceImpl implements CartProductCommandService {
 
-    private final ProductRepository productRepository;
+    private final ProductQueryService productQueryService;
     private final CartProductRepository cartProductRepository;
 
     // 장바구니 상품 추가
     @Override
     public void createCartProduct(Long userId, CreateCartProductRequest request) {
-        Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        // 상품 존재 여부 검증
+        Product product = productQueryService.getByProductId(request.productId());
 
-        // 판매 불가 상품 검증
+        // 판매 상태 검증
         if (product.getStatus() != ProductStatus.ON_SALE) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
         // 재고 검증
-        if (product.getStock() < request.quantity()) {
-            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-        }
+        product.checkAvailability(request.quantity());
 
         // 이미 담긴 상품이면 수량 합산
         cartProductRepository.findByUserIdAndProductId(userId, request.productId())
@@ -45,9 +44,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                             // 기존수량 + 신규 수량 합산
                             int totalQuantity = existing.getQuantity() + request.quantity();
                             // 합산된 수량이 재고를 초과하는지 체크
-                            if (product.getStock() < totalQuantity) {
-                                throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-                            }
+                            product.checkAvailability(totalQuantity);
                             existing.updateQuantity(totalQuantity);
                         },
                         () -> cartProductRepository.save(
@@ -96,6 +93,8 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         cartProductRepository.delete(cartProduct);
     }
 
+        // 장바구니에 담긴 상품의 존재 여부 검증
+        Product product = productQueryService.getByProductId(cartProduct.getProductId());
 
     // ======= 장바구니 공통 검증 로직 ========
 
