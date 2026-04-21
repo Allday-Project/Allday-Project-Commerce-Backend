@@ -2,16 +2,15 @@ package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
 import jpa.basic.alldayprojectcommerce.common.util.RedisKeyUtils;
 import jpa.basic.alldayprojectcommerce.domain.keyword.entity.SearchKeyword;
+import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordRepository;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -22,64 +21,83 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final SearchKeywordRepository searchKeywordRepository;
+    private final PopularKeywordRepository popularKeywordRepository;
 
     // 한글, 영문, 숫자, 공백만 허용 (특수문자 전부 제거)
     private static final Pattern SPECIAL_CHAR = Pattern.compile("[^가-힣a-zA-Z0-9\\s]");
 
+    // 연속 공백을 1칸으로 축소하는 패턴
+    private static final Pattern MULTI_SPACE = Pattern.compile("\\s+");
+
     /**
-     * 검색어 기록
+     * 검색어 정규화
      *
-     * 1. 특수문자 제거 + 공백 기준 단어 파싱
-     * 2. 각 단어를 Redis ZSet에 ZINCRBY로 +1
+     * "  아이폰  15   PRO!!! " 입력 시
+     * 특수문자 제거   → "  아이폰  15   PRO "
+     * 소문자 변환    → "  아이폰  15   pro "
+     * 연속 공백 축소 → " 아이폰 15 pro "
+     * 앞뒤 공백 제거 → "아이폰 15 pro"
+     *
+     * 결과: "아이폰 15 pro" 하나의 키워드로 처리
+     */
+    private String normalize(String query) {
+        if (query == null ||  query.isEmpty()) return "";
+
+        String result = SPECIAL_CHAR.matcher(query).replaceAll("");
+        result = result.toLowerCase();
+        result = MULTI_SPACE.matcher(result).replaceAll(" ");
+        result = result.trim();
+
+        return result;
+    }
+
+    /**
+     * 회원 검색어 기록
+     *
+     * Redis Set memberValue: "user:{userId}:{keyword}"
      */
     @Override
-    public void createRecordSearch(Long loginId, String query) {
-        // 빈 검색어 무시
-        if (query == null || query.isBlank()) {
+    public void recordSearch(Long userId, String query) {
+        String keyword = normalize(query);
+        if (keyword.isEmpty() || keyword.length() < 2) return;
+
+        String memberValue = "user:" + userId + ":" + keyword;
+        doRecord(keyword, memberValue);
+    }
+
+    /**
+     * 비회원 검색어 기록
+     *
+     * Redis Set memberValue: "ip:{ip}:{keyword}"
+     */
+    @Override
+    public void recordSearchByIp(String ip, String query) {
+        String keyword = normalize(query);
+        if (keyword.isEmpty() || keyword.length() < 2) return;
+
+        String memberValue = "ip:" + ip + ":" + keyword;
+        doRecord(keyword, memberValue);
+    }
+
+    /**
+     * Redis 기록 공통 로직
+     *
+     * SADD로 중복 체크 + 추가를 원자적으로 처리
+     */
+    public void doRecord(String keyword, String memberValue) {
+        String rankKey    = RedisKeyUtils.todayRankKey();
+        String userLogKey = RedisKeyUtils.todayUserLogKey();
+
+        // SADD - 원자적 처리
+        Long added = redisTemplate.opsForSet().add(userLogKey, memberValue);
+
+        if (added == null || added == 0) {
+            log.debug("[중복 검색 제외] keyword: {}", keyword);
             return;
         }
 
-        // 특수문자 제거 후 앞뒤 공백 제거
-        String cleaned = SPECIAL_CHAR.matcher(query.trim()).replaceAll("");
-
-        // 공백 기준으로 단어 분리
-        String[] keywords = cleaned.split("\\s+");
-
-        /**
-         * Redis ZSet 키 형식: "search:rank:<현재 날짜>"
-         * 스케쥴러가 특정 날짜 키만 골라서 삭제할 수 있도록 설계
-         */
-        String rankKey = RedisKeyUtils.todayRankKey();
-        /**
-         * Redis Set 키 형식: "search:user:<현재 날짜>"
-         * 고객의 특정 날짜 중복 검색 여부 확인
-         */
-        String userLogKey = RedisKeyUtils.todayUserLogKey();
-
-        for (String keyword : keywords) {
-            // 1글자 이하는 의미없는 검색어로 간주하고 제외
-            if (keyword.isBlank() || keyword.length() < 2) {
-                continue;
-            }
-
-            // "userId:keyword" 조합으로 오늘 이 고객이 이 키워드를 검색했는지 확인
-            String memberValue = loginId + ":" + keyword;
-
-            /**
-             * SADD - 추가 + 중복 여부 확인을 원자적으로 한 번에 처리
-             * 반환값: 새로 추가(1), 이미 존재(0)
-             */
-            Long added = redisTemplate.opsForSet().add(userLogKey, memberValue);
-
-            if (added == null || added == 0) {
-                log.debug("[중복 검색 제외] userId: {}, keyword: {}", loginId, keyword);
-                continue;
-            }
-
-            // 처음 검색한 키워드만 ZSet score + 1
-            redisTemplate.opsForZSet().incrementScore(rankKey, keyword, 1);
-            log.debug("[검색어 기록] userId: {}, keyword: {}", loginId, keyword);
-        }
+        redisTemplate.opsForZSet().incrementScore(rankKey, keyword, 1);
+        log.debug("[검색어 기록] keyword: {}", keyword);
     }
 
     /**
