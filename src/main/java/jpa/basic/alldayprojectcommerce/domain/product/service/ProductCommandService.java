@@ -9,4 +9,5 @@ public interface ProductCommandService {
     void decreaseStock(Long productId, int quantity);
     void increaseStock(Long productId, int quantity);
     void saveStockHistory(Long productId, Long orderId, int quantity);
+    void checkStock(Long productId, int quantity);
 }
