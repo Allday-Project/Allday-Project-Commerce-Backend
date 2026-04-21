@@ -32,6 +32,7 @@ public class CartProductController {
                 .body(ApiResponse.success(HttpStatus.CREATED));
     }
 
+    // 장바구니 조회
     @GetMapping
     public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
             @LoginUser LoginUserInfo loginUser,
