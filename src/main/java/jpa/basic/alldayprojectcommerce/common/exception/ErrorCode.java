@@ -44,7 +44,7 @@ public enum ErrorCode {
     //  장바구니 상품 관련 에러 코드(CP###)
     CARTPRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "CP001", "해당 장바구니 상품은 존재하지 않습니다."),
 
-    // 결제 도메인(PAY###)
+    //  결제 도메인(PAY###)
     PAYMENT_ALREADY_SUCCESS(HttpStatus.BAD_REQUEST,"PAY001","해당 주문에 대하여 이미 성공한 결제 건이 존재합니다."),
     PAYMENT_INVALID_AMOUNT(HttpStatus.BAD_REQUEST, "PAY002", "올바르지 않은 결제 금액입니다."),
     PAYMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "PAY003", "해당 결제 건을 찾을 수 없습니다."),
