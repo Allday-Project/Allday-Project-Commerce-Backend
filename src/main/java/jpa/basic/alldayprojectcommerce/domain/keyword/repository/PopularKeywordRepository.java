@@ -10,4 +10,5 @@ public interface PopularKeywordRepository extends JpaRepository<PopularKeyword, 
 
 
     List<PopularKeyword> findBySnapshotDateOrderByRankAsc(LocalDate snapshotDate);
+
 }
