@@ -38,8 +38,6 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                         existing -> {
                             // 기존수량 + 신규 수량 합산
                             int totalQuantity = existing.getQuantity() + request.quantity();
-                            // 합산된 수량이 재고를 초과하는지 체크
-                            product.checkAvailability(totalQuantity);
                             existing.updateQuantity(totalQuantity);
                         },
                         () -> cartProductRepository.save(
