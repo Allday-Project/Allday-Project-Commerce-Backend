@@ -58,8 +58,7 @@ public class ProductCommandServiceImpl implements ProductCommandService{
     public void checkStock(Long productId, int quantity){
         Product product =  productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        product.verifyStock(quantity);
-        product.validQuantity(quantity);
+        product.checkAvailability(quantity);
     }
 
 }
