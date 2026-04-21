@@ -9,6 +9,7 @@ import jpa.basic.alldayprojectcommerce.domain.cartProduct.repository.CartProduct
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
+import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,15 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CartProductCommandServiceImpl implements CartProductCommandService {
 
-    private final ProductRepository productRepository;
+    private final ProductQueryService productQueryService;
     private final CartProductRepository cartProductRepository;
 
     // 장바구니 상품 추가
     @Override
     public void createCartProduct(Long userId, CreateCartProductRequest request) {
         // 상품 존재 여부 검증
-        Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productQueryService.getByProductId(request.productId());
 
         // 판매 상태 검증
         if (product.getStatus() != ProductStatus.ON_SALE) {
@@ -56,6 +56,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                 );
     }
 
+    // 장바구니 상품 수량 업데이트
     @Override
     public void updateQuantity(
             Long userId, Long cartProductId, UpdateQuantityRequest request) {
@@ -70,8 +71,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         }
 
         // 장바구니에 담긴 상품의 존재 여부 검증
-        Product product = productRepository.findById(cartProduct.getProductId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productQueryService.getByProductId(cartProduct.getProductId());
 
         // 재고 확인
         product.checkAvailability(request.quantity());
