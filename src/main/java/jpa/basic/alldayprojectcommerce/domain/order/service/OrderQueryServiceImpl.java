@@ -6,6 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetAllOrdersResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOneOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOrderDetailsResponse;
+import jpa.basic.alldayprojectcommerce.domain.order.dto.response.OrderProductInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
@@ -13,7 +14,6 @@ import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderUser;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
-import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,6 @@ public class OrderQueryServiceImpl implements OrderQueryService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final OrderUserRepository orderUserRepository;
-    private final UserQueryService userQueryService;
 
     /**
      * 주문 목록 조회
@@ -64,8 +63,14 @@ public class OrderQueryServiceImpl implements OrderQueryService {
     public GetOneOrderResponse getOneOrder(Long loginId, String orderUid) {
         Order order = findOrderWithOwnerCheck(loginId, orderUid);
 
+        // 주문서는 PENDING 상태일 때만 접근 가능
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS);
+        }
 
-        return null;
+        List<OrderProduct> products = orderProductRepository.findByOrderId(order.getId());
+
+        return GetOneOrderResponse.from(order, products);
     }
 
     /**
@@ -105,18 +110,28 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         return order;
     }
 
-    @Override
-    public Order getOrderByOrderUid(String orderUid) {
-        return orderRepository.findByOrderUid(orderUid).orElseThrow(
-                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
-        );
-    }
 
     @Override
     public Order getOrderByOrderUidForUpdate(String orderUid) {
         return orderRepository.findByOrderUidForUpdate(orderUid).orElseThrow(
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
+    }
+
+    @Override
+    public List<OrderProductInfo> getOrderProducts(Long orderId) {
+        List<OrderProduct> orderProducts = orderProductRepository.findByOrderId(orderId);
+
+        if (orderProducts.isEmpty()) {
+            throw new CustomException(ErrorCode.ORDER_PRODUCT_NOT_FOUND);
+        }
+
+        return orderProducts.stream()
+                .map(orderProduct -> new OrderProductInfo(
+                        orderProduct.getProductId(),
+                        orderProduct.getQuantity()
+                ))
+                .toList();
     }
 }
 
