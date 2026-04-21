@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.cartProduct.service;
 
-import jakarta.validation.Valid;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.CreateCartProductRequest;
@@ -9,7 +8,6 @@ import jpa.basic.alldayprojectcommerce.domain.cartProduct.entity.CartProduct;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.repository.CartProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
-import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,9 +31,6 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         if (product.getStatus() != ProductStatus.ON_SALE) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
-
-        // 재고 검증
-        product.checkAvailability(request.quantity());
 
         // 이미 담긴 상품이면 수량 합산
         cartProductRepository.findByUserIdAndProductId(userId, request.productId())
@@ -68,12 +63,7 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
         validateOwner(cartProduct, userId);
 
         // 장바구니에 담긴 상품의 존재 여부 검증
-        Product product = productQueryService.getByProductId(cartProduct.getProductId());
-
-        // 재고 확인
-        if (product.getStock() < request.quantity()) {
-            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-        }
+        productQueryService.getByProductId(cartProduct.getProductId());
 
         // @Transactional -> dirty checking으로 자동저장
         cartProduct.updateQuantity(request.quantity());
