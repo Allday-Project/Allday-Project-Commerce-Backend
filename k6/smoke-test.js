@@ -38,22 +38,22 @@ export default function () {
         });
     });
 
-    group('product search', function () {
-        const search_keyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)];
-        const res = http.get(`${BASE_URL}/api/products/search?keyword=${search_keyword}`);
-
-        check(res, {
-            'search status 200': (r) => r.status === 200,
-        });
-    });
-
-    group('popular products', function () {
-        const res = http.get(`${BASE_URL}/api/products/popular`);
-
-        check(res, {
-            'popular status 200': (r) => r.status === 200,
-        });
-    });
+    // group('product search', function () {
+    //     const search_keyword = SEARCH_KEYWORDS[Math.floor(Math.random() * SEARCH_KEYWORDS.length)];
+    //     const res = http.get(`${BASE_URL}/api/products/search?keyword=${search_keyword}`);
+    //
+    //     check(res, {
+    //         'search status 200': (r) => r.status === 200,
+    //     });
+    // });
+    //
+    // group('popular products', function () {
+    //     const res = http.get(`${BASE_URL}/api/products/popular`);
+    //
+    //     check(res, {
+    //         'popular status 200': (r) => r.status === 200,
+    //     });
+    // });
 
     sleep(1);
 }

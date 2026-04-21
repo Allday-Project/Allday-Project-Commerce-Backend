@@ -8,7 +8,9 @@
 *.iml
 
 # Build outputs
-build/
+build/*
+!build/libs/
+!build/libs/*.jar
 out/
 .gradle/
 

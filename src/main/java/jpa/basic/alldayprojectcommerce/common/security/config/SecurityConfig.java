@@ -44,7 +44,8 @@ public class SecurityConfig {
                         "/api/products",
                         "/api/products/{productId}"
                         ).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/actuator/health").permitAll()
+                    .anyRequest().authenticated()
             )
             .addFilterBefore(
                     new JwtAuthenticationFilter(jwtTokenProvider),
