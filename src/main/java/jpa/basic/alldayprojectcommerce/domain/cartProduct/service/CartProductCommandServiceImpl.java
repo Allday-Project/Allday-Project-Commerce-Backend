@@ -74,16 +74,9 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 재고 확인
-        if (product.getStock() < request.quantity()) {
-            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-        }
+        product.checkAvailability(request.quantity());
 
         // @Transactional -> dirty checking으로 자동저장
         cartProduct.updateQuantity(request.quantity());
     }
-
-
-
-
-
 }

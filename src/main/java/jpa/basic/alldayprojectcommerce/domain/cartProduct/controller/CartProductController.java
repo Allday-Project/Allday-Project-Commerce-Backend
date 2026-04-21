@@ -8,7 +8,6 @@ import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.CreateCartProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.request.UpdateQuantityRequest;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.response.GetAllCartProductResponse;
-import jpa.basic.alldayprojectcommerce.domain.cartProduct.dto.response.GetAllCartProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.service.CartProductCommandService;
 import jpa.basic.alldayprojectcommerce.domain.cartProduct.service.CartProductQueryService;
 import lombok.RequiredArgsConstructor;
@@ -35,18 +34,6 @@ public class CartProductController {
     }
 
     // 장바구니 조회
-    @GetMapping
-    public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
-            @LoginUser LoginUserInfo loginUser,
-            @RequestParam(required = false) Long cursorId,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        CursorResponse<GetAllCartProductResponse> response =
-                cartProductQueryService.getAllCartProduct(loginUser.id(), cursorId, size);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
-    }
-
-    // 장바구니 상품 전체 조회
     @GetMapping
     public ResponseEntity<ApiResponse<CursorResponse<GetAllCartProductResponse>>> getAllCartProduct(
             @LoginUser LoginUserInfo loginUser,
