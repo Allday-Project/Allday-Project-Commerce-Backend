@@ -9,4 +9,5 @@ public interface OrderProductRepository extends JpaRepository<OrderProduct, Long
 
     // 주문 ID에 해당하는 모든 상품 목록 조회
     List<OrderProduct> findByOrderId(Long orderId);
+
 }

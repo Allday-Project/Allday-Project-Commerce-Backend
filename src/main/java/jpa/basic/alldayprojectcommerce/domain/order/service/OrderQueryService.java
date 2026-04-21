@@ -5,7 +5,10 @@ import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetAllOrdersRes
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOneOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOrderDetailsResponse;
 
+import jpa.basic.alldayprojectcommerce.domain.order.dto.response.OrderProductInfo;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
+
+import java.util.List;
 
 public interface OrderQueryService {
 
@@ -15,7 +18,9 @@ public interface OrderQueryService {
 
     GetOrderDetailsResponse getOneOrderDetail(Long loginId, String orderUid);
 
-    Order getOrderByOrderUid(String orderUid);
     Order getOrderByOrderUidForUpdate(String orderUid);
+
+    List<OrderProductInfo> getOrderProducts(Long orderId);
+
 
 }
