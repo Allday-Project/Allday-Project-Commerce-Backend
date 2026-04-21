@@ -2,11 +2,10 @@ package jpa.basic.alldayprojectcommerce.domain.payment.entity;
 
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -40,6 +39,7 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
+    @Setter
     private LocalDateTime paidAt;
 
     @Builder
@@ -52,4 +52,10 @@ public class Payment extends BaseEntity {
         this.status = status;
         this.expiresAt = expiresAt;
     }
+
+    public void markSuccess(){
+        this.status = PaymentStatus.SUCCESS;
+        this.paidAt = LocalDateTime.now();
+    }
+
 }
