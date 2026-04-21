@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartProductCommandServiceImpl implements CartProductCommandService {
 
     private final ProductQueryService productQueryService;
@@ -59,9 +59,6 @@ public class CartProductCommandServiceImpl implements CartProductCommandService 
 
         // 해당 장바구니 접근 권한 검증
         validateOwner(cartProduct, userId);
-
-        // 장바구니에 담긴 상품의 존재 여부 검증
-        productQueryService.getByProductId(cartProduct.getProductId());
 
         // @Transactional -> dirty checking으로 자동저장
         cartProduct.updateQuantity(request.quantity());
