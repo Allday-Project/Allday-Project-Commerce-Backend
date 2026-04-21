@@ -1,12 +1,12 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
-import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
+import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 
 public interface ProductCommandService {
-    void decreaseStock(Order order);
 
+    void decreaseStock(Long productId, int quantity, Long orderId);
+    void increaseStock(Long productId, int quantity, Long orderId);
+    void saveStockHistory(Product product, int quantity, Long orderId);
+    void checkStock(Long productId, int quantity);
 
-    void decreaseStock(Long productId, int quantity);
-    void increaseStock(Long productId, int quantity);
-    void saveStockHistory(Long productId, Long orderId, int quantity);
 }

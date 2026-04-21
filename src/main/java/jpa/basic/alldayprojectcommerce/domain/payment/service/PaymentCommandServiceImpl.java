@@ -2,12 +2,12 @@ package jpa.basic.alldayprojectcommerce.domain.payment.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import jpa.basic.alldayprojectcommerce.domain.order.service.OrderQueryService;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.request.CreatePaymentRequest;
+import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.ConfirmPaymentResult;
 import jpa.basic.alldayprojectcommerce.domain.payment.dto.response.CreatePaymentResponse;
 import jpa.basic.alldayprojectcommerce.domain.payment.entity.Payment;
 import jpa.basic.alldayprojectcommerce.domain.payment.entity.PaymentStatus;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 
 @Service
@@ -30,14 +30,14 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
     private final UserQueryService userQueryService;
 
     @Override   // 결제 생성 메서드
-    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, LoginUserInfo loginUser) {
+    public CreatePaymentResponse createPayment(String orderUid, CreatePaymentRequest request, Long loginUserId) {
 
         // 주문 정보 조회(비관적 락 사용)
         Order order = orderQueryService.getOrderByOrderUidForUpdate(orderUid);
 
         // orderUid를 생성한 주문자와 결제 생성한 로그인 유저가 일치하는지 검증
         Long orderUserId = order.getUserId();
-        Long loginUserId = loginUser.id();
+
         if(!orderUserId.equals(loginUserId)){
             throw new CustomException(ErrorCode.AUTH_FORBIDDEN_ACCESS);
         }
@@ -90,6 +90,54 @@ public class PaymentCommandServiceImpl implements PaymentCommandService{
 
         paymentRepository.save(payment);
         return CreatePaymentResponse.from(payment);
+    }
+
+    @Override
+    public ConfirmPaymentResult confirmPayment(Order order, String paymentUid) {
+
+        // paymentUid 존재 여부 검증
+        if (!StringUtils.hasText(paymentUid)) {
+            throw new CustomException(ErrorCode.PAYMENT_INVALID_UID);
+        }
+
+        // Payment 객체 조회. 없으면 생성되지 않은 결제 요청
+        Payment payment = paymentRepository.findByPaymentUid(paymentUid).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
+
+        // 검증한 주문 건에 대해 생성한 결제 건이 맞는지 확인
+        if (!order.getId().equals(payment.getOrderId())) {
+            throw new CustomException(ErrorCode.PAYMENT_ORDER_NOT_MATCHES);
+        }
+
+        // Payment 상태 검증. 결제 대기 상태가 아니라면 이미 처리된 결제 요청이므로 확정 요청이 올 수 없음
+        // 이미 존재하던 결제 상태를 반환
+        if (PaymentStatus.PENDING != payment.getStatus()) {
+            return ConfirmPaymentResult.alreadyProcessed(payment.getStatus());
+        }
+
+        // Order 상태 검증
+        if (OrderStatus.PENDING != order.getStatus()) {
+            if (OrderStatus.COMPLETED == order.getStatus()) {
+                return ConfirmPaymentResult.alreadyProcessed(PaymentStatus.SUCCESS);
+            }
+            throw new CustomException(ErrorCode.ORDER_STATUS_NOT_PENDING);
+        }
+
+        // 주문 건에 대하여 이미 성공한 결제 건이 있는지 검증.
+        boolean existsAnotherSuccess =
+                paymentRepository.existsByOrderIdAndStatusAndIdNot(order.getId(), PaymentStatus.SUCCESS, payment.getId());
+
+        if (existsAnotherSuccess) {
+            return ConfirmPaymentResult.alreadyProcessed(PaymentStatus.SUCCESS);
+        }
+
+        // TODO : 포트원 검증 로직
+
+        // 우선 결제 확정 요청이 들어오면 검증을 통과하면 성공한 것으로 응답 추후 포트원 연동 검증 구현 예정
+        payment.markSuccess();
+
+        return ConfirmPaymentResult.newlyConfirmed(PaymentStatus.SUCCESS);
     }
 
     private String createPaymentUid() {

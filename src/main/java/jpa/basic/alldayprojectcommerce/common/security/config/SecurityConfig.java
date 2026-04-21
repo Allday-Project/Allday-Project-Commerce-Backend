@@ -37,14 +37,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/login",
                         "/api/auth/signup",
-                        "/api/auth/reissue"
+                        "/api/auth/reissue",
+                        "/api/keywords/search"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,
                         "/api/auth/check-duplicate",
                         "/api/products",
                         "/api/products/{productId}"
                         ).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/actuator/health").permitAll()
+                    .anyRequest().authenticated()
             )
             .addFilterBefore(
                     new JwtAuthenticationFilter(jwtTokenProvider),
