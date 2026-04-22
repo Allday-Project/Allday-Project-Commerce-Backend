@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -140,34 +143,37 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             return;
         }
 
+        // 개선 전: 키워드마다 SELECT 1번씩. 총 N번 SELECT
+        // 개선 후: 오늘 전체 데이터를 한 번에 가져와서 Map으로 변환. SELECT 1번
+        Map<String, SearchKeyword> existingMap = searchKeywordRepository
+                .findBySearchDate(today)
+                .stream()
+                .collect(Collectors.toMap(SearchKeyword::getKeyword, sk -> sk));
+
+        List<SearchKeyword> toSave = new ArrayList<>();
+
         for (ZSetOperations.TypedTuple<String> tuple : allData) {
             String keyword = tuple.getValue();
             long count = tuple.getScore() == null ? 0L : tuple.getScore().longValue();
 
             if (keyword == null || keyword.isBlank()) continue;
 
-            // 오늘 날짜 + 키워드로 기존 레코드 조회
-            searchKeywordRepository
-                    .findByKeywordAndSearchDate(keyword, today)
-                    .ifPresentOrElse(
-                            existing -> {
-                                /**
-                                 * 이미 있으면 Redis 현재값으로 덮어씌우기
-                                 * Redis에는 오늘 누적 전체가 담겨있어서 그냥 덮어쓰기
-                                 */
-                                existing.setCount(count);
-                            },
-                            () -> {
-                                // 없으면 새로 INSERT
-                                searchKeywordRepository.save(
-                                        SearchKeyword.builder()
-                                                .keyword(keyword)
-                                                .searchCount(count)
-                                                .searchDate(today)
-                                                .build()
-                                );
-                            }
-                    );
+            if (existingMap.containsKey(keyword)) {
+                // 이미 있으면 메모리에서 바로 업데이트
+                existingMap.get(keyword).setCount(count);
+            } else {
+                // 없으면 INSERT 목록에 추가
+                toSave.add(SearchKeyword.builder()
+                        .keyword(keyword)
+                        .searchCount(count)
+                        .searchDate(today)
+                        .build());
+            }
+        }
+
+        // 신규 키워드 한 번에 INSERT
+        if (!toSave.isEmpty()) {
+            searchKeywordRepository.saveAll(toSave);
         }
 
         log.info("[Write-back] {}건 DB 동기화 완료", allData.size());
@@ -189,9 +195,15 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             return;
         }
 
+        // 같은 날짜에 Fallback 데이터가 있으면 삭제
+        popularKeywordRepository.deleteBySnapshotDateAndIsFallbackTrue(date);
+
+        // 개선 전: 루프 안에서 save() 5번 호출. 총 INSERT 5번
+        // 개선 후: 리스트로 모아서 saveAll() 한 번 호출. INSERT 1번
+        List<PopularKeyword> snapshots = new ArrayList<>();
         for (int i = 0; i < top5.size(); i++) {
             SearchKeyword sk = top5.get(i);
-            popularKeywordRepository.save(
+            snapshots.add(
                     PopularKeyword.builder()
                             .keyword(sk.getKeyword())
                             .rank(i + 1)
@@ -201,6 +213,8 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
                             .build()
             );
         }
+
+        popularKeywordRepository.saveAll(snapshots);
 
         log.info("[스냅샷] {} Top5 저장 완료 - {}건", date, top5.size());
     }
@@ -253,9 +267,12 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             log.info("[Fallback] 대체 키워드 없음");
         }
 
+        // 개선 전: 루프 안에서 save() 5번 호출. 총 INSERT 5번
+        // 개선 후: 리스트로 모아서 saveAll() 한 번 호출. INSERT 1번
+        List<PopularKeyword> fallbacks = new ArrayList<>();
         for (int i = 0; i < fallbackList.size(); i++) {
             SearchKeyword sk = fallbackList.get(i);
-            popularKeywordRepository.save(
+            fallbacks.add(
                     PopularKeyword.builder()
                             .keyword(sk.getKeyword())
                             .rank(i + 1)
@@ -265,6 +282,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
                             .build()
             );
         }
+        popularKeywordRepository.saveAll(fallbacks);
 
         log.info("[Fallback] {} 임시 Top5 저장 완료", today);
     }
