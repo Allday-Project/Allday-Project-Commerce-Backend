@@ -52,7 +52,12 @@ public enum ErrorCode {
     PAYMENT_INVALID_UID(HttpStatus.BAD_REQUEST, "PAY005", "유효하지 않은 결제 UID 입니다."),
 
     // 채팅 도메인(CH001)
-    CHAT_INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "CH001", "유효하지 않은 상태 전이입니다.");
+    CHAT_INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "CH001", "유효하지 않은 상태 전이입니다."),
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CH002", "채팅방을 찾을 수 없습니다."),
+    CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "CH003", "채팅방에 접근할 권한이 없습니다."),
+    CHAT_ROOM_ALREADY_EXISTS(HttpStatus.CONFLICT, "CH004", "이미 진행 중인 상담이 있습니다."),
+    CHAT_ROOM_CLOSED(HttpStatus.BAD_REQUEST, "CH005", "종료된 상담방입니다."),
+    CHAT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "CH006", "채팅 인증에 실패했습니다.");
 
 
 

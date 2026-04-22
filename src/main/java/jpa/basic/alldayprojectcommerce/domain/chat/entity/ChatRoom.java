@@ -20,14 +20,14 @@ import java.time.LocalDateTime;
                 columnNames = {"user_id", "active_flag"}
         ),
         indexes = {
-                @Index(name = "idx_chat_rooms_status", columnList = "status"),
+                @Index(name = "idx_chat_rooms_status", columnList = "chat_room_status"),
                 @Index(name = "idx_chat_rooms_user_id", columnList = "user_id")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "user_id", nullable = false)
