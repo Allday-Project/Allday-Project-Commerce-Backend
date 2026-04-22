@@ -13,7 +13,17 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "chat_rooms")
+@Table(
+        name = "chat_rooms",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_user_active",
+                columnNames = {"user_id", "active_flag"}
+        ),
+        indexes = {
+                @Index(name = "idx_chat_rooms_status", columnList = "status"),
+                @Index(name = "idx_chat_rooms_user_id", columnList = "user_id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom extends BaseEntity {
 
@@ -30,15 +40,23 @@ public class ChatRoom extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String title;
 
+    /**
+     * UNIQUE(user_id, active_flag) -> null은 여러 개 허용, 1은 1개만 허용
+     * 활성 상태(WAITING / IN_PROFRESS)면 1, 종료(COMPLETED)면 null
+     */
+    @Column(name = "active_flag")
+    private Integer activeFlag;
+
     @Column
     private LocalDateTime lastMessageAt;
 
     @Builder
-    public ChatRoom(Long userId, ChatRoomStatus chatRoomStatus, String title, LocalDateTime lastMessageAt) {
+    public ChatRoom(Long userId, String title) {
         this.userId = userId;
-        this.chatRoomStatus = chatRoomStatus;
+        this.chatRoomStatus = ChatRoomStatus.WAITING;
         this.title = title;
-        this.lastMessageAt = lastMessageAt;
+        this.activeFlag = 1;
+        this.lastMessageAt = LocalDateTime.now();
     }
 
     // 상태 전이 메서드
@@ -47,6 +65,11 @@ public class ChatRoom extends BaseEntity {
             throw new CustomException(ErrorCode.CHAT_INVALID_STATUS_TRANSITION);
         }
         this.chatRoomStatus = newStatus;
+
+        // COMPLETED로 전환 시 active_flag를 null로 설정
+        if (newStatus == ChatRoomStatus.COMPLETED) {
+            this.activeFlag = null;
+        }
     }
 
     // 마지막 메시지 시각 갱신

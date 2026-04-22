@@ -10,7 +10,13 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "chat_messages")
+@Table(
+        name = "chat_messages",
+        indexes = {
+                // 커서 기반 페이징 인덱스
+                @Index(name = "idx_chat_messages_room_cursor", columnList = "room_id, id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatMessage {
 
