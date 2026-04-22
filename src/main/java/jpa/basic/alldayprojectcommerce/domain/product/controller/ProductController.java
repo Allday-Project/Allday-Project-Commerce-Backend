@@ -10,6 +10,7 @@ import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProduct
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
-    @GetMapping("/search")
+    @GetMapping("v1/boards/search")
     public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> search(
             @Valid SearchProductRequest searchRequest,
             @RequestParam(defaultValue = "1") int page,
@@ -55,6 +56,14 @@ public class ProductController {
         Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
+
+//    @Cacheable(value = "searchCache", key = "#productId")
+//    @GetMapping("v2/boards/search")
+//    public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> search(
+//            @Valid SearchProductRequest
+//    ){
+//
+//    }
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
