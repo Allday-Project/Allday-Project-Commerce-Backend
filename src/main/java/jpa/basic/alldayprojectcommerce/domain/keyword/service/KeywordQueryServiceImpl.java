@@ -6,6 +6,7 @@ import jpa.basic.alldayprojectcommerce.domain.keyword.entity.PopularKeyword;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,20 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
             log.warn("[인기 검색어 Top5 조회] Redis 조회 실패: {}", e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * v2 - Caffeine 캐시 적용 Top5 조회
+     *
+     * value    : 캐시 저장소 이름
+     * key      : 캐시 데이터 식별자
+     */
+    @Override
+    @Cacheable(value = "top5Keywords", key = "'top5'")
+    public List<Top5KeywordResponse> getTop5Cached() {
+        log.debug("[Top5 v2] 캐시 미스 → Redis/DB 조회");
+        // 캐시가 없을 때만 실행
+        return getTop5();
     }
 
     /**

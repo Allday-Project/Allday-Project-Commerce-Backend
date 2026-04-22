@@ -50,10 +50,25 @@ public class KeywordController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK));
     }
 
-    @GetMapping("/top5")
+    /**
+     * v1 - Redis 실시간 조회
+     * 매 요청마다 Redis에 접근 → 항상 최신 데이터
+     */
+    @GetMapping("/v1/top5")
     public ResponseEntity<ApiResponse<List<Top5KeywordResponse>>> getTop5Keywords() {
         return ResponseEntity.ok(
                 ApiResponse.success(HttpStatus.OK, keywordQueryService.getTop5())
+        );
+    }
+
+    /**
+     * v2 - Caffeine 인메모리 캐시 적용
+     * 최초 요청만 Redis 조회
+     */
+    @GetMapping("/v2/top5")
+    public ResponseEntity<ApiResponse<List<Top5KeywordResponse>>> getTop5V2() {
+        return ResponseEntity.ok(
+                ApiResponse.success(HttpStatus.OK, keywordQueryService.getTop5Cached())
         );
     }
 }
