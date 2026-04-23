@@ -24,4 +24,7 @@ public interface KeywordCommandService {
 
     // Fallback Top5 생성
     void saveFallbackTop5(LocalDate today);
+
+    // warm-up 메서드 추가
+    void warmUp();
 }
