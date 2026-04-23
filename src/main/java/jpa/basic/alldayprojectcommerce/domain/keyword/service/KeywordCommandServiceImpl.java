@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
 import jpa.basic.alldayprojectcommerce.common.util.RedisKeyUtils;
+import jpa.basic.alldayprojectcommerce.domain.keyword.entity.PopularKeyword;
 import jpa.basic.alldayprojectcommerce.domain.keyword.entity.SearchKeyword;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordRepository;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -153,5 +155,101 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         }
 
         log.info("[Write-back] {}건 DB 동기화 완료", allData.size());
+    }
+
+    /**
+     * Top5 스냅샷 저장
+     *
+     * SearchKeyword에서 꺼내서 PopularKeyword에 순위별로 저장
+     * isFallback = false -> Top5 순위권
+     */
+    @Override
+    @Transactional
+    public void snapshotTop5(LocalDate date) {
+        List<SearchKeyword> top5 = searchKeywordRepository.findTop5BySearchDate(date);
+
+        if (top5.isEmpty()) {
+            log.info("[스냅샷] {} 오늘 데이터 없음", date);
+            return;
+        }
+
+        for (int i = 0; i < top5.size(); i++) {
+            SearchKeyword sk = top5.get(i);
+            popularKeywordRepository.save(
+                    PopularKeyword.builder()
+                            .keyword(sk.getKeyword())
+                            .rank(i + 1)
+                            .searchCount(sk.getSearchCount())
+                            .snapshotDate(date)
+                            .isFallback(false)
+                            .build()
+            );
+        }
+
+        log.info("[스냅샷] {} Top5 저장 완료 - {}건", date, top5.size());
+    }
+
+    /**
+     * Redis 오늘 데이터 초기화
+     *
+     * ZSet(검색어 순위) + Set(유저 기록) 두 개 삭제
+     * 날짜별로 키를 만들어서 오늘 것만 삭제
+     */
+    @Override
+    public void clearTodayRedisData(LocalDate date) {
+        // ZSet 삭제: "search:rank:<오늘 날짜>"
+        redisTemplate.delete(RedisKeyUtils.rankKey(date));
+
+        // Set 삭제: "search:user:<오늘 날짜>"
+        redisTemplate.delete(RedisKeyUtils.userLogKey(date));
+
+        log.info("[Redis 초기화] {} 데이터 삭제 완료", date);
+    }
+
+    /**
+     * Fallback Top5 생성
+     *
+     * 자정 직후 Redis가 비어있어서 임시 Top5를 생성
+     * 최근 7일 데이터에서 다음 순위 5개 뽑아서 isFallback = true 저장
+     */
+    @Override
+    @Transactional
+    public void saveFallbackTop5(LocalDate today) {
+        LocalDate yesterday = today.minusDays(1);
+
+        // 어제 Top5 키워드 목록 추출
+        List<String> yesterdayTop5 = popularKeywordRepository
+                .findBySnapshotDateAndIsFallbackFalse(yesterday)
+                .stream()
+                .map(PopularKeyword::getKeyword)
+                .toList();
+
+        if (yesterdayTop5.isEmpty()) {
+            log.info("[Fallback] 어제 Top5 없음");
+            return;
+        }
+
+        // 어제 Top5 제외하고 최근 7일 내 상위 5개 조회
+        LocalDate weekAgo = today.minusDays(7);
+        List<SearchKeyword> fallbackList = searchKeywordRepository.findTop5ExcludingKeywords(weekAgo, yesterdayTop5);
+
+        if (fallbackList.isEmpty()) {
+            log.info("[Fallback] 대체 키워드 없음");
+        }
+
+        for (int i = 0; i < fallbackList.size(); i++) {
+            SearchKeyword sk = fallbackList.get(i);
+            popularKeywordRepository.save(
+                    PopularKeyword.builder()
+                            .keyword(sk.getKeyword())
+                            .rank(i + 1)
+                            .searchCount(sk.getSearchCount())
+                            .snapshotDate(today)
+                            .isFallback(true)
+                            .build()
+            );
+        }
+
+        log.info("[Fallback] {} 임시 Top5 저장 완료", today);
     }
 }
