@@ -125,12 +125,16 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
     }
 
     public void logCacheStatus() {
-        Cache<Object, Object> cache =
-                ((CaffeineCache) cacheManager.getCache("top5Keywords")).getNativeCache();
+        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("top5Keywords");
+
+        if (caffeineCache == null) {
+            log.warn("[캐시 통계] top5Keywords 캐시를 찾을 수 없습니다.");
+            return;
+        }
+
+        Cache<Object, Object> cache = caffeineCache.getNativeCache();
 
         log.info("[캐시 통계] hit: {}, miss: {}, hitRate: {}",
-                            cache.stats().hitCount(),
-                            cache.stats().missCount(),
-                            cache.stats().hitRate());
+                cache.stats().hitCount(), cache.stats().missCount(), cache.stats().hitRate());
     }
 }
