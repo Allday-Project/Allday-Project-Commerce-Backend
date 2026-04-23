@@ -54,7 +54,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
             Long userId = jwtTokenProvider.getMemberId(token);
             String role = jwtTokenProvider.getRole(token);
 
-            // Principle 설정
+            // Principal 설정
             accessor.setUser(new StompPrincipal(userId, role));
             log.info("[STOMP] 연결 성공 userId: {}, role: {}", userId, role);
         }
