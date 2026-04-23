@@ -1,5 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
+import java.time.LocalDate;
+
 public interface KeywordCommandService {
 
     // 회원용   - userId 기반 중복 방지
@@ -13,4 +15,16 @@ public interface KeywordCommandService {
      * 1시간마다 스케쥴러가 호출
      */
     void writeBack();
+
+    // Top5 스냅샷 저장
+    void snapshotTop5(LocalDate date);
+
+    // Redis 초기화
+    void clearTodayRedisData(LocalDate date);
+
+    // Fallback Top5 생성
+    void saveFallbackTop5(LocalDate today);
+
+    // warm-up 메서드 추가
+    void warmUp();
 }
