@@ -41,6 +41,9 @@ public class Product extends BaseEntity {
 
     private String imageUrl;
 
+    @Version
+    private Long version;
+
 
     @Builder
     private Product(String name, Long price, int stock, String description, ProductStatus status, Category category, String imageUrl) {

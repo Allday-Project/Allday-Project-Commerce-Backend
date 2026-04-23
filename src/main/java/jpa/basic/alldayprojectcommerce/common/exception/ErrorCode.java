@@ -53,8 +53,8 @@ public enum ErrorCode {
     PAYMENT_INVALID_UID(HttpStatus.BAD_REQUEST, "PAY005", "유효하지 않은 결제 UID 입니다."),
 
     // Lock 관련
-    LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT,"L001","락 획득에 실패했습니다.")
-
+    LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT,"L001","락 획득에 실패했습니다."),
+    OPTIMISTIC_LOCK_CONFLICT(HttpStatus.CONFLICT, "L002","낙관적 락 충돌이 반복되어 요청 처리에 실패했습니다."),
         ;
 
 
