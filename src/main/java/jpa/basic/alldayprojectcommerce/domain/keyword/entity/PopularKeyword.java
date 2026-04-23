@@ -11,7 +11,16 @@ import java.time.LocalDate;
 
 @Getter
 @Entity
-@Table(name = "popular_keywords")
+@Table(
+        name = "popular_keywords",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_popular_keywords_date_rank",
+                columnNames = {"snapshot_date", "keyword_rank"}
+        ),
+        indexes = {
+                @Index(name = "idx_snapshot_date_rank", columnList = "snapshot_date, keyword_rank")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PopularKeyword extends BaseEntity {
 

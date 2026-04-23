@@ -26,10 +26,13 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
-     * 클라이언트가 메시지를 보내기 전 인터셉터
+     * STOMP 메시지 전처러 인터셉터
      *
      * CONNECT 시점에만 JWT 검증
-     * 이후 SEND / SUBSCRIBE는 이미 인증된 Principle 사용
+     * 이후 SEND / SUBSCRIBE는 이미 인증된 Principal 사용
+     *
+     * SecurityConfig에서 "/ws-chat/**"를 열어줘야 SockJS 폴백 가능
+     * STOMP CONNECT 레벨에서 JWT로 검증
      */
     @Nullable
     @Override
@@ -51,11 +54,8 @@ public class StompChannelInterceptor implements ChannelInterceptor {
             Long userId = jwtTokenProvider.getMemberId(token);
             String role = jwtTokenProvider.getRole(token);
 
-            // Principle 설정
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(userId, null, List.of(new SimpleGrantedAuthority(role)));
-
-            accessor.setUser(auth);
+            // Principal 설정
+            accessor.setUser(new StompPrincipal(userId, role));
             log.info("[STOMP] 연결 성공 userId: {}, role: {}", userId, role);
         }
 

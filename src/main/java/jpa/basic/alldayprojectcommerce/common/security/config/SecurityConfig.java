@@ -48,11 +48,10 @@ public class SecurityConfig {
                         "/api/keywords/v1/top5",
                         "/api/keywords/v2/top5"
                         ).permitAll()
-                .requestMatchers(
-                        "/actuator/health",
-                        "/ws-chat/**"
-                ).permitAll()
-                    .anyRequest().authenticated()
+                .requestMatchers("/actuator/health",
+                                 "/api/events/**",
+                                 "/ws-chat/**"
+                ).permitAll().anyRequest().authenticated()
             )
             .addFilterBefore(
                     new JwtAuthenticationFilter(jwtTokenProvider),
