@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
                 columnNames = {"user_id", "active_flag"}
         ),
         indexes = {
-                @Index(name = "idx_chat_rooms_status", columnList = "chat_rooms_status"),
-                @Index(name = "idx_chat_rooms_user_id", columnList = "user_id")
+                @Index(name = "idx_chat_rooms_status", columnList = "chat_rooms_status")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,7 +33,7 @@ public class ChatRoom extends BaseEntity {
     private Long userId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "chat_rooms_status", nullable = false, length = 20)
     private ChatRoomStatus chatRoomStatus;
 
     @Column(nullable = false, length = 100)
