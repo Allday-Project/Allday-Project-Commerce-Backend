@@ -1,7 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
@@ -9,8 +8,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
