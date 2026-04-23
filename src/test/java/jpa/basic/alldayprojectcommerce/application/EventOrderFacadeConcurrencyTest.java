@@ -109,9 +109,11 @@ class EventOrderFacadeConcurrencyTest {
         // 동시 실행용 스레드 풀
         ExecutorService executorService = Executors.newFixedThreadPool(100);
 
+        // CountDownLatch : 여러 작업이 끝날 때까지 기다리는 도구
         // 모든 작업 종료를 기다리기 위한 래치
         CountDownLatch doneLatch = new CountDownLatch(TOTAL_REQUEST_COUNT);
 
+        // CyclicBarrier : 모든 스레드를 동시에 출발시키기 위한 도구
         // 모든 스레드를 최대한 동시에 시작시키기 위한 배리어
         CyclicBarrier startBarrier = new CyclicBarrier(100);
 
