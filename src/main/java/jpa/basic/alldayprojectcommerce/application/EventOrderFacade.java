@@ -1,7 +1,7 @@
 package jpa.basic.alldayprojectcommerce.application;
 
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
-import jpa.basic.alldayprojectcommerce.domain.order.service.EventOrderService;
+import jpa.basic.alldayprojectcommerce.domain.order.service.event.EventOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

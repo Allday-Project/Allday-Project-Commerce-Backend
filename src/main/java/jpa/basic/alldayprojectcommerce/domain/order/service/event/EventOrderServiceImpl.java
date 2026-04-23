@@ -1,4 +1,4 @@
-package jpa.basic.alldayprojectcommerce.domain.order.service;
+package jpa.basic.alldayprojectcommerce.domain.order.service.event;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
@@ -9,6 +9,7 @@ import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
+import jpa.basic.alldayprojectcommerce.domain.order.service.OrderCommandService;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductCommandService;
