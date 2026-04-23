@@ -1,6 +1,8 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +20,7 @@ import java.time.LocalDateTime;
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatMessage {
+public class ChatMessage extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,15 +35,13 @@ public class ChatMessage {
     @Column(nullable = false, length = 20)
     private SenderType senderType;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Size(max = 1000, message = "메시지는 1000자를 초과할 수 없습니다.")
+    @Column(nullable = false, length = 1000)
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MessageType messageType;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @Builder
     public ChatMessage(Long roomId, Long senderId, SenderType senderType, String content, MessageType messageType) {
@@ -50,7 +50,6 @@ public class ChatMessage {
         this.senderType = senderType;
         this.content = content;
         this.messageType = messageType;
-        this.createdAt = LocalDateTime.now();
     }
 
     // 입장, 종료 알림 생성용 정적 팩토리
