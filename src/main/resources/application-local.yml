@@ -24,7 +24,7 @@ logging:
     root: info
     com:
       example:
-        instagramclone: debug
+        alldayproject: debug
     org:
       hibernate:
         SQL: debug
