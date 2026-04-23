@@ -22,9 +22,9 @@ spring:
 logging:
   level:
     root: info
-    com:
-      example:
-        alldayproject: info
+    jpa:
+      basic:
+        alldayprojectcommerce: info
     org:
       hibernate:
         SQL: info

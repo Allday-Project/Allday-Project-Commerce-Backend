@@ -1,0 +1,31 @@
+# application-test.yml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: soyoung7509
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    root: info
+    jpa.basic.alldayprojectcommerce: debug
+
+    # 쿼리 확인이 필요할때만 활성화
+#    org.hibernate.SQL: debug
+#    org.hibernate.orm.jdbc.bind: trace
+jwt:
+  secret-key: dGVzdC10ZXN0LXRlc3QtdGVzdC10ZXN0LXRlc3QtdGVzdC10ZXN0LXRlc3QtdGVzdA==
