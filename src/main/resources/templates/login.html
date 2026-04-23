@@ -24,7 +24,7 @@
         <div class="login-error" id="login-error" th:if="${error}" th:text="${error}"></div>
 
         <!-- 로그인 폼 -->
-        <form th:action="@{/login}" method="post" class="login-form" id="login-form">
+        <form class="login-form" id="login-form">
             <div class="form-group" id="form-group-email">
                 <label for="email" class="form-label">이메일</label>
                 <input type="email" id="email" name="email" class="form-input" required autocomplete="email">
@@ -61,5 +61,55 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            const submitBtn = document.getElementById('login-submit-btn');
+
+            if (!email || !password) {
+                if (errorEl) {
+                    errorEl.textContent = '이메일과 비밀번호를 입력해주세요.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '로그인 중...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res.ok) {
+                    window.location.href = '/';
+                } else {
+                    const json = await res.json().catch(() => null);
+                    const msg = json?.data?.message || '이메일 또는 비밀번호가 올바르지 않습니다.';
+                    if (errorEl) {
+                        errorEl.textContent = msg;
+                        errorEl.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                if (errorEl) {
+                    errorEl.textContent = '서버 연결에 실패했습니다.';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '로그인';
+            }
+        });
+    </script>
 </body>
 </html>

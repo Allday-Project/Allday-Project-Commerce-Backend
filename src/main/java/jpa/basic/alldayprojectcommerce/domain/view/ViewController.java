@@ -47,4 +47,9 @@ public class ViewController {
         // order 정보는 추후 서비스 연동 시 주입
         return "order-detail";
     }
+
+    @GetMapping("/checkout/{orderUid}")
+    public String checkout(@PathVariable String orderUid, Model model) {
+        return "checkout";
+    }
 }

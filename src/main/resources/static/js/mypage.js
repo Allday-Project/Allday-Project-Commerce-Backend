@@ -1,11 +1,54 @@
 /**
  * ADP Commerce - MyPage JavaScript
+ * 마이페이지 API 연동: 프로필 조회, 수정
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadUserProfile();
     initEditButtons();
 });
 
+/* ===========================
+   프로필 로드
+   =========================== */
+async function loadUserProfile() {
+    try {
+        const res = await fetch('/api/users/me', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (res.status === 401 || res.status === 403) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        const user = json.data;
+
+        // 이메일
+        const emailEl = document.getElementById('info-email-value');
+        if (emailEl && user.email) emailEl.textContent = user.email;
+
+        // 이름
+        const nameEl = document.getElementById('info-name-value');
+        if (nameEl && user.name) nameEl.textContent = user.name;
+
+        // 전화번호
+        const phoneEl = document.getElementById('info-phone-value');
+        if (phoneEl) phoneEl.textContent = user.phone || '전화번호 설정';
+
+        // 주소
+        const addressEl = document.getElementById('info-address-value');
+        if (addressEl) addressEl.textContent = user.address || '주소 설정';
+    } catch (err) {
+        console.error('프로필 로드 실패:', err);
+    }
+}
+
+/* ===========================
+   수정 버튼
+   =========================== */
 function initEditButtons() {
     // 이름 변경
     const btnEditName = document.getElementById('btn-edit-name');
@@ -20,7 +63,6 @@ function initEditButtons() {
     const btnEditPassword = document.getElementById('btn-edit-password');
     if (btnEditPassword) {
         btnEditPassword.addEventListener('click', () => {
-            // TODO: 비밀번호 변경 모달/페이지
             alert('비밀번호 변경 기능은 준비 중입니다.');
         });
     }
@@ -50,7 +92,13 @@ function toggleInlineEdit(valueEl, btn, fieldName) {
     // 이미 수정 모드면 저장
     const existingInput = valueEl.parentElement.querySelector('.inline-edit-input');
     if (existingInput) {
-        valueEl.textContent = existingInput.value || valueEl.dataset.original;
+        const newValue = existingInput.value.trim();
+        if (newValue) {
+            valueEl.textContent = newValue;
+            saveUserField(fieldName, newValue);
+        } else {
+            valueEl.textContent = valueEl.dataset.original;
+        }
         existingInput.remove();
         valueEl.style.display = '';
         btn.textContent = fieldName === 'name' ? '변경' : '설정';
@@ -79,4 +127,30 @@ function toggleInlineEdit(valueEl, btn, fieldName) {
             btn.click();
         }
     });
+}
+
+async function saveUserField(fieldName, value) {
+    try {
+        const body = {};
+        body[fieldName] = value;
+
+        const res = await fetch('/api/users/me', {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            console.log(`${fieldName} 업데이트 성공`);
+        } else {
+            console.error(`${fieldName} 업데이트 실패: HTTP ${res.status}`);
+            const errorJson = await res.json().catch(() => null);
+            if (errorJson && errorJson.data && errorJson.data.message) {
+                alert(errorJson.data.message);
+            }
+        }
+    } catch (err) {
+        console.error(`${fieldName} 업데이트 실패:`, err);
+    }
 }

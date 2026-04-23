@@ -1,5 +1,6 @@
 /**
  * ADP Commerce - Signup Page JavaScript
+ * 회원가입 API 연동: 이메일 중복 확인, 가입 처리
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res = await fetch(`/api/auth/check-duplicate?email=${encodeURIComponent(email)}`);
                 const data = await res.json();
 
-                if (data.duplicate) {
+                if (data.data === true || data.duplicate) {
                     showMessage(emailMessage, '이미 사용 중인 이메일입니다.', 'error');
                     emailChecked = false;
                 } else {
@@ -73,6 +74,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
         passwordConfirm.addEventListener('input', checkMatch);
         passwordInput.addEventListener('input', checkMatch);
+    }
+
+    // 폼 제출 - API 연동
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const errorEl = document.getElementById('signup-error');
+
+            if (!emailChecked) {
+                showMessage(emailMessage, '이메일 중복 확인을 해주세요.', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm.value) {
+                showMessage(passwordMessage, '비밀번호가 일치하지 않습니다.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '가입 중...';
+
+            try {
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res.ok || res.status === 201) {
+                    alert('회원가입이 완료되었습니다! 로그인해주세요.');
+                    window.location.href = '/login';
+                } else {
+                    const json = await res.json().catch(() => null);
+                    const msg = json?.data?.message || '회원가입에 실패했습니다.';
+                    if (errorEl) {
+                        errorEl.textContent = msg;
+                        errorEl.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                if (errorEl) {
+                    errorEl.textContent = '서버 연결에 실패했습니다.';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '회원가입';
+            }
+        });
     }
 
     // 제출 버튼 활성화

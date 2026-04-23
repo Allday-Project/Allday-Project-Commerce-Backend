@@ -4,9 +4,50 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    initAuthState();
     initSearch();
     initChatbot();
+    initCartBadge();
+    initLogout();
 });
+
+/* ===========================
+   Auth State Detection (JWT Cookie)
+   =========================== */
+function initAuthState() {
+    const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('access_token='));
+
+    const mypageLink = document.getElementById('mypage-link');
+    const cartBtn = document.getElementById('cart-btn');
+    const logoutLink = document.getElementById('logout-link');
+    const loginLink = document.getElementById('login-link');
+    const signupLink = document.getElementById('signup-link');
+    const dividerUser = document.getElementById('auth-divider-user');
+    const dividerLogout = document.getElementById('auth-divider-logout');
+    const dividerSignup = document.getElementById('auth-divider-signup');
+
+    if (hasToken) {
+        // 로그인 상태
+        if (mypageLink) mypageLink.style.display = '';
+        if (dividerUser) dividerUser.style.display = '';
+        if (cartBtn) cartBtn.style.display = '';
+        if (dividerLogout) dividerLogout.style.display = '';
+        if (logoutLink) logoutLink.style.display = '';
+        if (loginLink) loginLink.style.display = 'none';
+        if (dividerSignup) dividerSignup.style.display = 'none';
+        if (signupLink) signupLink.style.display = 'none';
+    } else {
+        // 비로그인 상태
+        if (mypageLink) mypageLink.style.display = 'none';
+        if (dividerUser) dividerUser.style.display = 'none';
+        if (cartBtn) cartBtn.style.display = 'none';
+        if (dividerLogout) dividerLogout.style.display = 'none';
+        if (logoutLink) logoutLink.style.display = 'none';
+        if (loginLink) loginLink.style.display = '';
+        if (dividerSignup) dividerSignup.style.display = '';
+        if (signupLink) signupLink.style.display = '';
+    }
+}
 
 /* ===========================
    Search
@@ -173,3 +214,50 @@ function addChatbotMessage(text, isUser = false) {
     body.appendChild(msgEl);
     body.scrollTop = body.scrollHeight;
 }
+
+/* ===========================
+   Cart Badge
+   =========================== */
+function initCartBadge() {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+
+    fetch('/api/cart?size=100', { credentials: 'include' })
+        .then(res => {
+            if (!res.ok) return null;
+            return res.json();
+        })
+        .then(json => {
+            if (!json || !json.success) return;
+            const count = json.data.content ? json.data.content.length : 0;
+            badge.textContent = count;
+            if (count > 0) {
+                badge.style.display = '';
+            }
+        })
+        .catch(() => {});
+}
+
+/* ===========================
+   Logout
+   =========================== */
+function initLogout() {
+    const logoutLink = document.getElementById('logout-link');
+    if (!logoutLink) return;
+
+    logoutLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (err) {
+            // 무시
+        }
+
+        window.location.href = '/login';
+    });
+}
+

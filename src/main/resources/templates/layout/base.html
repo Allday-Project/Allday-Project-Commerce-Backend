@@ -42,14 +42,15 @@
             </div>
             <div class="header-right">
                 <!-- 비로그인 상태 -->
-                <div class="auth-links" id="auth-links-guest" th:if="${session.user == null}">
-                    <a th:href="@{/login}" class="auth-link" id="login-link">로그인</a>
-                    <span class="auth-divider">|</span>
-                    <a th:href="@{/signup}" class="auth-link" id="signup-link">회원가입</a>
-                </div>
-                <!-- 로그인 상태 -->
-                <div class="auth-links logged-in" id="auth-links-user" th:if="${session.user != null}">
-                    <a th:href="@{/cart}" class="header-icon-btn" id="cart-btn">
+                <div class="auth-links" id="auth-links-guest">
+                    <a href="/mypage" class="header-icon-btn" id="mypage-link" style="display:none;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </a>
+                    <span class="auth-divider" id="auth-divider-user" style="display:none;">|</span>
+                    <a href="/cart" class="header-icon-btn" id="cart-btn" style="display:none;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                             <line x1="3" y1="6" x2="21" y2="6"/>
@@ -57,13 +58,16 @@
                         </svg>
                         <span class="badge" id="cart-badge">0</span>
                     </a>
-                    <span class="auth-divider">|</span>
-                    <a th:href="@{/logout}" class="auth-link" id="logout-link">로그아웃</a>
+                    <span class="auth-divider" id="auth-divider-logout" style="display:none;">|</span>
+                    <a href="#" class="auth-link" id="logout-link" style="display:none;">로그아웃</a>
+                    <a href="/login" class="auth-link" id="login-link">로그인</a>
+                    <span class="auth-divider" id="auth-divider-signup">|</span>
+                    <a href="/signup" class="auth-link" id="signup-link">회원가입</a>
                 </div>
             </div>
         </div>
-        <!-- 검색 키워드 바 (로그인 시) -->
-        <div class="search-keywords-bar" id="search-keywords-bar" th:if="${session.user != null}">
+        <!-- 검색 키워드 바 -->
+        <div class="search-keywords-bar" id="search-keywords-bar">
             <div class="keywords-scroll">
                 <span class="keyword-tag">1. 한정판매</span>
                 <span class="keyword-tag">2. look at me</span>

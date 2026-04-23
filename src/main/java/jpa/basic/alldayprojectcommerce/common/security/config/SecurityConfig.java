@@ -32,7 +32,8 @@ public class SecurityConfig {
                         "/", "/login", "/signup",
                         "/css/**", "/js/**", "/images/**",
                         "/assets/**", "/img/**", "/error", "/favicon.ico",
-                        "/h2-console/**"
+                        "/h2-console/**",
+                        "/checkout/**", "/cart", "/mypage", "/orders", "/orders/**"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST,
                         "/api/auth/login",
