@@ -24,6 +24,7 @@ public class CacheConfig {
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(60, TimeUnit.SECONDS)
+                .recordStats()
         );
 
         // null 값이 캐싱되지 않도록 설정
