@@ -16,7 +16,6 @@ import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserReposito
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
-import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,6 @@ public class OrderCommandServiceImpl implements OrderCommandService {
     private final OrderProductRepository orderProductRepository;
     private final OrderUserRepository orderUserRepository;
     private final ProductQueryService productQueryService;
-    private final UserQueryService userQueryService;
 
     /**
      * 주문서 생성
