@@ -7,6 +7,7 @@ import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordR
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -109,13 +110,13 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         /**
          * TTL 설정
          *
-         * 이미 TTL이 설정된 키는 덮어씌어짐
-         * 매 요청마다 expire 호출은 성능 부담으로 TTL이 없는 경우에만 설정
+         * hasKey()로 키 존재 여부만 확인
+         * 키가 없을 때(최초 검색어 발생 시)만 TTL 설정
+         * 이미 TTL이 걸려있으면 스킵
          */
-        Duration ttl = RedisKeyUtils.remainingTodayTtl();
-
-        Long currentTtl = redisTemplate.getExpire(rankKey);
-        if (currentTtl != null && currentTtl == -1) {
+        Boolean hasKey = redisTemplate.hasKey(rankKey);
+        if (Boolean.FALSE.equals(hasKey)) {
+            Duration ttl = RedisKeyUtils.remainingTodayTtl();
             redisTemplate.expire(rankKey, ttl);
             redisTemplate.expire(userLogKey, ttl);
             log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
@@ -135,6 +136,13 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         writeBack(LocalDate.now());
     }
 
+    /**
+     * 자정 스케쥴러 write-back
+     *
+     * 1단계: Map으로 기존 데이터 분기
+     * 2단계: UNIQUE(keyword, search_date) 제약
+     * 3단계: 중복 시 update로 전환
+     */
     @Override
     @Transactional
     public void writeBack(LocalDate date) {
@@ -176,8 +184,15 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         }
 
         // 신규 키워드 한 번에 INSERT
-        if (!toSave.isEmpty()) {
-            searchKeywordRepository.saveAll(toSave);
+        for (SearchKeyword sk : toSave) {
+            try {
+                searchKeywordRepository.save(sk);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("[Write-back] 동시 INSERT 감지. keyword: {}", sk.getKeyword());
+                searchKeywordRepository
+                        .findByKeywordAndSearchDate(sk.getKeyword(), date)
+                        .ifPresent(existing -> existing.setCount(sk.getSearchCount()));
+            }
         }
 
         log.info("[Write-back] {} {}건 DB 동기화 완료", date, allData.size());
@@ -249,6 +264,19 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     @Override
     @Transactional
     public void saveFallbackTop5(LocalDate today) {
+
+        /**
+         * 멱등성 보장
+         * 이미 오늘 날짜 데이터가 있으면 스킵
+         */
+        boolean alreadyExists = !popularKeywordRepository
+                .findBySnapshotDateOrderByRankAsc(today).isEmpty();
+
+        if (alreadyExists) {
+            log.info("[Fallback] {} 이미 오늘 데이터 존재", today);
+            return;
+        }
+
         LocalDate yesterday = today.minusDays(1);
 
         // 어제 Top5 키워드 목록 추출
@@ -269,6 +297,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
         if (fallbackList.isEmpty()) {
             log.info("[Fallback] 대체 키워드 없음");
+            return;
         }
 
         // 개선 전: 루프 안에서 save() 5번 호출. 총 INSERT 5번
