@@ -17,14 +17,17 @@ public class CacheConfig {
     // 동시성 맵 캐시 관리자
     @Bean
     public CacheManager cacheManager(){
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "productSearchCache",
+                "top5Keywords"
+        );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(60, TimeUnit.SECONDS)
         );
 
         // null 값이 캐싱되지 않도록 설정
-        // 하지만 null 값 반환이 아닌 빈 페이지를 반환하기에 사용하지 않는다.
+        // 하지만 null 값 반환이 아닌 빈 리스트를 반환하기에 사용하지 않는다.
 //        cacheManager.setAllowNullValues(true);
         return cacheManager;
     }
