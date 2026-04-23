@@ -1,6 +1,10 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
+import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +22,7 @@ import java.time.LocalDateTime;
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatMessage {
+public class ChatMessage extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,25 +37,28 @@ public class ChatMessage {
     @Column(nullable = false, length = 20)
     private SenderType senderType;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 1000)
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MessageType messageType;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     @Builder
-
     public ChatMessage(Long roomId, Long senderId, SenderType senderType, String content, MessageType messageType) {
+
+        if (content == null || content.isBlank()) {
+            throw new CustomException(ErrorCode.CHAT_MESSAGE_EMPTY);
+        }
+        if (content.length() > 1000) {
+            throw new CustomException(ErrorCode.CHAT_MESSAGE_TOO_LONG);
+        }
+
         this.roomId = roomId;
         this.senderId = senderId;
         this.senderType = senderType;
         this.content = content;
         this.messageType = messageType;
-        this.createdAt = LocalDateTime.now();
     }
 
     // 입장, 종료 알림 생성용 정적 팩토리

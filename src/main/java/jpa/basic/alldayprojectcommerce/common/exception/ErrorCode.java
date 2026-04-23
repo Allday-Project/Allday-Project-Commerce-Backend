@@ -31,6 +31,7 @@ public enum ErrorCode {
     ORDER_USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "O005", "주문자 정보를 찾을 수 없습니다."),
     ORDER_INVALID_UID(HttpStatus.BAD_REQUEST, "O005", "유효하지 않은 주문 UID 입니다."),
     ORDER_STATUS_NOT_PENDING(HttpStatus.BAD_REQUEST,"O006","주문 상태가 결제 대기 상태가 아닙니다."),
+    EVENT_ORDER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST,"O007","이미 주문한 이벤트 상품입니다."),
 
     //  상품 관련 에러 코드(P###)
     ORDER_STATUS_NOT_COMPLETED(HttpStatus.BAD_REQUEST,"O007","주문 상태가 결제 완료 상태가 아닙니다."),
@@ -57,7 +58,9 @@ public enum ErrorCode {
     CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "CH003", "채팅방에 접근할 권한이 없습니다."),
     CHAT_ROOM_ALREADY_EXISTS(HttpStatus.CONFLICT, "CH004", "이미 진행 중인 상담이 있습니다."),
     CHAT_ROOM_CLOSED(HttpStatus.BAD_REQUEST, "CH005", "종료된 상담방입니다."),
-    CHAT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "CH006", "채팅 인증에 실패했습니다.");
+    CHAT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "CH006", "채팅 인증에 실패했습니다."),
+    CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "CH007", "메시지 내용은 비어있을 수 없습니다."),
+    CHAT_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "CH008", "메시지는 1000자를 초과할 수 없습니다.");
 
 
 

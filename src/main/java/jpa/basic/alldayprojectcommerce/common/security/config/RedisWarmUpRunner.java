@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +29,10 @@ public class RedisWarmUpRunner implements ApplicationRunner {
         log.info("[Warm-up] 서버 시작 감지 - Redis 상태 확인");
 
         try {
-            // Redis 연결 확인
-            redisTemplate.getConnectionFactory()
-                    .getConnection()
-                    .ping();
+            // Redis 연결 확인 — PING 대신 실제 작업으로 연결 상태 확인
+            redisTemplate.hasKey("health-check");
         } catch (Exception e) {
-            log.warn("[Warm-up] Redis 연결 불가 - 스킵");
+            log.warn("[Warm-up] Redis 연결 불가 - 스킵 (서버는 정상 시작)");
             return;
         }
 
