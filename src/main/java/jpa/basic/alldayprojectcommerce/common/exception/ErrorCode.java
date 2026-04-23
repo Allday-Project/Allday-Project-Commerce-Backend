@@ -54,11 +54,11 @@ public enum ErrorCode {
 
     // 채팅 도메인(CH001)
     CHAT_INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "CH001", "유효하지 않은 상태 전이입니다."),
-
-
-
-
-
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CH002", "채팅방을 찾을 수 없습니다."),
+    CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "CH003", "채팅방에 접근할 권한이 없습니다."),
+    CHAT_ROOM_ALREADY_EXISTS(HttpStatus.CONFLICT, "CH004", "이미 진행 중인 상담이 있습니다."),
+    CHAT_ROOM_CLOSED(HttpStatus.BAD_REQUEST, "CH005", "종료된 상담방입니다."),
+    CHAT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "CH006", "채팅 인증에 실패했습니다."),
     CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "CH007", "메시지 내용은 비어있을 수 없습니다."),
     CHAT_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "CH008", "메시지는 1000자를 초과할 수 없습니다.");
 
