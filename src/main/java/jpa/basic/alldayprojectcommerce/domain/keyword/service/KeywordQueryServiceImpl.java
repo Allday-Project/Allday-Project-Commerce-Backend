@@ -1,15 +1,12 @@
 package jpa.basic.alldayprojectcommerce.domain.keyword.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import jpa.basic.alldayprojectcommerce.common.util.RedisKeyUtils;
 import jpa.basic.alldayprojectcommerce.domain.keyword.dto.response.Top5KeywordResponse;
 import jpa.basic.alldayprojectcommerce.domain.keyword.entity.PopularKeyword;
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -28,7 +25,6 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
 
     private final RedisTemplate<String, String>  redisTemplate;
     private final PopularKeywordRepository popularKeywordRepository;
-    private final CacheManager cacheManager;
 
     /**
      * 인기 검색어 Top5 조회
@@ -122,19 +118,5 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
         return yesterdayList.stream()
                 .map(Top5KeywordResponse::from)
                 .toList();
-    }
-
-    public void logCacheStatus() {
-        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("top5Keywords");
-
-        if (caffeineCache == null) {
-            log.warn("[캐시 통계] top5Keywords 캐시를 찾을 수 없습니다.");
-            return;
-        }
-
-        Cache<Object, Object> cache = caffeineCache.getNativeCache();
-
-        log.info("[캐시 통계] hit: {}, miss: {}, hitRate: {}",
-                cache.stats().hitCount(), cache.stats().missCount(), cache.stats().hitRate());
     }
 }
