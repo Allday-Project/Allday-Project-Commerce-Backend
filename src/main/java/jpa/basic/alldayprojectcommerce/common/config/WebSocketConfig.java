@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -14,6 +15,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompChannelInterceptor stompChannelInterceptor;
+
+    @Value("${websocket.allowed-origins}")
+    private String allowedOrigins;
 
     /**
      * 메시지 브로커 설정
@@ -37,8 +41,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("*")      // 운영할 때는 도메인 지정
-                .withSockJS();                      // WebSocket 미지원 브라우저 fallback 처리
+                .setAllowedOriginPatterns(allowedOrigins.split(","))      // 운영할 때는 도메인 지정
+                .withSockJS();           // WebSocket 미지원 브라우저 fallback 처리
     }
 
     /**

@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
                 columnNames = {"user_id", "active_flag"}
         ),
         indexes = {
-                @Index(name = "idx_chat_rooms_status", columnList = "chat_room_status")
+                @Index(name = "idx_chat_room_status", columnList = "chat_room_status")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
