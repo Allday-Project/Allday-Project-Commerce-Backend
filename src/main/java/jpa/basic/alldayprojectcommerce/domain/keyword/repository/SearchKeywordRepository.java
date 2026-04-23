@@ -51,4 +51,6 @@ public interface SearchKeywordRepository extends JpaRepository<SearchKeyword, Lo
             """)
     List<SearchKeyword> findTop5ExcludingKeywords(@Param("fromDate") LocalDate fromDate,
                                                   @Param("excludeKeywords") List<String> excludeKeywords);
+
+    List<SearchKeyword> findBySearchDate(LocalDate today);
 }

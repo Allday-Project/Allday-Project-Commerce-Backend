@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -101,6 +102,21 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
         redisTemplate.opsForZSet().incrementScore(rankKey, keyword, 1);
         log.debug("[검색어 기록] keyword: {}", keyword);
+
+        /**
+         * TTL 설정
+         *
+         * 이미 TTL이 설정된 키는 덮어씌어짐
+         * 매 요청마다 expire 호출은 성능 부담으로 TTL이 없는 경우에만 설정
+         */
+        Duration ttl = RedisKeyUtils.remainingTodayTtl();
+
+        Long currentTtl = redisTemplate.getExpire(rankKey);
+        if (currentTtl != null && currentTtl == -1) {
+            redisTemplate.expire(rankKey, ttl);
+            redisTemplate.expire(userLogKey, ttl);
+            log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
+        }
     }
 
     /**
@@ -251,5 +267,37 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         }
 
         log.info("[Fallback] {} 임시 Top5 저장 완료", today);
+    }
+
+    /**
+     * Redis Warm-up
+     *
+     * 서버 재시작 감지 시 호출
+     * SearchKeyword에서 오늘 데이터 전체를 가져와서 Redis ZSet에 복원 후 TTL 설정
+     */
+    @Override
+    public void warmUp() {
+        LocalDate today = LocalDate.now();
+        String rankKey = RedisKeyUtils.todayRankKey();
+        String userKey = RedisKeyUtils.todayUserLogKey();
+
+        List<SearchKeyword> todayData = searchKeywordRepository.findBySearchDate(today);
+
+        if (todayData.isEmpty()) {
+            log.info("[Warm-up] 오늘 DB 데이터 없음");
+            return;
+        }
+
+        // Redis ZSet 복원
+        for (SearchKeyword sk : todayData) {
+            redisTemplate.opsForZSet()
+                    .add(rankKey, sk.getKeyword(), sk.getSearchCount());
+        }
+
+        Duration ttl = RedisKeyUtils.remainingTodayTtl();
+        redisTemplate.expire(rankKey, ttl);
+        redisTemplate.expire(userKey, ttl);
+
+        log.info("[Warm-up] {}건 Redis 복원 완료. TTL: {}시간", todayData.size(), ttl.toHours());
     }
 }
