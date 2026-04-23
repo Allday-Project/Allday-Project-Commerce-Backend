@@ -132,21 +132,26 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     @Override
     @Transactional
     public void writeBack() {
-        LocalDate today = LocalDate.now();
-        String rankKey = RedisKeyUtils.todayRankKey();
+        writeBack(LocalDate.now());
+    }
+
+    @Override
+    @Transactional
+    public void writeBack(LocalDate date) {
+        String rankKey = RedisKeyUtils.rankKey(date);
 
         Set<ZSetOperations.TypedTuple<String>> allData =
                 redisTemplate.opsForZSet().rangeWithScores(rankKey, 0, -1);
 
         if (allData == null || allData.isEmpty()) {
-            log.info("[Write-back] 동기화할 데이터 없음");
+            log.info("[Write-back] {} 동기화할 데이터 없음", date);
             return;
         }
 
         // 개선 전: 키워드마다 SELECT 1번씩. 총 N번 SELECT
         // 개선 후: 오늘 전체 데이터를 한 번에 가져와서 Map으로 변환. SELECT 1번
         Map<String, SearchKeyword> existingMap = searchKeywordRepository
-                .findBySearchDate(today)
+                .findBySearchDate(date)
                 .stream()
                 .collect(Collectors.toMap(SearchKeyword::getKeyword, sk -> sk));
 
@@ -155,18 +160,17 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         for (ZSetOperations.TypedTuple<String> tuple : allData) {
             String keyword = tuple.getValue();
             long count = tuple.getScore() == null ? 0L : tuple.getScore().longValue();
-
             if (keyword == null || keyword.isBlank()) continue;
 
             if (existingMap.containsKey(keyword)) {
                 // 이미 있으면 메모리에서 바로 업데이트
                 existingMap.get(keyword).setCount(count);
-            } else {
+            }  else {
                 // 없으면 INSERT 목록에 추가
                 toSave.add(SearchKeyword.builder()
                         .keyword(keyword)
                         .searchCount(count)
-                        .searchDate(today)
+                        .searchDate(date)
                         .build());
             }
         }
@@ -176,7 +180,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             searchKeywordRepository.saveAll(toSave);
         }
 
-        log.info("[Write-back] {}건 DB 동기화 완료", allData.size());
+        log.info("[Write-back] {} {}건 DB 동기화 완료", date, allData.size());
     }
 
     /**
