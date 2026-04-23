@@ -43,9 +43,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         // 콘텐츠 조회 쿼리
         List<Product> content = queryFactory
                 .selectFrom(product)
-                .where(categoryEq(filterRequest.category()),
-                        statusEq(filterRequest.status()))
-                .orderBy(getOrderSpecifiers(pageable.getSort()))
+                .where(categoryEqV1(filterRequest.category()),
+                        statusEqV1(filterRequest.status()))
+                .orderBy(getOrderSpecifiersV1(pageable.getSort()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -66,8 +66,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             Pageable pageable) {
         List<Product> content = queryFactory
                 .selectFrom(product)
-                .where(keywordContains(searchRequest.keyword()))
-                .orderBy(getOrderSpecifiers(pageable.getSort()))
+                .where(keywordContainsV1(searchRequest.keyword()))
+                .orderBy(getOrderSpecifiersV1(pageable.getSort()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -75,30 +75,33 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         Long total = queryFactory
                 .select(product.count())
                 .from(product)
-                .where(keywordContains(searchRequest.keyword()))
+                .where(keywordContainsV1(searchRequest.keyword()))
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
 
-    private BooleanExpression keywordContains(String keyword) {
+
+
+    // 키워드에 빈 값이 들어갔을 때 에러
+    private BooleanExpression keywordContainsV1(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        return product.name.contains(keyword).or(product.description.contains(keyword));
+        return product.name.containsIgnoreCase(keyword).or(product.description.contains(keyword));
     }
 
-    private BooleanExpression categoryEq(Category category) {
+    private BooleanExpression categoryEqV1(Category category) {
         return category != null ? product.category.eq(category) : null;
     }
 
-    private BooleanExpression statusEq(ProductStatus status) {
+    private BooleanExpression statusEqV1(ProductStatus status) {
         return status != null ? product.status.eq(status) : null;
     }
 
-
-    private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
+    // 정렬 조건을 동적으로 생성하는 메서드
+    private OrderSpecifier<?>[] getOrderSpecifiersV1(Sort sort) {
         return sort.stream()
                 .map(order -> {
                     Order direction = order.isAscending() ? Order.ASC : Order.DESC;
@@ -108,5 +111,4 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 })
                 .toArray(OrderSpecifier[]::new);
     }
-
 }

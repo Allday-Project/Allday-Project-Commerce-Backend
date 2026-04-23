@@ -7,10 +7,10 @@ import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductR
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProductResponse;
+import jpa.basic.alldayprojectcommerce.domain.product.dto.response.SearchProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +27,38 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductQueryServiceImpl productQueryServiceImpl;
+
+
+    @GetMapping("/v1/boards/search")
+    public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> search(
+            @Valid SearchProductRequest searchRequest,
+            @RequestParam(defaultValue = "1") int page,
+            Pageable pageable) {
+
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
+    }
+
+
+    @GetMapping("/v2/boards/search")
+    public ResponseEntity<ApiResponse<Page<SearchProductResponse>>> searchV2(
+            @Valid SearchProductRequest request,
+            @RequestParam(defaultValue = "1") int page,
+            Pageable pageable){
+        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        Page<SearchProductResponse> responses = productQueryServiceImpl.searchProductsV2(request, adjustedPageable);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        // true: 공백만 있는 문자열을 null로 바꿀 것인가? (여기선 false로 해서 빈 문자열로 둠)
+        StringTrimmerEditor editor = new StringTrimmerEditor(false);
+        binder.registerCustomEditor(String.class, editor);
+    }
+
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetOneProductResponse>> getOne(@PathVariable("productId") Long id) {
@@ -45,30 +77,5 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
-    @GetMapping("v1/boards/search")
-    public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> search(
-            @Valid SearchProductRequest searchRequest,
-            @RequestParam(defaultValue = "1") int page,
-            Pageable pageable) {
 
-        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-
-        Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
-    }
-
-//    @Cacheable(value = "searchCache", key = "#productId")
-//    @GetMapping("v2/boards/search")
-//    public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> search(
-//            @Valid SearchProductRequest
-//    ){
-//
-//    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        // true: 공백만 있는 문자열을 null로 바꿀 것인가? (여기선 false로 해서 빈 문자열로 둠)
-        StringTrimmerEditor editor = new StringTrimmerEditor(false);
-        binder.registerCustomEditor(String.class, editor);
-    }
 }
