@@ -3,6 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.keyword.entity;
 import jakarta.persistence.*;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,6 +33,7 @@ public class PopularKeyword extends BaseEntity {
     @Column(nullable = false)
     private boolean isFallback;     // Top5 -> false, 대체 키워드 -> true
 
+    @Builder
     public PopularKeyword(String keyword, Integer rank, Long searchCount, LocalDate snapshotDate, boolean isFallback) {
         this.keyword = keyword;
         this.rank = rank;
