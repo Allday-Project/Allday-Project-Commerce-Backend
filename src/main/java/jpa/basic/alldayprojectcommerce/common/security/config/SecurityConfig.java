@@ -47,6 +47,7 @@ public class SecurityConfig {
                         "/api/keywords/top5"
                         ).permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/api/events/**").permitAll()
                     .anyRequest().authenticated()
             )
             .addFilterBefore(

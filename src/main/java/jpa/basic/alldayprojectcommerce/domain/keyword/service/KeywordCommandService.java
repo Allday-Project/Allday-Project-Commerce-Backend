@@ -16,6 +16,9 @@ public interface KeywordCommandService {
      */
     void writeBack();
 
+    // 자정 스케쥴러용
+    void writeBack(LocalDate date);
+
     // Top5 스냅샷 저장
     void snapshotTop5(LocalDate date);
 
