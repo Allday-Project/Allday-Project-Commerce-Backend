@@ -8,7 +8,11 @@ import java.util.List;
 
 public interface PopularKeywordRepository extends JpaRepository<PopularKeyword, Long> {
 
-
     List<PopularKeyword> findBySnapshotDateOrderByRankAsc(LocalDate snapshotDate);
 
+    // Fallback 생성 시 어제 Top5 키워드 목록 조회
+    List<PopularKeyword> findBySnapshotDateAndIsFallbackFalse(LocalDate snapshotDate);
+
+    // 오늘 Fallback 삭제
+    void deleteBySnapshotDateAndIsFallbackTrue(LocalDate snapshotDate);
 }
