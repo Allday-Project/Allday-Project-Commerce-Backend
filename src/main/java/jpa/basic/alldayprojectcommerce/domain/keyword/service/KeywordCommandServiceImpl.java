@@ -7,6 +7,7 @@ import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordR
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -110,17 +111,17 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         /**
          * TTL 설정
          *
-         * hasKey()로 키 존재 여부만 확인
-         * 키가 없을 때(최초 검색어 발생 시)만 TTL 설정
-         * 이미 TTL이 걸려있으면 스킵
+         * 기존  : hasKey() 체크 후 없을 때만 expire()
+         * 문제점: 두 서버 동시 실행 시 둘 다 false 판단 가능으로 경쟁 상태 + Redis 왕복 1회 추가
+         *
+         * 개선  : 매번 expire() 덮어쓰기
+         * expire()는 기존 TTL을 갱신하는 멱등 연산으로 여러 번 호출해도 결과가 같고 경쟁 상태 없음
+         * Redis 명령 1회로 성능 영향 미미
          */
-        Boolean hasKey = redisTemplate.hasKey(rankKey);
-        if (Boolean.FALSE.equals(hasKey)) {
-            Duration ttl = RedisKeyUtils.remainingTodayTtl();
-            redisTemplate.expire(rankKey, ttl);
-            redisTemplate.expire(userLogKey, ttl);
-            log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
-        }
+         Duration ttl = RedisKeyUtils.remainingTodayTtl();
+         redisTemplate.expire(rankKey, ttl);
+         redisTemplate.expire(userLogKey, ttl);
+         log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
     }
 
     /**
@@ -206,7 +207,9 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "top5Keywords", key = "'top5'")
     public void snapshotTop5(LocalDate date) {
+        // 새 Top5가 DB에 저장되는 시점에 Caffeine 캐시를 즉시 무효화
         List<SearchKeyword> top5 = searchKeywordRepository.findTop5BySearchDate(date);
 
         if (top5.isEmpty()) {
