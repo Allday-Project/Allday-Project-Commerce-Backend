@@ -44,7 +44,6 @@ public class ChatMessage {
     private LocalDateTime createdAt;
 
     @Builder
-
     public ChatMessage(Long roomId, Long senderId, SenderType senderType, String content, MessageType messageType) {
         this.roomId = roomId;
         this.senderId = senderId;
