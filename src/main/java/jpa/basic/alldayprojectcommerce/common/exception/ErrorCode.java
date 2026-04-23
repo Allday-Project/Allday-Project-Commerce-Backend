@@ -53,7 +53,14 @@ public enum ErrorCode {
     PAYMENT_INVALID_UID(HttpStatus.BAD_REQUEST, "PAY005", "유효하지 않은 결제 UID 입니다."),
 
     // 채팅 도메인(CH001)
-    CHAT_INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "CH001", "유효하지 않은 상태 전이입니다.");
+    CHAT_INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "CH001", "유효하지 않은 상태 전이입니다."),
+
+
+
+
+
+    CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "CH007", "메시지 내용은 비어있을 수 없습니다."),
+    CHAT_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "CH008", "메시지는 1000자를 초과할 수 없습니다.");
 
 
 

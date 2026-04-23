@@ -8,11 +8,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@Check(constraints = "active_flag IS NULL OR active_flag = 1")
 @Table(
         name = "chat_rooms",
         uniqueConstraints = @UniqueConstraint(

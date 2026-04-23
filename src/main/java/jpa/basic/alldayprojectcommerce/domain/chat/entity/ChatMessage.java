@@ -2,6 +2,8 @@ package jpa.basic.alldayprojectcommerce.domain.chat.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
+import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -35,7 +37,6 @@ public class ChatMessage extends BaseEntity {
     @Column(nullable = false, length = 20)
     private SenderType senderType;
 
-    @Size(max = 1000, message = "메시지는 1000자를 초과할 수 없습니다.")
     @Column(nullable = false, length = 1000)
     private String content;
 
@@ -45,6 +46,14 @@ public class ChatMessage extends BaseEntity {
 
     @Builder
     public ChatMessage(Long roomId, Long senderId, SenderType senderType, String content, MessageType messageType) {
+
+        if (content == null || content.isBlank()) {
+            throw new CustomException(ErrorCode.CHAT_MESSAGE_EMPTY);
+        }
+        if (content.length() > 1000) {
+            throw new CustomException(ErrorCode.CHAT_MESSAGE_TOO_LONG);
+        }
+
         this.roomId = roomId;
         this.senderId = senderId;
         this.senderType = senderType;
