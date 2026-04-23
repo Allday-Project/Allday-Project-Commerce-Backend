@@ -12,7 +12,17 @@ import java.time.LocalDate;
 
 @Getter
 @Entity
-@Table(name = "search_keywords")
+@Table(
+        name = "search_keywords",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_search_keywords_keyword_date",
+                columnNames = {"keyword", "search_date"}
+        ),
+        indexes = {
+                @Index(name = "idx_search_date_count", columnList = "search_date, search_count"),
+                @Index(name = "idx_keyword", columnList = "keyword")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SearchKeyword extends BaseEntity {
 

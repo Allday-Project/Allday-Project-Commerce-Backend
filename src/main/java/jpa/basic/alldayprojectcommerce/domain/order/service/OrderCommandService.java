@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.service;
 
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
+import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 
 public interface OrderCommandService {
