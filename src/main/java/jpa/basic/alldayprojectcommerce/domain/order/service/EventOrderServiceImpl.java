@@ -59,7 +59,7 @@ public class EventOrderServiceImpl implements EventOrderService {
 
         // 유저 한 명당 이벤트 상품은 하나만 구매 가능.
         // 이 상품에 대해서 주문 상태가 COMPLETED인 주문이 있는지 검증
-        if(orderProductRepository.existsCompletedEventOrder(productId,userId)){
+        if(orderProductRepository.existsCompletedEventOrder(productId,userId, OrderStatus.COMPLETED)){
             throw new CustomException(ErrorCode.EVENT_ORDER_ALREADY_EXISTS);
 
         }
@@ -93,7 +93,6 @@ public class EventOrderServiceImpl implements EventOrderService {
         productCommandService.decreaseStock(productId, quantity, savedOrder.getId());
 
         // OrderItem 저장 - 스냅샷
-
         orderProductRepository.save(OrderProduct.builder()
                 .orderId(savedOrder.getId())
                 .productId(product.getId())

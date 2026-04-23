@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.order.repository;
 
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
+import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,16 +14,17 @@ public interface OrderProductRepository extends JpaRepository<OrderProduct, Long
     List<OrderProduct> findByOrderId(Long orderId);
 
     @Query("""
-        select case when count(op) > 0 then true else false end
-        from OrderProduct op
-        join Order o on o.id = op.orderId
-        where op.productId = :productId
-          and o.userId = :userId
-          and o.status = jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus.COMPLETED
+    select case when count(op) > 0 then true else false end
+    from OrderProduct op
+    join Order o on o.id = op.orderId
+    where op.productId = :productId
+      and o.userId = :userId
+      and o.status = :status
 """)
     boolean existsCompletedEventOrder(
             @Param("productId") Long productId,
-            @Param("userId") Long userId
+            @Param("userId") Long userId,
+            @Param("status") OrderStatus status
     );
 
 }

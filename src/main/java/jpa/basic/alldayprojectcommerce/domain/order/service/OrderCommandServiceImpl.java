@@ -1,14 +1,11 @@
 package jpa.basic.alldayprojectcommerce.domain.order.service;
 
-import jdk.jfr.Event;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.common.util.IdFactory;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.CreateOrderRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.request.OrderItemRequest;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.CreateOrderResponse;
-import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
-import jpa.basic.alldayprojectcommerce.domain.order.dto.response.GetOneOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.Order;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderProduct;
 import jpa.basic.alldayprojectcommerce.domain.order.entity.OrderStatus;
@@ -18,10 +15,7 @@ import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderRepository;
 import jpa.basic.alldayprojectcommerce.domain.order.repository.OrderUserRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
-import jpa.basic.alldayprojectcommerce.domain.product.service.ProductCommandService;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
-import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
-import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
