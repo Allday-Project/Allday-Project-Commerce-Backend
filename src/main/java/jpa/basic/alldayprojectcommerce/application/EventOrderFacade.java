@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.application;
 
 import jpa.basic.alldayprojectcommerce.common.lock.annotation.RedisLock;
+import jpa.basic.alldayprojectcommerce.common.lock.annotation.RedissonLock;
 import jpa.basic.alldayprojectcommerce.common.lock.enums.RedisLockStrategy;
 import jpa.basic.alldayprojectcommerce.common.lock.service.RedisLockService;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
@@ -122,6 +123,79 @@ public class EventOrderFacade {
             strategy = RedisLockStrategy.BLOCKING
     )
     public EventOrderResponse createEventOrderWithRedisLockAopBlocking(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redisson 분산락 - AOP 적용 버전
+     *
+     * waitTimeSeconds:
+     * - 락 획득을 최대 몇 초까지 기다릴지.
+     * 짧으면 Retry 전략, 길면 Blocking 전략
+     *
+     * leaseTimeSeconds:
+     * - 락을 몇 초 동안 유지할지
+     * - 이 시간이 지나면 자동으로 락이 해제됨
+     *
+     * Retry + TTL
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeSeconds = 2,
+            leaseTimeSeconds = 5
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopRetry(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redisson 분산락 - AOP 적용 버전
+     * Blocking + TTL
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeSeconds = 10,
+            leaseTimeSeconds = 10
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopBlocking(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+
+
+    /**
+     * Redisson 분산락 - Watchdog 적용 버전
+     *
+     * leaseTimeSeconds = -1
+     * - Redisson Watchdog 사용
+     * - 작업이 끝나기 전까지 락 TTL을 자동 연장
+     *
+     * Retry + Watchdog
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeSeconds = 2,
+            leaseTimeSeconds = -1
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopRetryWatchdog(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redisson 분산락 - Watchdog 적용 버전
+     *
+     * leaseTimeSeconds = -1
+     * - Redisson Watchdog 사용
+     * - 작업이 끝나기 전까지 락 TTL을 자동 연장
+     *
+     * Blocking + Watchdog
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeSeconds = 10,
+            leaseTimeSeconds = -1
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
     }
 
