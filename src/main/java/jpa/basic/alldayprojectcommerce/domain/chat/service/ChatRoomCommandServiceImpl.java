@@ -126,6 +126,8 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
             return;
         }
 
+        ChatRoomStatus previousStatus = chatRoom.getChatRoomStatus();
+
         chatRoom.changeStatus(ChatRoomStatus.COMPLETED);
 
         chatMessageRepository.save(
@@ -133,7 +135,7 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
                         "10분간 응답이 없어 상담이 자동 종료되었습니다.")
         );
 
-        log.info("[자동종료] 완료 roomId: {}, 이전 상태: {}", roomId, chatRoom.getChatRoomStatus());
+        log.info("[자동종료] 완료 roomId: {}, 이전 상태: {}", roomId, previousStatus);
     }
 
     /**

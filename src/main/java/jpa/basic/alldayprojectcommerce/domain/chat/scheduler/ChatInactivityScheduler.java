@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.scheduler;
 
+import jpa.basic.alldayprojectcommerce.common.lock.repository.RedisLockRepository;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatMessageResponse;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoom;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.MessageType;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -27,6 +29,10 @@ public class ChatInactivityScheduler {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomCommandService chatRoomCommandService;
     private final ChatRedisPublisher chatRedisPublisher;
+    private final RedisLockRepository redisLockRepository;
+
+    private static final String INACTIVITY_LOCK_KEY = "lock:chat:inactivity";
+    private static final long INACTIVITY_LOCK_TTL = 55L;    // 55초
 
     /**
      * 비활성 채팅방 자동 종료 스케쥴러
@@ -47,53 +53,64 @@ public class ChatInactivityScheduler {
      */
     @Scheduled(fixedRate = 60_000) // 1분마다 실행
     public void closeInactiveRooms() {
-        // 기준 시각: 현재 - 10분
-        LocalDateTime cutOff = LocalDateTime.now().minusMinutes(inactivityTimeoutMinutes);
+        String lockValue = UUID.randomUUID().toString();
 
-        List<ChatRoom> targets = chatRoomRepository.findInactiveRooms(cutOff);
-
-        if (targets.isEmpty()) {
-            log.debug("[자동종료] 처리 대상 없음");
+        if (!redisLockRepository.tryLock(INACTIVITY_LOCK_KEY, lockValue, INACTIVITY_LOCK_TTL)) {
+            log.info("[자동종료] 다른 서버 실행 중 - 스킵");
             return;
         }
 
-        log.info("[자동종료] 처리 대상 {}건");
+        try {
+            // 기준 시각: 현재 - 10분
+            LocalDateTime cutOff = LocalDateTime.now().minusMinutes(inactivityTimeoutMinutes);
 
-        for (ChatRoom room : targets) {
-            try {
-                Long roomId = room.getId();
+            List<ChatRoom> targets = chatRoomRepository.findInactiveRooms(cutOff);
 
-                // 비관적 락 + 상태 변경 + 시스템 메시지 DB 저장
-                chatRoomCommandService.autoCloseRoom(roomId);
-
-                /**
-                 * WebSocket으로 실시간 알림
-                 *
-                 * autoCloseRoom()에서 저장한 시스템 메시지를 Redis를 통해 발행
-                 * -> 모든 서버의 구독자에게 브로드캐스트
-                 * -> 클라이언트가 messageType = SYSTEM 감지 -> 채팅창 비활성화 처리
-                 *
-                 * ChatMessageResponse를 직접 생성하는 이유:
-                 * autoCloseRoom()은 @Transcational 메서드라서 반환값 없이 커밋만 함
-                 * 알림용 DTO는 스케쥴러에서 직접 만들어서 발행
-                 */
-                ChatMessageResponse notification = new ChatMessageResponse(
-                        null,   // id - 알림 전용이라 null
-                        null,      // senderId - 시스템 메시지
-                        SenderType.SYSTEM,
-                        MessageType.SYSTEM,
-                        "10분간 응답이 없어 상담이 자동 종료되었습니다.",
-                        LocalDateTime.now()
-                );
-
-                chatRedisPublisher.publish(roomId, notification);
-
-                log.info("[자동종료] 알림 발송 완료 roomId: {}", roomId);
-
-            } catch (Exception e) {
-                // 한 방 실패해도 다른 방 처리 계속 진행
-                log.error("[자동종료] 처리 실패 roomId: {}", room.getId(), e);
+            if (targets.isEmpty()) {
+                log.debug("[자동종료] 처리 대상 없음");
+                return;
             }
+
+            log.info("[자동종료] 처리 대상 {}건");
+
+            for (ChatRoom room : targets) {
+                try {
+                    Long roomId = room.getId();
+
+                    // 비관적 락 + 상태 변경 + 시스템 메시지 DB 저장
+                    chatRoomCommandService.autoCloseRoom(roomId);
+
+                    /**
+                     * WebSocket으로 실시간 알림
+                     *
+                     * autoCloseRoom()에서 저장한 시스템 메시지를 Redis를 통해 발행
+                     * -> 모든 서버의 구독자에게 브로드캐스트
+                     * -> 클라이언트가 messageType = SYSTEM 감지 -> 채팅창 비활성화 처리
+                     *
+                     * ChatMessageResponse를 직접 생성하는 이유:
+                     * autoCloseRoom()은 @Transcational 메서드라서 반환값 없이 커밋만 함
+                     * 알림용 DTO는 스케쥴러에서 직접 만들어서 발행
+                     */
+                    ChatMessageResponse notification = new ChatMessageResponse(
+                            null,   // id - 알림 전용이라 null
+                            null,      // senderId - 시스템 메시지
+                            SenderType.SYSTEM,
+                            MessageType.SYSTEM,
+                            "10분간 응답이 없어 상담이 자동 종료되었습니다.",
+                            LocalDateTime.now()
+                    );
+
+                    chatRedisPublisher.publish(roomId, notification);
+
+                    log.info("[자동종료] 알림 발송 완료 roomId: {}", roomId);
+
+                } catch (Exception e) {
+                    // 한 방 실패해도 다른 방 처리 계속 진행
+                    log.error("[자동종료] 처리 실패 roomId: {}", room.getId(), e);
+                }
+            }
+        } finally {
+            redisLockRepository.unlock(INACTIVITY_LOCK_KEY, lockValue);
         }
     }
 }

@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.repository;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
