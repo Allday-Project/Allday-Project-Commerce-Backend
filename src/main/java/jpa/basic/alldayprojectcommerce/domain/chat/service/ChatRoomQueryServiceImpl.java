@@ -9,6 +9,8 @@ import jpa.basic.alldayprojectcommerce.domain.chat.repository.ChatRoomRepository
 import jpa.basic.alldayprojectcommerce.domain.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,14 +62,8 @@ public class ChatRoomQueryServiceImpl implements ChatRoomQueryService {
      * status != null -> 특정 상태만 필터링
      */
     @Override
-    public List<ChatRoomResponse> getAllRooms(ChatRoomStatus status) {
-        List<ChatRoom> chatRooms = (status == null)
-                ? chatRoomRepository.findAllByOrderByCreatedAtDesc()
-                : chatRoomRepository.findByChatRoomStatusOrderByCreatedAtDesc(status);
-
-        return chatRooms.stream()
-                .map(ChatRoomResponse::from)
-                .toList();
+    public Page<ChatRoomResponse> getAllRooms(ChatRoomStatus status, Pageable pageable) {
+        return chatRoomRepository.findAllWithFilter(status, pageable);
     }
 
     private void validateAccess(ChatRoom chatRoom, Long userId, String role) {

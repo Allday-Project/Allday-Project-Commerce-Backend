@@ -13,6 +13,10 @@ import jpa.basic.alldayprojectcommerce.domain.chat.service.ChatMessageService;
 import jpa.basic.alldayprojectcommerce.domain.chat.service.ChatRoomCommandService;
 import jpa.basic.alldayprojectcommerce.domain.chat.service.ChatRoomQueryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -109,12 +113,12 @@ public class ChatController {
      * chatRoomStatus 파라미터로 상태 필터링 (생략 시 전체 조회)
      */
     @GetMapping("/admin/rooms")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getAdminRooms(
-            @LoginUser LoginUserInfo loginUserInfo,
-            @RequestParam(required = false) ChatRoomStatus chatRoomStatus) {
+    public ResponseEntity<ApiResponse<Page<ChatRoomResponse>>> getAdminRooms(
+            @RequestParam(required = false) ChatRoomStatus chatRoomStatus,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK,
-                chatRoomQueryService.getAllRooms(chatRoomStatus)));
+                chatRoomQueryService.getAllRooms(chatRoomStatus, pageable)));
     }
 
     /**
