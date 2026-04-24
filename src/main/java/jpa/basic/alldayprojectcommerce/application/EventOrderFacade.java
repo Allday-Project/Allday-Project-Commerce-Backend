@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.application;
 
 import jpa.basic.alldayprojectcommerce.common.lock.service.RedisLockService;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
+import jpa.basic.alldayprojectcommerce.domain.order.service.event.EventOrderOptimisticLockService;
 import jpa.basic.alldayprojectcommerce.domain.order.service.event.EventOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ public class EventOrderFacade {
 
     private final EventOrderService eventOrderService;
     private final RedisLockService redisLockService;
+    private final EventOrderOptimisticLockService eventOrderOptimisticLockService;
+
 
     /**
      * 락을 사용하지 않은 버전
@@ -87,5 +90,10 @@ public class EventOrderFacade {
         );
     }
 
-
+    /**
+     * JPA 낙관락 + Retry 전략 적용 버전
+     */
+    public EventOrderResponse createEventOrderWithOptimisticLockRetry(Long productId, Long userId) {
+        return eventOrderOptimisticLockService.createEventOrderWithOptimisticLockRetry(productId, userId);
+    }
 }

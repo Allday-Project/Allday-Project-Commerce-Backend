@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class EventOrderConcurrencyTest {
+class EventOrderFacadeConcurrencyTest {
 
     @Autowired
     private EventOrderFacade eventOrderFacade;
@@ -158,6 +158,33 @@ class EventOrderConcurrencyTest {
         long orderCount = orderRepository.count();
 
         printResult("Redis Blocking", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+        assertThat(result.successCount()).isEqualTo(10);
+        assertThat(result.failCount()).isEqualTo(90);
+        assertThat(orderCount).isEqualTo(10);
+        assertThat(product.getStock()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("JPA 낙관락 Retry 전략 - 성능 및 정합성 테스트")
+    void createEventOrder_optimisticLock_retry_success() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithOptimisticLockRetry(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("Optimistic Lock Retry", result, orderCount, product.getStock());
 
         assertThat(result.completed()).isTrue();
         assertThat(result.successCount()).isEqualTo(10);
