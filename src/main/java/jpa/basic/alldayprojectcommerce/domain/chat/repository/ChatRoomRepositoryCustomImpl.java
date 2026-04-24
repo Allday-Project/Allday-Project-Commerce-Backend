@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static jpa.basic.alldayprojectcommerce.domain.chat.entity.QChatRoom.chatRoom;
@@ -56,6 +57,19 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, count == null ? 0L : count);
+    }
+
+    @Override
+    public List<ChatRoom> findInactiveRooms(LocalDateTime cutoff) {
+        return queryFactory
+                .selectFrom(chatRoom)
+                .where(
+                        chatRoom.chatRoomStatus.in(
+                                ChatRoomStatus.WAITING,
+                                ChatRoomStatus.IN_PROGRESS
+                        ),
+                        chatRoom.lastMessageAt.before(cutoff)
+                ).fetch();
     }
 
     private BooleanExpression statusEq(ChatRoomStatus status) {
