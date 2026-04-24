@@ -44,161 +44,161 @@ class EventOrderFacadeConcurrencyTest {
         clearOrders();
         restoreStock(DEFAULT_TICKET_STOCK);
     }
-//
-//    @Test
-//    @DisplayName("락 없는 주문 생성 - 성능 및 정합성 테스트")
-//    void createEventOrder_withoutLock_fail() throws Exception {
-//        // given
-//        prepareTestData(TEST_TICKET_STOCK);
-//
-//        // when
-//        ConcurrencyTestResult result = runConcurrencyTest(
-//                userId -> eventOrderFacade.createEventOrderWithoutLock(
-//                        TEST_TICKET_PRODUCT_ID,
-//                        userId
-//                )
-//        );
-//
-//        // then
-//        Product product = getTestProduct();
-//        long orderCount = orderRepository.count();
-//
-//        printResult("WithoutLock", result, orderCount, product.getStock());
-//
-//        assertThat(result.completed()).isTrue();
-//
-//        // 락 없는 버전은 정합성이 깨지는 것이 목적
-//        // 즉 정상 기대값(10/90/10/0)과 달라야 한다.
-//        boolean isExactlyCorrect =
-//                result.successCount() == 10 &&
-//                        result.failCount() == 90 &&
-//                        orderCount == 10 &&
-//                        product.getStock() == 0;
-//
-//        assertThat(isExactlyCorrect).isFalse();
-//    }
-//
-//    @Test
-//    @DisplayName("Redis 분산락 FailFast 전략 - 성능 및 정합성 테스트")
-//    void createEventOrder_redisLettuce_failFast() throws Exception {
-//        // given
-//        prepareTestData(TEST_TICKET_STOCK);
-//
-//        // when
-//        ConcurrencyTestResult result = runConcurrencyTest(
-//                userId -> eventOrderFacade.createEventOrderWithRedisLockFailFast(
-//                        TEST_TICKET_PRODUCT_ID,
-//                        userId
-//                )
-//        );
-//
-//        // then
-//        Product product = getTestProduct();
-//        long orderCount = orderRepository.count();
-//
-//        printResult("Redis FailFast", result, orderCount, product.getStock());
-//
-//        assertThat(result.completed()).isTrue();
-//
-//        // FailFast는 락 획득 실패 시 즉시 종료 전략이므로
-//        // 성공은 0 또는 1 정도가 자연스럽다.
-//        assertThat(result.successCount()).isBetween(0, 1);
-//        assertThat(result.failCount()).isEqualTo(TOTAL_REQUEST_COUNT - result.successCount());
-//
-//        // 주문 수도 성공 수와 같아야 한다.
-//        assertThat(orderCount).isEqualTo(result.successCount());
-//
-//        // 재고는 최소 9, 최대 10이 자연스럽다.
-//        assertThat(product.getStock()).isBetween(9, 10);
-//    }
-//
-//    @Test
-//    @DisplayName("Redis 분산락 Retry 전략 - 성능 및 정합성 테스트")
-//    void createEventOrder_redisLettuce_retry_success() throws Exception {
-//        // given
-//        prepareTestData(TEST_TICKET_STOCK);
-//
-//        // when
-//        ConcurrencyTestResult result = runConcurrencyTest(
-//                userId -> eventOrderFacade.createEventOrderWithRedisLockRetry(
-//                        TEST_TICKET_PRODUCT_ID,
-//                        userId
-//                )
-//        );
-//
-//        // then
-//        Product product = getTestProduct();
-//        long orderCount = orderRepository.count();
-//
-//        printResult("Redis Retry", result, orderCount, product.getStock());
-//
-//        assertThat(result.completed()).isTrue();
-//        assertThat(result.successCount()).isEqualTo(10);
-//        assertThat(result.failCount()).isEqualTo(90);
-//        assertThat(orderCount).isEqualTo(10);
-//        assertThat(product.getStock()).isEqualTo(0);
-//    }
-//
-//    @Test
-//    @DisplayName("Redis 분산락 Blocking 전략 - 성능 및 정합성 테스트")
-//    void createEventOrder_redisLettuce_blocking_success() throws Exception {
-//        // given
-//        prepareTestData(TEST_TICKET_STOCK);
-//
-//        // when
-//        ConcurrencyTestResult result = runConcurrencyTest(
-//                userId -> eventOrderFacade.createEventOrderWithRedisLockBlocking(
-//                        TEST_TICKET_PRODUCT_ID,
-//                        userId
-//                )
-//        );
-//
-//        // then
-//        Product product = getTestProduct();
-//        long orderCount = orderRepository.count();
-//
-//        printResult("Redis Blocking", result, orderCount, product.getStock());
-//
-//        assertThat(result.completed()).isTrue();
-//        assertThat(result.successCount()).isEqualTo(10);
-//        assertThat(result.failCount()).isEqualTo(90);
-//        assertThat(orderCount).isEqualTo(10);
-//        assertThat(product.getStock()).isEqualTo(0);
-//    }
-//
-//    @Test
-//    @DisplayName("Redis 분산락 - AOP 버전 - FailFast 전략 - 성능 및 정합성 테스트")
-//    void createEventOrder_redisLettuce_aop_failFast() throws Exception {
-//        // given
-//        prepareTestData(TEST_TICKET_STOCK);
-//
-//        // when
-//        ConcurrencyTestResult result = runConcurrencyTest(
-//                userId -> eventOrderFacade.createEventOrderWithRedisLockAopFailFast(
-//                        TEST_TICKET_PRODUCT_ID,
-//                        userId
-//                )
-//        );
-//
-//        // then
-//        Product product = getTestProduct();
-//        long orderCount = orderRepository.count();
-//
-//        printResult("Redis AOP FailFast", result, orderCount, product.getStock());
-//
-//        assertThat(result.completed()).isTrue();
-//
-//        // FailFast는 락 획득 실패 시 즉시 종료 전략이므로
-//        // 성공은 0 또는 1 정도가 자연스럽다.
-//        assertThat(result.successCount()).isBetween(0, 1);
-//        assertThat(result.failCount()).isEqualTo(TOTAL_REQUEST_COUNT - result.successCount());
-//
-//        // 주문 수도 성공 수와 같아야 한다.
-//        assertThat(orderCount).isEqualTo(result.successCount());
-//
-//        // 재고는 최소 9, 최대 10이 자연스럽다.
-//        assertThat(product.getStock()).isBetween(9, 10);
-//    }
+
+    @Test
+    @DisplayName("락 없는 주문 생성 - 성능 및 정합성 테스트")
+    void createEventOrder_withoutLock_fail() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithoutLock(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("WithoutLock", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+
+        // 락 없는 버전은 정합성이 깨지는 것이 목적
+        // 즉 정상 기대값(10/90/10/0)과 달라야 한다.
+        boolean isExactlyCorrect =
+                result.successCount() == 10 &&
+                        result.failCount() == 90 &&
+                        orderCount == 10 &&
+                        product.getStock() == 0;
+
+        assertThat(isExactlyCorrect).isFalse();
+    }
+
+    @Test
+    @DisplayName("Redis 분산락 FailFast 전략 - 성능 및 정합성 테스트")
+    void createEventOrder_redisLettuce_failFast() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithRedisLockFailFast(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("Redis FailFast", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+
+        // FailFast는 락 획득 실패 시 즉시 종료 전략이므로
+        // 성공은 0 또는 1 정도가 자연스럽다.
+        assertThat(result.successCount()).isBetween(0, 1);
+        assertThat(result.failCount()).isEqualTo(TOTAL_REQUEST_COUNT - result.successCount());
+
+        // 주문 수도 성공 수와 같아야 한다.
+        assertThat(orderCount).isEqualTo(result.successCount());
+
+        // 재고는 최소 9, 최대 10이 자연스럽다.
+        assertThat(product.getStock()).isBetween(9, 10);
+    }
+
+    @Test
+    @DisplayName("Redis 분산락 Retry 전략 - 성능 및 정합성 테스트")
+    void createEventOrder_redisLettuce_retry_success() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithRedisLockRetry(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("Redis Retry", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+        assertThat(result.successCount()).isEqualTo(10);
+        assertThat(result.failCount()).isEqualTo(90);
+        assertThat(orderCount).isEqualTo(10);
+        assertThat(product.getStock()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Redis 분산락 Blocking 전략 - 성능 및 정합성 테스트")
+    void createEventOrder_redisLettuce_blocking_success() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithRedisLockBlocking(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("Redis Blocking", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+        assertThat(result.successCount()).isEqualTo(10);
+        assertThat(result.failCount()).isEqualTo(90);
+        assertThat(orderCount).isEqualTo(10);
+        assertThat(product.getStock()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Redis 분산락 - AOP 버전 - FailFast 전략 - 성능 및 정합성 테스트")
+    void createEventOrder_redisLettuce_aop_failFast() throws Exception {
+        // given
+        prepareTestData(TEST_TICKET_STOCK);
+
+        // when
+        ConcurrencyTestResult result = runConcurrencyTest(
+                userId -> eventOrderFacade.createEventOrderWithRedisLockAopFailFast(
+                        TEST_TICKET_PRODUCT_ID,
+                        userId
+                )
+        );
+
+        // then
+        Product product = getTestProduct();
+        long orderCount = orderRepository.count();
+
+        printResult("Redis AOP FailFast", result, orderCount, product.getStock());
+
+        assertThat(result.completed()).isTrue();
+
+        // FailFast는 락 획득 실패 시 즉시 종료 전략이므로
+        // 성공은 0 또는 1 정도가 자연스럽다.
+        assertThat(result.successCount()).isBetween(0, 1);
+        assertThat(result.failCount()).isEqualTo(TOTAL_REQUEST_COUNT - result.successCount());
+
+        // 주문 수도 성공 수와 같아야 한다.
+        assertThat(orderCount).isEqualTo(result.successCount());
+
+        // 재고는 최소 9, 최대 10이 자연스럽다.
+        assertThat(product.getStock()).isBetween(9, 10);
+    }
 
     @Test
     @DisplayName("Redis Lettuce 분산락 - AOP 버전 - Retry 전략 - 성능 및 정합성 테스트")
