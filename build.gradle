@@ -66,3 +66,8 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// 파라미터명을 SpEL에서 쓰려면 Gradle 컴파일 옵션에 -parameters가 필요
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-parameters']
+}

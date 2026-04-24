@@ -1,5 +1,7 @@
 package jpa.basic.alldayprojectcommerce.application;
 
+import jpa.basic.alldayprojectcommerce.common.lock.annotation.RedisLock;
+import jpa.basic.alldayprojectcommerce.common.lock.enums.RedisLockStrategy;
 import jpa.basic.alldayprojectcommerce.common.lock.service.RedisLockService;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.service.event.EventOrderService;
@@ -86,4 +88,42 @@ public class EventOrderFacade {
                 () -> eventOrderService.createEventOrder(productId, userId)
         );
     }
+
+    /**
+     * Redis 분산락 - AOP FailFast 전략 적용 버전
+     */
+    @RedisLock(
+            key = "'lock:product:' + #productId",
+            timeoutSeconds = 5,
+            strategy = RedisLockStrategy.FAIL_FAST
+    )
+    public EventOrderResponse createEventOrderWithRedisLockAopFailFast(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redis 분산락 - AOP Retry 전략 적용 버전
+     */
+    @RedisLock(
+            key = "'lock:product:' + #productId",
+            timeoutSeconds = 5,
+            strategy = RedisLockStrategy.RETRY
+    )
+    public EventOrderResponse createEventOrderWithRedisLockAopRetry(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redis 분산락 - AOP Blocking 전략 적용 버전
+     */
+    @RedisLock(
+            key = "'lock:product:' + #productId",
+            timeoutSeconds = 5,
+            strategy = RedisLockStrategy.BLOCKING
+    )
+    public EventOrderResponse createEventOrderWithRedisLockAopBlocking(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+
 }
