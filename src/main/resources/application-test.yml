@@ -5,6 +5,13 @@ spring:
     url: jdbc:mysql://localhost:3307/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: soyoung7509
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 30
+      connection-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: Hikari-Test-Pool
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -22,7 +29,8 @@ spring:
 logging:
   level:
     root: info
-    jpa.basic.alldayprojectcommerce: debug
+    jpa.basic.alldayprojectcommerce:
+    debugcom.zaxxer.hikari: debug
 
     # 쿼리 확인이 필요할때만 활성화
 #    org.hibernate.SQL: debug

@@ -71,7 +71,7 @@ public class RedisLockService {
         String lockValue = UUID.randomUUID().toString();
 
         // 최대 재시도 횟수
-        int maxRetryCount = 10;
+        int maxRetryCount = 15;
         // 재시도 간격(ms)
         long retryIntervalMillis = 100L;    // 최대 대기 시간은 대략 (20-1) * 100ms = 1.9초
         // TODO : 10개보다 적게 성공한다면

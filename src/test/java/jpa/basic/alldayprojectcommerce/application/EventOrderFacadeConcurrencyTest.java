@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class EventOrderConcurrencyTest {
+class EventOrderFacadeConcurrencyTest {
 
     @Autowired
     private EventOrderFacade eventOrderFacade;
