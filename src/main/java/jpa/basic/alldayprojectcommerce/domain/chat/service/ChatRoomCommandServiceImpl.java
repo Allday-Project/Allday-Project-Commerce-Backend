@@ -1,7 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.service;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.request.CreateChatRoomRequest;

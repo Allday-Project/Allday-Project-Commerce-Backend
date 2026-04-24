@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅 테스트</title>
+    <!-- SockJS + STOMP 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .section h3 { margin: 0 0 10px 0; color: #333; }
+        input, textarea { width: 100%; padding: 8px; margin: 4px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 16px; margin: 4px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-connect  { background: #4CAF50; color: white; }
+        .btn-disconnect { background: #f44336; color: white; }
+        .btn-send     { background: #2196F3; color: white; }
+        .btn-sub      { background: #FF9800; color: white; }
+        #log { background: #f9f9f9; border: 1px solid #ddd; padding: 10px;
+            height: 300px; overflow-y: auto; font-size: 13px; font-family: monospace; }
+        .log-info    { color: #2196F3; }
+        .log-success { color: #4CAF50; }
+        .log-error   { color: #f44336; }
+        .log-msg     { color: #333; }
+        .status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status.connected    { background: #e8f5e9; color: #2e7d32; }
+        .status.disconnected { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+
+<h2>🔌 채팅 WebSocket 테스트</h2>
+<span id="statusBadge" class="status disconnected">DISCONNECTED</span>
+
+<!-- 1. 로그인 -->
+<div class="section">
+    <h3>1. 로그인 (JWT 토큰 발급)</h3>
+    <input id="email"    type="text"     placeholder="이메일" value="test@test.com">
+    <input id="password" type="password" placeholder="비밀번호" value="password123">
+    <button onclick="login()" style="background:#673AB7;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">
+        로그인
+    </button>
+    <div style="margin-top:8px;">
+        <small>JWT 토큰: </small>
+        <input id="jwtToken" type="text" placeholder="Postman에서 복사한 토큰 붙여넣기">
+    </div>
+</div>
+
+<!-- 2. WebSocket 연결 -->
+<div class="section">
+    <h3>2. WebSocket 연결</h3>
+    <input id="wsUrl" type="text" value="http://localhost:8090/ws-chat">
+    <div>
+        <button class="btn-connect"    onclick="connect()">연결</button>
+        <button class="btn-disconnect" onclick="disconnect()">연결 해제</button>
+    </div>
+</div>
+
+<!-- 3. 채팅방 구독 -->
+<div class="section">
+    <h3>3. 채팅방 구독</h3>
+    <input id="subRoomId" type="number" placeholder="채팅방 ID" value="1">
+    <button class="btn-sub" onclick="subscribe()">구독 시작</button>
+    <button onclick="subscribeErrors()" style="background:#9C27B0;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer;">
+        에러 구독 (/user/queue/errors)
+    </button>
+</div>
+
+<!-- 4. 메시지 전송 -->
+<div class="section">
+    <h3>4. 메시지 전송</h3>
+    <input id="sendRoomId" type="number" placeholder="채팅방 ID" value="1">
+    <input id="message"    type="text"   placeholder="메시지 내용">
+    <button class="btn-send" onclick="sendMessage()">전송</button>
+</div>
+
+<!-- 로그 -->
+<div class="section">
+    <h3>📋 로그</h3>
+    <button onclick="clearLog()" style="background:#9E9E9E;color:white;padding:4px 10px;border:none;border-radius:4px;cursor:pointer;font-size:12px;">
+        로그 지우기
+    </button>
+    <div id="log"></div>
+</div>
+
+<script>
+    let stompClient = null;
+    let subscriptions = {};
+
+    // ── 로그 ──────────────────────────────────────
+    function log(msg, type = 'info') {
+        const div = document.getElementById('log');
+        const time = new Date().toLocaleTimeString();
+        const line = document.createElement('div');
+        line.className = 'log-' + type;
+        line.textContent = `[${time}] ${msg}`;
+        div.appendChild(line);
+        div.scrollTop = div.scrollHeight;
+    }
+    function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+    // ── 상태 배지 ──────────────────────────────────
+    function setStatus(connected) {
+        const badge = document.getElementById('statusBadge');
+        badge.textContent   = connected ? 'CONNECTED' : 'DISCONNECTED';
+        badge.className     = 'status ' + (connected ? 'connected' : 'disconnected');
+    }
+
+    // ── 1. 로그인 ──────────────────────────────────
+    async function login() {
+        const email    = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const res = await fetch('http://localhost:8090/api/auth/login', {
+                method: 'POST',
+                credentials: 'include', // 쿠키 수신
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!res.ok) { log('로그인 실패: ' + res.status, 'error'); return; }
+
+            // 쿠키에서 access_token 추출
+            // 쿠키는 HttpOnly라서 JS로 직접 못 읽음 → 응답 본문의 토큰 활용
+            const data = await res.json();
+
+            // 방법 1: 응답 body에 token이 있으면 사용
+            if (data?.data?.accessToken) {
+                document.getElementById('jwtToken').value = data.data.accessToken;
+                log('로그인 성공 — 토큰 발급 완료', 'success');
+                return;
+            }
+
+            // 방법 2: 서버가 쿠키만 주는 경우 → 토큰을 수동 입력 필드에 직접 붙여넣기
+            log('로그인 성공 — 쿠키에 토큰 저장됨 (HttpOnly). 아래 직접 입력란 사용', 'success');
+            log('Postman에서 토큰 복사 후 JWT 토큰 필드에 직접 붙여넣기', 'info');
+
+        } catch (e) {
+            log('로그인 오류: ' + e.message, 'error');
+        }
+    }
+
+    // ── 2. WebSocket 연결 ──────────────────────────
+    function connect() {
+        const url   = document.getElementById('wsUrl').value;
+        const token = document.getElementById('jwtToken').value;
+
+        if (!token) {
+            log('JWT 토큰이 없습니다. 로그인 후 토큰을 입력해주세요.', 'error');
+            return;
+        }
+
+        const socket = new SockJS(url);
+        stompClient  = Stomp.over(socket);
+
+        // STOMP 내부 로그 비활성화 (콘솔 노이즈 제거)
+        stompClient.debug = null;
+
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+
+        stompClient.connect(
+            headers,
+            // 연결 성공
+            (frame) => {
+                setStatus(true);
+                log('WebSocket 연결 성공 — ' + frame, 'success');
+            },
+            // 연결 실패 또는 에러
+            (error) => {
+                setStatus(false);
+                log('WebSocket 에러: ' + error, 'error');
+            }
+        );
+    }
+
+    // ── 연결 해제 ─────────────────────────────────
+    function disconnect() {
+        if (stompClient) {
+            stompClient.disconnect(() => {
+                setStatus(false);
+                subscriptions = {};
+                log('연결 해제됨', 'info');
+            });
+        }
+    }
+
+    // ── 3. 채팅방 구독 ────────────────────────────
+    function subscribe() {
+        if (!stompClient?.connected) { log('먼저 연결하세요.', 'error'); return; }
+
+        const roomId = document.getElementById('subRoomId').value;
+        const dest   = '/sub/chat/' + roomId;
+
+        if (subscriptions[dest]) {
+            log(dest + ' 이미 구독 중', 'info');
+            return;
+        }
+
+        subscriptions[dest] = stompClient.subscribe(dest, (frame) => {
+            try {
+                const msg = JSON.parse(frame.body);
+                log(`📩 수신 [방${roomId}] senderId:${msg.senderId} | ${msg.senderType} | ${msg.content}`, 'msg');
+                if (msg.messageType === 'SYSTEM') {
+                    log(`🔔 시스템 메시지: ${msg.content}`, 'info');
+                }
+            } catch (e) {
+                log('수신 (파싱 실패): ' + frame.body, 'msg');
+            }
+        });
+
+        log(dest + ' 구독 시작', 'success');
+    }
+
+    // 에러 구독
+    function subscribeErrors() {
+        if (!stompClient?.connected) { log('먼저 연결하세요.', 'error'); return; }
+
+        const dest = '/user/queue/errors';
+        if (subscriptions[dest]) { log(dest + ' 이미 구독 중', 'info'); return; }
+
+        subscriptions[dest] = stompClient.subscribe(dest, (frame) => {
+            try {
+                const err = JSON.parse(frame.body);
+                log(`❌ 에러 수신 [${err.code}] ${err.message}`, 'error');
+            } catch (e) {
+                log('에러 수신 (파싱 실패): ' + frame.body, 'error');
+            }
+        });
+
+        log(dest + ' 구독 시작', 'success');
+    }
+
+    // ── 4. 메시지 전송 ────────────────────────────
+    function sendMessage() {
+        if (!stompClient?.connected) { log('먼저 연결하세요.', 'error'); return; }
+
+        const roomId  = document.getElementById('sendRoomId').value;
+        const content = document.getElementById('message').value;
+
+        if (!content.trim()) { log('메시지를 입력하세요.', 'error'); return; }
+
+        stompClient.send(
+            '/pub/chat/' + roomId,
+            { 'content-type': 'application/json' },
+            JSON.stringify({ content })
+        );
+
+        log(`📤 전송 [방${roomId}] ${content}`, 'info');
+        document.getElementById('message').value = '';
+    }
+
+    // Enter 키 전송
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('message').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    });
+</script>
+</body>
+</html>
