@@ -108,37 +108,6 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
     }
 
     /**
-     * 비관적 락 적용
-     *
-     * 스케쥴러 실행 중 사용자가 동시에 메시지를 보내거나
-     * 관리자가 참여하는 경우 상태 불일치 방지
-     *
-     * 락 획득 후 상태 재확인 - 이미 종료됐으면 스킵
-     */
-    @Override
-    public void autoCloseRoom(Long roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByIdForUpdate(roomId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
-        // 이미 종료된 방이면 스킵 - 분산 환경 중복 실행 방어
-        if (chatRoom.getChatRoomStatus() == ChatRoomStatus.COMPLETED) {
-            log.info("[자동종료] 이미 종료된 방 - 스킵 roomId: {}", roomId);
-            return;
-        }
-
-        ChatRoomStatus previousStatus = chatRoom.getChatRoomStatus();
-
-        chatRoom.changeStatus(ChatRoomStatus.COMPLETED);
-
-        chatMessageRepository.save(
-                ChatMessage.systemMessage(roomId,
-                        "10분간 응답이 없어 상담이 자동 종료되었습니다.")
-        );
-
-        log.info("[자동종료] 완료 roomId: {}, 이전 상태: {}", roomId, previousStatus);
-    }
-
-    /**
      * 채팅방 접근 권한 검증
      *
      * 관리자      -> 모든 방 접근 가능

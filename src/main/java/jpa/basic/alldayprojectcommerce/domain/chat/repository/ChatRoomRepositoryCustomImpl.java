@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatRoomResponse;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoom;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoomStatus;
@@ -23,6 +24,7 @@ import static jpa.basic.alldayprojectcommerce.domain.chat.entity.QChatRoom.chatR
 public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
 
     /**
      * 전체 채팅방 조회 - QueryDSL Offset 페이징
@@ -84,6 +86,12 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                 .setNull(chatRoom.activeFlag)
                 .where(chatRoom.id.in(roomIds))
                 .execute();
+
+        /**
+         * bulk update를 진행하면서 1차 캐시에 남아있는 데이터를 초기화해서
+         * 다음 조회 시 DB에서 최신 데이터를 가져오도록 강제
+         */
+        em.clear();
     }
 
     private BooleanExpression statusEq(ChatRoomStatus status) {

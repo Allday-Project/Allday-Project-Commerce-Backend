@@ -29,12 +29,4 @@ public interface ChatRoomCommandService {
      * ADMIN 권한 필수
      */
     void joinChatRoom(Long adminId, Long roomId, String role);
-
-    /**
-     * 자동 종료 스케쥴러 전용
-     *
-     * closeChatRoom: 유저/관리자 요청   -> userId, role 검증 필요
-     * autoCloseRoom: 스케쥴러 내부 호출 -> 시스템이 직접 처리, 권한 검증 불필요
-     */
-    void autoCloseRoom(Long roomId);
 }
