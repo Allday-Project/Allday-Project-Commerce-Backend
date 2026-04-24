@@ -76,6 +76,16 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public void bulkCompleteRooms(List<Long> roomIds) {
+        queryFactory
+                .update(chatRoom)
+                .set(chatRoom.chatRoomStatus, ChatRoomStatus.COMPLETED)
+                .setNull(chatRoom.activeFlag)
+                .where(chatRoom.id.in(roomIds))
+                .execute();
+    }
+
     private BooleanExpression statusEq(ChatRoomStatus status) {
         return status != null ? chatRoom.chatRoomStatus.eq(status) : null;
     }

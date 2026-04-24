@@ -27,4 +27,12 @@ public interface ChatRoomRepositoryCustom {
      * COMPLETED는 activeFlag=null이라서 조건 2로 자동 제외됨
      */
     List<ChatRoom> findInactiveRooms(LocalDateTime cutoff, Long lastId, int batchSize);
+
+    /**
+     * 배치 자동 종료 - Bulk Update
+     *
+     * 개별 autoCloseRoom() N번 호출 대신 IN 쿼리로 한 번에 상태 변경
+     * DB 커넥션 N번 -> 1번으로 감소
+     */
+    void bulkCompleteRooms(List<Long> roomIds);
 }

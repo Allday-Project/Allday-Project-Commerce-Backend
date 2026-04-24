@@ -29,7 +29,7 @@ public class KeywordScheduler {
      * 매 1시간마다 실행
      * Redis ZSet -> SearchKeyword DB 동기화
      */
-    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    @Scheduled(cron = "0 0 * * * *", zone = "Asia/Seoul")
     public void writeBack() {
         log.info("[스케쥴러] Write-back 시작");
 
