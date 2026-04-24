@@ -36,4 +36,4 @@ logging:
 #    org.hibernate.SQL: debug
 #    org.hibernate.orm.jdbc.bind: trace
 jwt:
-  secret-key: dGVzdC10ZXN0LXRlc3QtdGVzdC10ZXN0LXRlc3QtdGVzdC10ZXN0LXRlc3QtdGVzdA==
+  secret-key: ${JWT_SECRET_KEY}
