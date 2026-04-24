@@ -73,7 +73,7 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
 
     @Override
     public void closeChatRoom(Long userId, Long roomId, String role) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdForUpdate(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         validateAccess(chatRoom, userId, role);
@@ -97,7 +97,7 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
             throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
         }
 
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdForUpdate(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         chatRoom.changeStatus(ChatRoomStatus.IN_PROGRESS);

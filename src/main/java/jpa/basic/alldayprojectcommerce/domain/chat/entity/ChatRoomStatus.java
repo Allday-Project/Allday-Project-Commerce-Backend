@@ -17,7 +17,7 @@ public enum ChatRoomStatus {
     // 유효한 상태 전이인지 검증
     public boolean canTransitTo(ChatRoomStatus nextStatus) {
         return switch (this) {
-            case WAITING -> nextStatus == IN_PROGRESS;
+            case WAITING -> nextStatus == IN_PROGRESS || nextStatus == COMPLETED;
             case IN_PROGRESS -> nextStatus == COMPLETED;
             case COMPLETED -> false;
         };
