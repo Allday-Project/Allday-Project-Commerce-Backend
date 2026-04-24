@@ -64,6 +64,10 @@ dependencies {
 
     // WebSocket + STOMP
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // Caffeine 인메모리 캐시
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 tasks.named('test') {

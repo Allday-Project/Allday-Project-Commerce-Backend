@@ -16,9 +16,10 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외 처리
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleException(CustomException exception) {
-        log.error("[API - ERROR] 발생 원인: ", exception);
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleCustomException(CustomException exception) {
         ErrorCode errorCode = exception.getErrorCode();
+        log.warn("[API - CUSTOM] {} - {}", errorCode.getCode(), errorCode.getMessage());
+
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode));
     }
@@ -28,13 +29,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception) {
 
-        log.error("[API - ERROR] 발생 원인: ", exception);
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         List<FieldError> fieldErrors = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(FieldError::from)
                 .toList();
+
+        log.warn("[API - VALIDATION] {} - {}", errorCode.getCode(), errorCode.getMessage());
 
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode, fieldErrors));
@@ -44,8 +46,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<ErrorResponse>> handleConstraintViolationException(
             ConstraintViolationException exception) {
 
-        log.error("[API - ERROR] 발생 원인: ", exception);
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        log.warn("[API - VALIDATION] {} - {}", errorCode.getCode(), errorCode.getMessage());
 
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ApiResponse.fail(errorCode));
