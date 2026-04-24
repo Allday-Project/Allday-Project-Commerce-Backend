@@ -1,13 +1,16 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.repository;
 
+import jakarta.persistence.LockModeType;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoom;
-import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoomStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatRoomRepositoryCustom {
 
     /**
      * 유저의 활성 채팅방 조회
@@ -18,13 +21,17 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     /**
      * 관리자 전용
-     * 특정 상태의 방 전체 조회
+     *
+     * 고객이 종료하는 동시에 관리자가 참여하는 Race Condition이 발생할 수 있음
+     * -> 비관적 락을 사용해서 정합성을 보장
      */
-    List<ChatRoom> findByChatRoomStatusOrderByCreatedAtDesc(ChatRoomStatus status);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+           SELECT cr
+           FROM ChatRoom cr
+           WHERE cr.id = :roomId
+           """)
+    Optional<ChatRoom> findByIdForUpdate(@Param("roomId") Long roomId);
 
-    /**
-     * 관리자 전용
-     * 전체 채팅방 조회
-     */
-    List<ChatRoom> findAllByOrderByCreatedAtDesc();
+
 }
