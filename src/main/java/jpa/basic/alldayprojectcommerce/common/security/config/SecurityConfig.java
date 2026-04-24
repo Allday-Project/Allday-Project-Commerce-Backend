@@ -44,11 +44,18 @@ public class SecurityConfig {
                         "/api/auth/check-duplicate",
                         "/api/products",
                         "/api/products/{productId}",
-                        "/api/keywords/top5"
+                        "/api/keywords/v1/top5",
+                        "/api/keywords/v2/top5"
                         ).permitAll()
-                .requestMatchers("/actuator/health").permitAll()
-                    .requestMatchers("/api/events/**").permitAll()
-                    .anyRequest().authenticated()
+                .requestMatchers(
+                        "/actuator/health",
+                        "/api/events/**",
+                        "/ws-chat/**"
+                ).permitAll()
+                .requestMatchers(
+                        "/api/chat/admin/**"
+                ).hasAuthority("ADMIN")
+                .anyRequest().authenticated()
             )
             .addFilterBefore(
                     new JwtAuthenticationFilter(jwtTokenProvider),

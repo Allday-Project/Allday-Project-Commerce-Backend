@@ -7,6 +7,8 @@ import jpa.basic.alldayprojectcommerce.domain.keyword.repository.PopularKeywordR
 import jpa.basic.alldayprojectcommerce.domain.keyword.repository.SearchKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -106,17 +111,17 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         /**
          * TTL 설정
          *
-         * 이미 TTL이 설정된 키는 덮어씌어짐
-         * 매 요청마다 expire 호출은 성능 부담으로 TTL이 없는 경우에만 설정
+         * 기존  : hasKey() 체크 후 없을 때만 expire()
+         * 문제점: 두 서버 동시 실행 시 둘 다 false 판단 가능으로 경쟁 상태 + Redis 왕복 1회 추가
+         *
+         * 개선  : 매번 expire() 덮어쓰기
+         * expire()는 기존 TTL을 갱신하는 멱등 연산으로 여러 번 호출해도 결과가 같고 경쟁 상태 없음
+         * Redis 명령 1회로 성능 영향 미미
          */
-        Duration ttl = RedisKeyUtils.remainingTodayTtl();
-
-        Long currentTtl = redisTemplate.getExpire(rankKey);
-        if (currentTtl != null && currentTtl == -1) {
-            redisTemplate.expire(rankKey, ttl);
-            redisTemplate.expire(userLogKey, ttl);
-            log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
-        }
+         Duration ttl = RedisKeyUtils.remainingTodayTtl();
+         redisTemplate.expire(rankKey, ttl);
+         redisTemplate.expire(userLogKey, ttl);
+         log.debug("[TTL 설정] rankKey TTL: {}시간", ttl.toHours());
     }
 
     /**
@@ -129,48 +134,69 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     @Override
     @Transactional
     public void writeBack() {
-        LocalDate today = LocalDate.now();
-        String rankKey = RedisKeyUtils.todayRankKey();
+        writeBack(LocalDate.now());
+    }
+
+    /**
+     * 자정 스케쥴러 write-back
+     *
+     * 1단계: Map으로 기존 데이터 분기
+     * 2단계: UNIQUE(keyword, search_date) 제약
+     * 3단계: 중복 시 update로 전환
+     */
+    @Override
+    @Transactional
+    public void writeBack(LocalDate date) {
+        String rankKey = RedisKeyUtils.rankKey(date);
 
         Set<ZSetOperations.TypedTuple<String>> allData =
                 redisTemplate.opsForZSet().rangeWithScores(rankKey, 0, -1);
 
         if (allData == null || allData.isEmpty()) {
-            log.info("[Write-back] 동기화할 데이터 없음");
+            log.info("[Write-back] {} 동기화할 데이터 없음", date);
             return;
         }
+
+        // 개선 전: 키워드마다 SELECT 1번씩. 총 N번 SELECT
+        // 개선 후: 오늘 전체 데이터를 한 번에 가져와서 Map으로 변환. SELECT 1번
+        Map<String, SearchKeyword> existingMap = searchKeywordRepository
+                .findBySearchDate(date)
+                .stream()
+                .collect(Collectors.toMap(SearchKeyword::getKeyword, sk -> sk));
+
+        List<SearchKeyword> toSave = new ArrayList<>();
 
         for (ZSetOperations.TypedTuple<String> tuple : allData) {
             String keyword = tuple.getValue();
             long count = tuple.getScore() == null ? 0L : tuple.getScore().longValue();
-
             if (keyword == null || keyword.isBlank()) continue;
 
-            // 오늘 날짜 + 키워드로 기존 레코드 조회
-            searchKeywordRepository
-                    .findByKeywordAndSearchDate(keyword, today)
-                    .ifPresentOrElse(
-                            existing -> {
-                                /**
-                                 * 이미 있으면 Redis 현재값으로 덮어씌우기
-                                 * Redis에는 오늘 누적 전체가 담겨있어서 그냥 덮어쓰기
-                                 */
-                                existing.setCount(count);
-                            },
-                            () -> {
-                                // 없으면 새로 INSERT
-                                searchKeywordRepository.save(
-                                        SearchKeyword.builder()
-                                                .keyword(keyword)
-                                                .searchCount(count)
-                                                .searchDate(today)
-                                                .build()
-                                );
-                            }
-                    );
+            if (existingMap.containsKey(keyword)) {
+                // 이미 있으면 메모리에서 바로 업데이트
+                existingMap.get(keyword).setCount(count);
+            }  else {
+                // 없으면 INSERT 목록에 추가
+                toSave.add(SearchKeyword.builder()
+                        .keyword(keyword)
+                        .searchCount(count)
+                        .searchDate(date)
+                        .build());
+            }
         }
 
-        log.info("[Write-back] {}건 DB 동기화 완료", allData.size());
+        // 신규 키워드 한 번에 INSERT
+        for (SearchKeyword sk : toSave) {
+            try {
+                searchKeywordRepository.save(sk);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("[Write-back] 동시 INSERT 감지. keyword: {}", sk.getKeyword());
+                searchKeywordRepository
+                        .findByKeywordAndSearchDate(sk.getKeyword(), date)
+                        .ifPresent(existing -> existing.setCount(sk.getSearchCount()));
+            }
+        }
+
+        log.info("[Write-back] {} {}건 DB 동기화 완료", date, allData.size());
     }
 
     /**
@@ -181,7 +207,9 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "top5Keywords", key = "'top5'")
     public void snapshotTop5(LocalDate date) {
+        // 새 Top5가 DB에 저장되는 시점에 Caffeine 캐시를 즉시 무효화
         List<SearchKeyword> top5 = searchKeywordRepository.findTop5BySearchDate(date);
 
         if (top5.isEmpty()) {
@@ -189,9 +217,15 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
             return;
         }
 
+        // 같은 날짜에 Fallback 데이터가 있으면 삭제
+        popularKeywordRepository.deleteBySnapshotDateAndIsFallbackTrue(date);
+
+        // 개선 전: 루프 안에서 save() 5번 호출. 총 INSERT 5번
+        // 개선 후: 리스트로 모아서 saveAll() 한 번 호출. INSERT 1번
+        List<PopularKeyword> snapshots = new ArrayList<>();
         for (int i = 0; i < top5.size(); i++) {
             SearchKeyword sk = top5.get(i);
-            popularKeywordRepository.save(
+            snapshots.add(
                     PopularKeyword.builder()
                             .keyword(sk.getKeyword())
                             .rank(i + 1)
@@ -201,6 +235,8 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
                             .build()
             );
         }
+
+        popularKeywordRepository.saveAll(snapshots);
 
         log.info("[스냅샷] {} Top5 저장 완료 - {}건", date, top5.size());
     }
@@ -231,6 +267,19 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     @Override
     @Transactional
     public void saveFallbackTop5(LocalDate today) {
+
+        /**
+         * 멱등성 보장
+         * 이미 오늘 날짜 데이터가 있으면 스킵
+         */
+        boolean alreadyExists = !popularKeywordRepository
+                .findBySnapshotDateOrderByRankAsc(today).isEmpty();
+
+        if (alreadyExists) {
+            log.info("[Fallback] {} 이미 오늘 데이터 존재", today);
+            return;
+        }
+
         LocalDate yesterday = today.minusDays(1);
 
         // 어제 Top5 키워드 목록 추출
@@ -251,11 +300,15 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
         if (fallbackList.isEmpty()) {
             log.info("[Fallback] 대체 키워드 없음");
+            return;
         }
 
+        // 개선 전: 루프 안에서 save() 5번 호출. 총 INSERT 5번
+        // 개선 후: 리스트로 모아서 saveAll() 한 번 호출. INSERT 1번
+        List<PopularKeyword> fallbacks = new ArrayList<>();
         for (int i = 0; i < fallbackList.size(); i++) {
             SearchKeyword sk = fallbackList.get(i);
-            popularKeywordRepository.save(
+            fallbacks.add(
                     PopularKeyword.builder()
                             .keyword(sk.getKeyword())
                             .rank(i + 1)
@@ -265,6 +318,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
                             .build()
             );
         }
+        popularKeywordRepository.saveAll(fallbacks);
 
         log.info("[Fallback] {} 임시 Top5 저장 완료", today);
     }
