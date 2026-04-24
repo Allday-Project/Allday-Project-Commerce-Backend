@@ -26,5 +26,5 @@ public interface ChatRoomRepositoryCustom {
      *
      * COMPLETED는 activeFlag=null이라서 조건 2로 자동 제외됨
      */
-    List<ChatRoom> findInactiveRooms(LocalDateTime cutoff);
+    List<ChatRoom> findInactiveRooms(LocalDateTime cutoff, Long lastId, int batchSize);
 }

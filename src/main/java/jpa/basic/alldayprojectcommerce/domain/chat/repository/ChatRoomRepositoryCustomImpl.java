@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.repository;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -59,19 +60,27 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
     }
 
     @Override
-    public List<ChatRoom> findInactiveRooms(LocalDateTime cutoff) {
+    public List<ChatRoom> findInactiveRooms(LocalDateTime cutoff, Long lastId, int batchSize) {
         return queryFactory
                 .selectFrom(chatRoom)
                 .where(
+                        gtRoomId(lastId),
                         chatRoom.chatRoomStatus.in(
                                 ChatRoomStatus.WAITING,
                                 ChatRoomStatus.IN_PROGRESS
                         ),
                         chatRoom.lastMessageAt.before(cutoff)
-                ).fetch();
+                )
+                .orderBy(chatRoom.id.asc())  // ID 오름차순 - 커서 기반 페이징
+                .limit(batchSize)
+                .fetch();
     }
 
     private BooleanExpression statusEq(ChatRoomStatus status) {
         return status != null ? chatRoom.chatRoomStatus.eq(status) : null;
+    }
+
+    private BooleanExpression gtRoomId(Long lastId) {
+        return lastId != null ? chatRoom.id.gt(lastId) : null;
     }
 }

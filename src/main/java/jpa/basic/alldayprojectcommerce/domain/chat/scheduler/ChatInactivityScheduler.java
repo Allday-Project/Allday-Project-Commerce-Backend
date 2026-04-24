@@ -33,6 +33,7 @@ public class ChatInactivityScheduler {
 
     private static final String INACTIVITY_LOCK_KEY = "lock:chat:inactivity";
     private static final long INACTIVITY_LOCK_TTL = 55L;    // 55초
+    private static final int BATCH_SIZE = 100;              // 한 번에 처리할 최대 방 수
 
     /**
      * 비활성 채팅방 자동 종료 스케쥴러
@@ -64,51 +65,66 @@ public class ChatInactivityScheduler {
             // 기준 시각: 현재 - 10분
             LocalDateTime cutOff = LocalDateTime.now().minusMinutes(inactivityTimeoutMinutes);
 
-            List<ChatRoom> targets = chatRoomRepository.findInactiveRooms(cutOff);
+            Long lastId = null;
+            int totalProcessed = 0;
 
-            if (targets.isEmpty()) {
-                log.debug("[자동종료] 처리 대상 없음");
-                return;
-            }
+            while (true) {
+                List<ChatRoom> targets = chatRoomRepository.findInactiveRooms(cutOff, lastId, BATCH_SIZE);
 
-            log.info("[자동종료] 처리 대상 {}건");
+                if (targets.isEmpty()) break;
 
-            for (ChatRoom room : targets) {
-                try {
-                    Long roomId = room.getId();
+                for (ChatRoom room : targets) {
+                    try {
+                        Long roomId = room.getId();
 
-                    // 비관적 락 + 상태 변경 + 시스템 메시지 DB 저장
-                    chatRoomCommandService.autoCloseRoom(roomId);
+                        // 비관적 락 + 상태 변경 + 시스템 메시지 DB 저장
+                        chatRoomCommandService.autoCloseRoom(roomId);
 
-                    /**
-                     * WebSocket으로 실시간 알림
-                     *
-                     * autoCloseRoom()에서 저장한 시스템 메시지를 Redis를 통해 발행
-                     * -> 모든 서버의 구독자에게 브로드캐스트
-                     * -> 클라이언트가 messageType = SYSTEM 감지 -> 채팅창 비활성화 처리
-                     *
-                     * ChatMessageResponse를 직접 생성하는 이유:
-                     * autoCloseRoom()은 @Transcational 메서드라서 반환값 없이 커밋만 함
-                     * 알림용 DTO는 스케쥴러에서 직접 만들어서 발행
-                     */
-                    ChatMessageResponse notification = new ChatMessageResponse(
-                            null,   // id - 알림 전용이라 null
-                            null,      // senderId - 시스템 메시지
-                            SenderType.SYSTEM,
-                            MessageType.SYSTEM,
-                            "10분간 응답이 없어 상담이 자동 종료되었습니다.",
-                            LocalDateTime.now()
-                    );
+                        /**
+                         * WebSocket으로 실시간 알림
+                         *
+                         * autoCloseRoom()에서 저장한 시스템 메시지를 Redis를 통해 발행
+                         * -> 모든 서버의 구독자에게 브로드캐스트
+                         * -> 클라이언트가 messageType = SYSTEM 감지 -> 채팅창 비활성화 처리
+                         *
+                         * ChatMessageResponse를 직접 생성하는 이유:
+                         * autoCloseRoom()은 @Transcational 메서드라서 반환값 없이 커밋만 함
+                         * 알림용 DTO는 스케쥴러에서 직접 만들어서 발행
+                         */
+                        ChatMessageResponse notification = new ChatMessageResponse(
+                                null,   // id - 알림 전용이라 null
+                                null,      // senderId - 시스템 메시지
+                                SenderType.SYSTEM,
+                                MessageType.SYSTEM,
+                                "10분간 응답이 없어 상담이 자동 종료되었습니다.",
+                                LocalDateTime.now()
+                        );
 
-                    chatRedisPublisher.publish(roomId, notification);
+                        chatRedisPublisher.publish(roomId, notification);
 
-                    log.info("[자동종료] 알림 발송 완료 roomId: {}", roomId);
+                        log.info("[자동종료] 알림 발송 완료 roomId: {}", roomId);
 
-                } catch (Exception e) {
-                    // 한 방 실패해도 다른 방 처리 계속 진행
-                    log.error("[자동종료] 처리 실패 roomId: {}", room.getId(), e);
+                    } catch (Exception e) {
+                        // 한 방 실패해도 다른 방 처리 계속 진행
+                        log.error("[자동종료] 처리 실패 roomId: {}", room.getId(), e);
+                    }
                 }
+
+                totalProcessed += targets.size();
+
+                // 다음 배치 시작점 - 현재 배치의 마지막 ID
+                lastId = targets.get(targets.size() - 1).getId();
+
+                // 마지막 배치면 종료
+                if (targets.size() < BATCH_SIZE) break;
             }
+
+            if (totalProcessed > 0) {
+                log.info("[자동종료] 총 {}건 처리 완료", totalProcessed);
+            } else {
+                log.debug("[자동종료] 처리 대상 없음");
+            }
+
         } finally {
             redisLockRepository.unlock(INACTIVITY_LOCK_KEY, lockValue);
         }
