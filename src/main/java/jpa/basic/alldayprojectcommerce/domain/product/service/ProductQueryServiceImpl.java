@@ -1,6 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
 
+import jpa.basic.alldayprojectcommerce.common.RestPage;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
@@ -13,12 +14,14 @@ import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductReposito
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -30,8 +33,10 @@ import java.util.List;
 public class ProductQueryServiceImpl implements ProductQueryService {
 
     private final ProductRepository productRepository;
+    private final CacheManager caffeineCacheManager;
 
     @Override
+    @Cacheable(value = "productDetail", key = "'product:' + #productId")
     public GetOneProductResponse getOneProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -67,14 +72,21 @@ public class ProductQueryServiceImpl implements ProductQueryService {
         return products.map(GetAllProductResponse::from);
     }
 
+
+    // 레디스 포함한 상품 검색
     @Override
-    @Transactional
-    @Cacheable(value = "productSearchCache", key = "'search:' + #searchRequest.keyword() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize", sync = true )
-    // sync : 동일 키에 대한 동시 DB 조회를 막아줌
-    public Page<SearchProductResponse> searchProductsV2(SearchProductRequest searchRequest, Pageable pageable){
-        // TODO: searchProductV2 repo method is commented out - using findByKeyword as fallback
-        log.info("[캐시 미스] keyword: {}", searchRequest.keyword());
+    @Cacheable(value = "productSearch",
+            key = "'product:' + #searchRequest.keyword() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            sync = true) // sync : 동일 키에 대한 동시 DB 조회를 막아줌
+
+    public RestPage<SearchProductResponse> searchProductsV2(SearchProductRequest searchRequest, Pageable pageable) {
+
+        log.info("[캐시 미스 V2] keyword: {}", searchRequest.keyword());
+
         Page<Product> products = productRepository.searchProduct(searchRequest, pageable);
-        return products.map(p -> new SearchProductResponse(p.getName(), 0L, java.time.LocalDate.now(), p.getCreatedAt(), p.getUpdatedAt()));
+        Page<SearchProductResponse> mappedPage = products.map(
+                p -> new SearchProductResponse(p.getName(), 0L, LocalDate.now(), p.getCreatedAt(), p.getUpdatedAt()));
+
+        return new RestPage<>(mappedPage);
     }
 }

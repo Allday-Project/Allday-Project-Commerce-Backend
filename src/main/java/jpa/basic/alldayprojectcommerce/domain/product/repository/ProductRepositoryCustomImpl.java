@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jpa.basic.alldayprojectcommerce.common.RestPage;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
@@ -92,10 +93,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         return product.name.containsIgnoreCase(keyword).or(product.description.contains(keyword));
     }
 
+    // 카테고리에 빈 값이 들어갔을 때 에러
     private BooleanExpression categoryEqV1(Category category) {
         return category != null ? product.category.eq(category) : null;
     }
 
+    // 상태에 빈 값이 들어갔을 때 에러
     private BooleanExpression statusEqV1(ProductStatus status) {
         return status != null ? product.status.eq(status) : null;
     }

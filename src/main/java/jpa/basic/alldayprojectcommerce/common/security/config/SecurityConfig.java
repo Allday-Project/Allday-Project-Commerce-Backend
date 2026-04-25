@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                         "/api/auth/check-duplicate",
                         "/api/products",
-                        "/api/products/{productId}",
+                        "/api/products/**",
                         "/api/keywords/top5"
                         ).permitAll()
                 .requestMatchers("/actuator/health").permitAll()

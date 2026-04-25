@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.product.dto.response;
 
+import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductKeyword;
 
 import java.time.LocalDate;

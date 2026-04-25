@@ -18,9 +18,6 @@ spring:
         format_sql: true
         show_sql: false
     defer-datasource-initialization: true
-  cache:
-    caffeine:
-      spec: maximumSize=10
 
 logging:
   level:

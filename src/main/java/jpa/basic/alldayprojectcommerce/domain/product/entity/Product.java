@@ -54,6 +54,18 @@ public class Product extends BaseEntity {
     }
 
 
+    public void update(String name, Long price, int stock, String description, Category category, String imageUrl) {
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.description = description;
+        this.category = category;
+        this.imageUrl = imageUrl;
+        closeSales();
+        resumeSales();
+    }
+
+
     // 재고 차감 로직
     public void decreaseStock(int quantity) {
         validQuantity(quantity);
