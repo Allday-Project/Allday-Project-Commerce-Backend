@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
-import jpa.basic.alldayprojectcommerce.common.RestPage;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;

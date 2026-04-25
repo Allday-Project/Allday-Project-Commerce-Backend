@@ -1,5 +1,7 @@
 package jpa.basic.alldayprojectcommerce.common.cache;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import org.springframework.cache.Cache;
 
 import java.util.ArrayList;
@@ -22,11 +24,13 @@ public class CompositeCache implements Cache {
     }
 
     @Override
+    @NonNull
     public String getName() {
         return name;
     }
 
     @Override
+    @NonNull
     public Object getNativeCache() {
         return this;
     }
@@ -36,7 +40,7 @@ public class CompositeCache implements Cache {
      * L2 히트 시 L1에 저장 (write-back to local)
      */
     @Override
-    public ValueWrapper get(Object key) {
+    public ValueWrapper get(@NonNull Object key) {
         for (int i = 0; i < caches.size(); i++) {
             ValueWrapper wrapper = caches.get(i).get(key);
             if (wrapper != null) {
@@ -51,7 +55,7 @@ public class CompositeCache implements Cache {
     }
 
     @Override
-    public <T> T get(Object key, Class<T> type) {
+    public <T> T get(@NonNull Object key, Class<T> type) {
         for (int i = 0; i < caches.size(); i++) {
             T value = caches.get(i).get(key, type);
             if (value != null) {
@@ -65,7 +69,8 @@ public class CompositeCache implements Cache {
     }
 
     @Override
-    public <T> T get(Object key, Callable<T> valueLoader) {
+    @SuppressWarnings("unchecked")
+    public <T> T get(@NonNull Object key, @NonNull Callable<T> valueLoader) {
         ValueWrapper wrapper = get(key);
         if (wrapper != null) {
             return (T) wrapper.get();
@@ -83,14 +88,14 @@ public class CompositeCache implements Cache {
      * 모든 계층에 저장
      */
     @Override
-    public void put(Object key, Object value) {
+    public void put(@NonNull Object key, Object value) {
         for (Cache cache : caches) {
             cache.put(key, value);
         }
     }
 
     @Override
-    public void evict(Object key) {
+    public void evict(@NonNull Object key) {
         for (Cache cache : caches) {
             cache.evict(key);
         }

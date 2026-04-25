@@ -6,5 +6,5 @@ import lombok.Getter;
 public enum CacheType {
     LOCAL,
     GLOBAL,
-    COMPOSITE;
+    COMPOSITE
 }

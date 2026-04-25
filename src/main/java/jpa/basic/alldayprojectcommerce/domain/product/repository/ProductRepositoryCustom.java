@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.product.repository;
 
-import jpa.basic.alldayprojectcommerce.common.RestPage;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;

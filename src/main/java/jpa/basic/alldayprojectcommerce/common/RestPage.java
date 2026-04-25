@@ -22,9 +22,9 @@ public class RestPage<T> extends PageImpl<T> {
         super(content, PageRequest.of(page, size), totalElements);
     }
 
-    public RestPage(List<T> content, Pageable pageable, Long totalElements){
-        super(content, pageable, totalElements);
-    }
+//    public RestPage(List<T> content, Pageable pageable, Long totalElements){
+//        super(content, pageable, totalElements);
+//    }
 
     public RestPage(Page<T> page) {
         super(page.getContent(), page.getPageable(), page.getTotalElements());

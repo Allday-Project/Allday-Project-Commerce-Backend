@@ -38,7 +38,6 @@ public class LocalCacheConfig {
                     return (Cache) new CaffeineCache(g.getCacheName(), builder.build());
                 })
                 .collect(Collectors.toList());
-        ;
         return new LocalCacheManager(caches);
     }
 

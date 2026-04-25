@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.common.cache;
 
+import lombok.NonNull;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
@@ -25,7 +26,7 @@ public class CompositeCacheCacheManager implements CacheManager {
      * - 둘 다 없으면 null → DB 조회 후 @Cacheable이 자동 저장
      */
     @Override
-    public Cache getCache(String name) {
+    public Cache getCache(@NonNull String name) {
         CompositeCache compositeCache = null;
 
         for (CacheManager manager : cacheManagers) {
@@ -42,6 +43,7 @@ public class CompositeCacheCacheManager implements CacheManager {
     }
 
     @Override
+    @NonNull
     public Collection<String> getCacheNames() {
         Set<String> names = new LinkedHashSet<>();
         for (CacheManager manager : cacheManagers) {
