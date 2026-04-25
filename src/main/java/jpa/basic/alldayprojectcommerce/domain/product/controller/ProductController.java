@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductQueryServiceImpl productQueryServiceImpl;
+    // ProductController.java
+  private final ProductQueryService productQueryService;
 
 
     @GetMapping("/v1/boards/search")
@@ -37,7 +38,7 @@ public class ProductController {
 
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
+        Page<GetAllProductResponse> responses = productQueryService.searchProducts(searchRequest, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
@@ -48,7 +49,7 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int page,
             Pageable pageable){
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<SearchProductResponse> responses = productQueryServiceImpl.searchProductsV2(request, adjustedPageable);
+        Page<SearchProductResponse> responses = productQueryService.searchProductsV2(request, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
@@ -73,7 +74,7 @@ public class ProductController {
 
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        Page<GetAllProductResponse> responses = productQueryServiceImpl.getAllProduct(filterRequest, adjustedPageable);
+        Page<GetAllProductResponse> responses = productQueryService.getAllProduct(filterRequest, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
