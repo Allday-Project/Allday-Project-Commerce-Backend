@@ -1,5 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
+import jpa.basic.alldayprojectcommerce.common.cache.CacheName;
+import jpa.basic.alldayprojectcommerce.common.cache.LocalCacheManager;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
@@ -10,22 +12,18 @@ import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.StockRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.core.ApplicationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
@@ -36,13 +34,11 @@ import org.springframework.util.StopWatch;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @Slf4j
@@ -259,7 +255,7 @@ public class ProductCommandServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Cache cache = cacheManager.getCache("productSearchCache");
+        Cache cache = localCacheManager.getCache("productSearchCache");
         if (cache != null) cache.clear();
 
         List<Product> products = IntStream.range(0, 20)
@@ -285,13 +281,13 @@ public class ProductCommandServiceImplTest {
         // ── 1. DB 조회 (캐시 미스 반복) ──────────────────────
         sw.start("DB 조회 (캐시 미스)");
         for (int i = 0; i < repeat; i++) {
-            cacheManager.getCache("productSearchCache").clear();
+            localCacheManager.getCache("productSearchCache").clear();
             productQueryService.searchProductsV2(SEARCH_REQUEST, PAGEABLE);
         }
         sw.stop();
 
         // ── 2. 캐시 워밍업 ────────────────────────────────────
-        cacheManager.getCache("productSearchCache").clear();
+        localCacheManager.getCache("productSearchCache").clear();
         productQueryService.searchProductsV2(SEARCH_REQUEST, PAGEABLE);
 
         // ── 3. 캐시 히트 반복 ────────────────────────────────
@@ -302,13 +298,13 @@ public class ProductCommandServiceImplTest {
         sw.stop();
 
         // ── 4. 결과 로그 ──────────────────────────────────────
-        long dbNanos    = sw.getTaskInfo()[0].getTimeNanos();
+        long dbNanos = sw.getTaskInfo()[0].getTimeNanos();
         long cacheNanos = sw.getTaskInfo()[1].getTimeNanos();
 
         log.info("\n{}", sw.prettyPrint(TimeUnit.MILLISECONDS));
-        log.info("DB    평균: {} ms", String.format("%.3f", dbNanos    / (double) repeat / 1_000_000));
+        log.info("DB    평균: {} ms", String.format("%.3f", dbNanos / (double) repeat / 1_000_000));
         log.info("Cache 평균: {} ms", String.format("%.3f", cacheNanos / (double) repeat / 1_000_000));
-        log.info("속도 향상:  {}x",  String.format("%.1f", (double) dbNanos / cacheNanos));
+        log.info("속도 향상:  {}x", String.format("%.1f", (double) dbNanos / cacheNanos));
 
         assertThat(cacheNanos).isLessThan(dbNanos);
     }
@@ -316,7 +312,7 @@ public class ProductCommandServiceImplTest {
     @Test
     @DisplayName("캐시 키 검증 - keyword/page 조합별로 독립 캐시 생성 확인")
     void cacheKeyIsolationTest() {
-        Cache cache = cacheManager.getCache("productSearchCache");
+        Cache cache = localCacheManager.getCache("productSearchCache");
 
         SearchProductRequest req1 = new SearchProductRequest("키워드A");
         SearchProductRequest req2 = new SearchProductRequest("키워드B");
@@ -348,5 +344,37 @@ public class ProductCommandServiceImplTest {
         assertThat(secondResult).isSameAs(firstResult);
 
         log.info("캐시 히트 시 동일 객체 반환 검증 통과 ✅");
+    }
+
+
+    @Autowired
+    private LocalCacheManager localCacheManager;
+
+    @Test
+    @DisplayName("maximumSize를 초과하면 오래된 데이터가 캐시에서 밀려나야 한다")
+    void testMaximumSizeEviction() {
+        // given: 테스트용으로 maximumSize가 10으로 설정된 캐시를 가져옴 (CacheName에 미리 세팅 필요)
+        Cache cache = localCacheManager.getCache(CacheName.PRODUCT_SEARCH.getCacheName());
+        com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCache =
+                (com.github.benmanes.caffeine.cache.Cache<Object, Object>) cache.getNativeCache();
+
+        // when: 제한(10개)보다 많은 15개의 데이터를 캐시에 강제로 저장
+        for (int i = 1; i <= 15; i++) {
+            cache.put("key" + i, "value" + i);
+        }
+
+        // 핵심 포인트: Caffeine의 eviction(삭제) 처리는 성능 최적화를 위해 '비동기'로 일어남.
+        // 데이터를 넣자마자 사이즈를 재면 15개가 나올 수 있으므로, 확실한 측정을 위해 정리 작업을 강제 호출함.
+        nativeCache.cleanUp();
+
+        // then: 캐시 사이즈는 maximumSize인 10을 초과하지 않아야 함
+        long currentSize = nativeCache.estimatedSize();
+        System.out.println("현재 캐시 사이즈: " + currentSize);
+
+        assertThat(currentSize).isLessThanOrEqualTo(10);
+
+        // 먼저 들어간 key1은 밀려나서 없어야 하고, 마지막에 들어간 key15는 남아있어야 함
+        assertThat(cache.get("key1")).isNull();
+        assertThat(cache.get("key15")).isNotNull();
     }
 }
