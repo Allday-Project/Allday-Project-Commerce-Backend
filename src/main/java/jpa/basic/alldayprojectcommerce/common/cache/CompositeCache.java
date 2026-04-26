@@ -1,6 +1,5 @@
 package jpa.basic.alldayprojectcommerce.common.cache;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import org.springframework.cache.Cache;
 

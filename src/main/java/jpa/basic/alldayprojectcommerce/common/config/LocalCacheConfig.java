@@ -11,7 +11,6 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class LocalCacheConfig {
     // 로컬 캐시 설정 클래스
 
     // 로컬 캐시에 담을 수 있는 무게 한도 : 10MB
-    private static final int MAX_WEIGHT = 10_000_000;
+//    private static final int MAX_WEIGHT = 10_000_000;
 
 
     @Bean
