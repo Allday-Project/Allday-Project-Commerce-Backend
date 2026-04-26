@@ -1,0 +1,39 @@
+# application-test.yml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 10
+      connection-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: Hikari-Test-Pool
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    root: info
+    jpa.basic.alldayprojectcommerce:
+    debugcom.zaxxer.hikari: debug
+
+    # 쿼리 확인이 필요할때만 활성화
+#    org.hibernate.SQL: debug
+#    org.hibernate.orm.jdbc.bind: trace
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

@@ -1,7 +1,5 @@
 package jpa.basic.alldayprojectcommerce.domain.chat.service;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.request.CreateChatRoomRequest;
@@ -73,7 +71,7 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
 
     @Override
     public void closeChatRoom(Long userId, Long roomId, String role) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdForUpdate(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         validateAccess(chatRoom, userId, role);
@@ -97,7 +95,7 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
             throw new CustomException(ErrorCode.CHAT_ROOM_FORBIDDEN);
         }
 
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdForUpdate(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         chatRoom.changeStatus(ChatRoomStatus.IN_PROGRESS);
