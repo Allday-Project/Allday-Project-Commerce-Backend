@@ -16,6 +16,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @Transactional
@@ -105,6 +108,22 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
         );
 
         log.info("[채팅방] 상담 시작 adminId: {}, roomId: {}", adminId, roomId);
+    }
+
+    @Override
+    @Transactional
+    public void batchAutoCloseRooms(List<Long> roomIds, String closeMessage) {
+        /**
+         * 상태 변경 + 시스템 메시지 저장을 하나의 트랜잭션으로 묶음
+         * saveAll 실패 시 bulkCompleteRooms도 함께 롤백
+         */
+        chatRoomRepository.bulkCompleteRooms(roomIds);
+
+        List<ChatMessage> messages = roomIds.stream()
+                .map(id -> ChatMessage.systemMessage(id, closeMessage))
+                .collect(Collectors.toList());
+
+        chatMessageRepository.saveAll(messages);
     }
 
     /**

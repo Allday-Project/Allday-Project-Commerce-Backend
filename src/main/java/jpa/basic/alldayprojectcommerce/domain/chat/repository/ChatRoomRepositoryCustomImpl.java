@@ -84,7 +84,13 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                 .update(chatRoom)
                 .set(chatRoom.chatRoomStatus, ChatRoomStatus.COMPLETED)
                 .setNull(chatRoom.activeFlag)
-                .where(chatRoom.id.in(roomIds))
+                .where(
+                        chatRoom.id.in(roomIds),
+                        chatRoom.chatRoomStatus.in(
+                                ChatRoomStatus.WAITING,
+                                ChatRoomStatus.IN_PROGRESS
+                        )
+                )
                 .execute();
 
         /**
