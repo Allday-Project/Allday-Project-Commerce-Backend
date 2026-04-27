@@ -8,7 +8,6 @@ public record GetUnmaskedUserResponse(
     Long id,
     String email,
     String name,
-    String password,
     String phone,
     String address
 ) {
@@ -17,7 +16,6 @@ public record GetUnmaskedUserResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getPassword(),
                 user.getPhone(),
                 user.getAddress()
         );
