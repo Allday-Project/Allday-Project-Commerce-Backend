@@ -347,7 +347,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.6);
     z-index: 2000;
     display: flex;
     align-items: center;
@@ -364,11 +364,10 @@
 
 .modal-content {
     background: #ffffff;
-    border-radius: 16px;
-    padding: 32px;
+    border-radius: 12px;
     position: relative;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     transform: translateY(12px) scale(0.97);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -380,40 +379,51 @@
 .modal-close {
     position: absolute;
     top: 16px;
-    right: 20px;
-    font-size: 24px;
-    color: #999;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #666;
     cursor: pointer;
-    line-height: 1;
-    transition: color 0.2s ease;
     z-index: 10;
+    transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-    color: #1a1a1a;
+    background: rgba(0, 0, 0, 0.2);
+    color: #333;
 }
 
 .product-detail-modal {
-    width: 100%;
-    max-width: 720px;
+    width: 900px;
+    max-width: 95vw;
 }
 
 .product-detail-body {
     display: flex;
-    gap: 28px;
+    height: 550px;
 }
 
 .product-detail-left {
     flex-shrink: 0;
-    width: 240px;
+    width: 400px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .product-detail-img {
-    width: 240px;
-    height: 240px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #f0f0f0;
+    width: 100%;
+    height: 100%;
+    background: #e0e0e0;
     position: relative;
 }
 
@@ -440,24 +450,23 @@
 
 .product-detail-right {
     flex: 1;
-    min-width: 0;
+    padding: 40px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .detail-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #999;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 12px;
 }
 
 .detail-description {
-    margin-bottom: 16px;
-    max-height: 140px;
-    overflow-y: auto;
+    margin-bottom: 24px;
 }
 
 .detail-desc-list {
@@ -467,83 +476,296 @@
 }
 
 .detail-desc-list li {
-    font-size: 12px;
-    color: #666;
-    line-height: 1.7;
-    padding: 1px 0;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    padding: 2px 0;
 }
 
 .detail-product-name {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
     color: #1a1a1a;
     line-height: 1.4;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-shipping-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: #666;
+}
+
+.shipping-label {
+    font-weight: 600;
+    color: #333;
 }
 
 .detail-product-price {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 800;
     color: #1a1a1a;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
     display: flex;
     align-items: baseline;
-    gap: 2px;
+    gap: 4px;
+    margin-top: auto;
+}
+
+.price-original {
+    font-size: 16px;
+    color: #999;
+    text-decoration: line-through;
+    margin-right: 8px;
+    font-weight: 500;
 }
 
 .detail-actions {
     display: flex;
-    gap: 10px;
-    margin-top: auto;
+    gap: 12px;
 }
 
 .detail-btn {
     flex: 1;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 600;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 700;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    border: none;
 }
 
 .detail-btn-cart {
-    background: #f0f0f0;
+    background: #ffffff;
     color: #333;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
 }
 
 .detail-btn-cart:hover {
-    background: #e5e5e5;
+    background: #f5f5f5;
+    border-color: #999;
 }
 
 .detail-btn-buy {
     background: #1a1a1a;
     color: #ffffff;
-    border: 1px solid #1a1a1a;
 }
 
 .detail-btn-buy:hover {
     background: #333;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .product-detail-modal {
-        max-width: calc(100% - 32px);
+        width: 95%;
+        max-width: none;
+        height: 90vh;
     }
 
     .product-detail-body {
         flex-direction: column;
+        height: auto;
     }
 
     .product-detail-left {
         width: 100%;
+        height: 300px;
     }
 
-    .product-detail-img {
-        width: 100%;
-        height: 200px;
+    .product-detail-right {
+        padding: 24px;
+    }
+
+    .detail-actions {
+        flex-direction: column;
     }
 }
 
+
+/* ===========================
+   Pagination Component
+   =========================== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 48px;
+    padding: 0 16px;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Pagination Buttons (Prev/Next) */
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #f5f5f5;
+    border-color: #ccc;
+    color: #1a1a1a;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-btn svg {
+    flex-shrink: 0;
+}
+
+/* Pagination Numbers Container */
+.pagination-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 4px;
+}
+
+/* Pagination Number Buttons */
+.pagination-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-number:hover:not(.active) {
+    background: #f5f5f5;
+    border-color: #ccc;
+    color: #1a1a1a;
+}
+
+.pagination-number.active {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: default;
+}
+
+/* Pagination Ellipsis */
+.pagination-ellipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    color: #999;
+    font-size: 14px;
+    user-select: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .pagination-container {
+        margin-top: 32px;
+    }
+
+    .pagination-btn,
+    .pagination-number {
+        min-width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .pagination-btn {
+        width: 32px;
+    }
+
+    .pagination-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .pagination-ellipsis {
+        min-width: 28px;
+        height: 32px;
+        font-size: 13px;
+    }
+}
+
+/* ===========================
+   Loading and Error States
+   =========================== */
+.loading-state,
+.error-state,
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f0f0f0;
+    border-top-color: #1a1a1a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-state p,
+.error-state p,
+.empty-state {
+    font-size: 15px;
+    color: #666;
+    margin: 0;
+}
+
+.retry-btn {
+    margin-top: 16px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+    background: #333;
+}

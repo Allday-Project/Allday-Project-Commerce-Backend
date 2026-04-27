@@ -14,7 +14,7 @@ import java.util.List;
 public interface ProductQueryService {
 
     GetOneProductResponse getOneProduct(Long productId);
-    Page<GetAllProductResponse> getAllProduct(FilterProductRequest filterRequest, Pageable pageable);
+    Page<GetAllProductResponse> getAllProduct(String category, String keyword, Pageable pageable);
 
     // 상품 단건 조회 - 주문 생성에서 사용
     Product getByProductId(Long productId);

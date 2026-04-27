@@ -2,7 +2,6 @@ package jpa.basic.alldayprojectcommerce.domain.chat.scheduler;
 
 import jpa.basic.alldayprojectcommerce.common.lock.repository.RedisLockRepository;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatMessageResponse;
-import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatMessage;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoom;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.MessageType;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.SenderType;
@@ -85,18 +84,9 @@ public class ChatInactivityScheduler {
                         .collect(Collectors.toList());
 
                 /**
-                 * Bulk Update
-                 *
-                 * 분산락이 스케쥴러 진입 자체를 1대만 허용하므로
-                 * 비관적 락 없이 Bulk Update 사용
+                 * 상태 변경 + 메시지 저장을 하나의 트랜잭션으로 처리
                  */
-                chatRoomRepository.bulkCompleteRooms(roomIds);
-
-                List<ChatMessage> messages = roomIds.stream()
-                        .map(id -> ChatMessage.systemMessage(id, buildCloseMessage()))
-                        .collect(Collectors.toList());
-
-                chatMessageRepository.saveAll(messages);
+                chatRoomCommandService.batchAutoCloseRooms(roomIds, buildCloseMessage());
 
                 for (Long roomId : roomIds) {
                     try {

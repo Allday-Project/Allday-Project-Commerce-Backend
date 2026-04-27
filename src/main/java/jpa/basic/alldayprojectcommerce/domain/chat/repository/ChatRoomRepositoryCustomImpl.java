@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static jpa.basic.alldayprojectcommerce.domain.chat.entity.QChatRoom.chatRoom;
+import static jpa.basic.alldayprojectcommerce.domain.user.entity.QUser.user;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,12 +40,14 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                         ChatRoomResponse.class,
                         chatRoom.id,
                         chatRoom.userId,
+                        user.email,
                         chatRoom.title,
                         chatRoom.chatRoomStatus,
                         chatRoom.lastMessageAt,
                         chatRoom.createdAt
                 ))
                 .from(chatRoom)
+                .leftJoin(user).on(user.id.eq(chatRoom.userId))
                 .where(statusEq(status))
                 .orderBy(chatRoom.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -84,7 +87,13 @@ public class ChatRoomRepositoryCustomImpl implements ChatRoomRepositoryCustom {
                 .update(chatRoom)
                 .set(chatRoom.chatRoomStatus, ChatRoomStatus.COMPLETED)
                 .setNull(chatRoom.activeFlag)
-                .where(chatRoom.id.in(roomIds))
+                .where(
+                        chatRoom.id.in(roomIds),
+                        chatRoom.chatRoomStatus.in(
+                                ChatRoomStatus.WAITING,
+                                ChatRoomStatus.IN_PROGRESS
+                        )
+                )
                 .execute();
 
         /**

@@ -30,6 +30,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/", "/login", "/signup",
+                        "/cart", "/mypage", "/orders", "/orders/**", "/checkout",
                         "/css/**", "/js/**", "/images/**",
                         "/assets/**", "/img/**", "/error", "/favicon.ico",
                         "/h2-console/**"
@@ -54,7 +55,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/actuator/health",
                         "/api/events/**",
-                        "/ws-chat/**"
+                        "/ws/**", "/ws-chat/**"
                 ).permitAll()
                 .requestMatchers(
                         "/api/chat/admin/**"

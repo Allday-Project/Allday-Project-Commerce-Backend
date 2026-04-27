@@ -4,17 +4,14 @@ package jpa.basic.alldayprojectcommerce.domain.product.service;
 import jpa.basic.alldayprojectcommerce.common.RestPage;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
-import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.SearchProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,14 +23,12 @@ import java.util.List;
 
 
 @Slf4j
-@Getter
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductQueryServiceImpl implements ProductQueryService {
 
     private final ProductRepository productRepository;
-    private final CacheManager caffeineCacheManager;
 
     @Override
     @Cacheable(value = "productDetail", key = "'product:' + #productId")
@@ -45,12 +40,9 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     // 전체 조회
     @Override
-    public Page<GetAllProductResponse> getAllProduct(FilterProductRequest filterRequest, Pageable pageable) {
-        if (filterRequest == null) {
-            filterRequest = new FilterProductRequest(null, null);
-        }
-        Page<Product> products = productRepository.findAllProducts(filterRequest, pageable);
-        return products.map(GetAllProductResponse::from);
+    public Page<GetAllProductResponse> getAllProduct(String category, String keyword, Pageable pageable){
+        return productRepository.findAllProducts(category, keyword, pageable)
+                .map(GetAllProductResponse::from);
     }
 
     @Override

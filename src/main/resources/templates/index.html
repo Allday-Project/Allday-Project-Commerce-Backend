@@ -11,7 +11,7 @@
 <body>
     <main layout:fragment="content">
         <!-- 타이틀 (로그인 시 표시) -->
-        <section class="hero-section" id="hero-section" th:if="${session.user != null}">
+        <section class="hero-section" id="hero-section" th:if="${user != null}">
             <h1 class="hero-title">ALLDAY PROJECT</h1>
         </section>
 
@@ -121,13 +121,16 @@
                                 <div class="product-img-placeholder"></div>
                             </div>
                             <div class="product-info">
-                                <h3 class="product-name">ALLDAY PROJECT 2026 'The AP Collection' VINYL RECORD & EXCLUSIVE BOOKLET SET</h3>
+                                <h3 class="product-name">ALLDAY PROJECT 2026 'The AP Collection' VINYL RECORD &amp; EXCLUSIVE BOOKLET SET</h3>
                                 <p class="product-price"><span class="price-currency">₩</span><span class="price-value">70,000</span></p>
                             </div>
                         </a>
                     </article>
                 </th:block>
             </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination-container" id="pagination-container"></div>
         </section>
 
         <!-- 상품 상세 모달 -->
@@ -145,20 +148,26 @@
                         <p class="detail-label">상품 상세</p>
                         <div class="detail-description" id="modal-product-description">
                             <ul class="detail-desc-list">
-                                <li>• PRE-ORDER 선착 입금</li>
-                                <li>• 2026년 2월 12일 10:00 PM ~ 2월 2025 11:11 PM</li>
-                                <li>• 배송 예정일</li>
-                                <li>• 2026년 4월 27일 이후 순차 배송</li>
-                                <li>• OFFICIAL MERCH 기존 판매 제품으로 수량 배정이 순차적으로 진행됩니다. 별도의 배송 안내 메일이 발송됩니다.</li>
+                                <li>• PRE - ORDER 판매 일정</li>
+                                <li>• 2026년 2월 12일 12:00 PM ~ 2월 22일 11:59 PM (KST)</li>
+                                <li>• 배송 일정</li>
+                                <li>• 2026년 4월 9일 (목) 부터 순차발고</li>
+                                <li>• 안내 사항</li>
+                                <li>• 배송 원지가 다른 상품을 한 번에 구매 하실 경우, 배 송비가 가장 높은 상품 기준으로 합배송 되어 발송됩니다.</li>
                             </ul>
                         </div>
                         <h2 class="detail-product-name" id="modal-product-name">ALLDAY PROJECT 2026 'Be My Valentine' EMBROIDERY CORDUROY BALL CAP</h2>
+                        <div class="detail-shipping-info" id="modal-shipping-info">
+                            <span class="shipping-label">배송비</span>
+                            <span class="shipping-value">₩3,000 (₩50,000 이상 구매 시 무료)</span>
+                        </div>
                         <p class="detail-product-price" id="modal-product-price">
-                            <span class="price-currency">₩</span><span class="price-value">39,000</span>
+                            <span class="price-original" id="modal-price-original"></span>
+                            <span class="price-currency">₩</span><span class="price-value">36,000</span>
                         </p>
                         <div class="detail-actions">
-                            <button class="detail-btn detail-btn-cart" id="modal-btn-cart">장바구니</button>
-                            <button class="detail-btn detail-btn-buy" id="modal-btn-buy">구매하기</button>
+                            <button class="detail-btn detail-btn-cart" id="modal-btn-cart">장바구니에 담기</button>
+                            <button class="detail-btn detail-btn-buy" id="modal-btn-buy">주문하기</button>
                         </div>
                     </div>
                 </div>
@@ -167,8 +176,9 @@
     </main>
 
     <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pagination.js}"></script>
+        <script th:src="@{/js/product-detail.js}"></script>
         <script th:src="@{/js/index.js}"></script>
     </th:block>
 </body>
 </html>
-

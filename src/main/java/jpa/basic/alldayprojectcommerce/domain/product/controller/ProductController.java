@@ -3,7 +3,6 @@ package jpa.basic.alldayprojectcommerce.domain.product.controller;
 
 import jakarta.validation.Valid;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
-import jpa.basic.alldayprojectcommerce.domain.product.dto.request.FilterProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.ProductUpdateRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.SearchProductRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetAllProductResponse;
@@ -11,12 +10,14 @@ import jpa.basic.alldayprojectcommerce.domain.product.dto.response.GetOneProduct
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.ProductUpdateResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.SearchProductResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.service.ProductCommandService;
-import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryServiceImpl;
+import jpa.basic.alldayprojectcommerce.domain.product.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductQueryServiceImpl productQueryServiceImpl;
+    private final ProductQueryService productQueryService;
     private final ProductCommandService productCommandService;
 
 
@@ -39,7 +40,7 @@ public class ProductController {
 
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        Page<GetAllProductResponse> responses = productQueryServiceImpl.searchProducts(searchRequest, adjustedPageable);
+        Page<GetAllProductResponse> responses = productQueryService.searchProducts(searchRequest, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
@@ -50,7 +51,7 @@ public class ProductController {
             @RequestParam(defaultValue = "1") int page,
             Pageable pageable) {
         Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<SearchProductResponse> responses = productQueryServiceImpl.searchProductsV2(request, adjustedPageable);
+        Page<SearchProductResponse> responses = productQueryService.searchProductsV2(request, adjustedPageable);
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
     }
 
@@ -64,19 +65,16 @@ public class ProductController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetOneProductResponse>> getOne(@PathVariable("productId") Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryServiceImpl.getOneProduct(id)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getOneProduct(id)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> getAll(
-            @ModelAttribute FilterProductRequest filterRequest,
-            @RequestParam(defaultValue = "1") int page,
-            Pageable pageable) {
-
-        Pageable adjustedPageable = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-
-        Page<GetAllProductResponse> responses = productQueryServiceImpl.getAllProduct(filterRequest, adjustedPageable);
-        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, responses));
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size =  10, page = 0, sort = "id",
+                    direction = Sort.Direction.DESC) Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getAllProduct(category, keyword, pageable)));
     }
 
 

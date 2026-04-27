@@ -35,11 +35,13 @@ public record GetOneOrderResponse(
                         item.getProductPrice() * item.getQuantity()
                 )).toList();
 
+        Long deliveryFee = order.getTotalAmount() >= 50000L ? 0L : DELIVERY_FEE;
+
         return new GetOneOrderResponse(
                 order.getOrderUid(),
                 order.getTotalAmount(),
-                DELIVERY_FEE,
-                order.getTotalAmount() + DELIVERY_FEE,
+                deliveryFee,
+                order.getTotalAmount() + deliveryFee,
                 info
         );
     }

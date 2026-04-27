@@ -6,6 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUser;
 import jpa.basic.alldayprojectcommerce.common.security.auth.LoginUserInfo;
 import jpa.basic.alldayprojectcommerce.domain.user.dto.request.UpdatePasswordRequest;
 import jpa.basic.alldayprojectcommerce.domain.user.dto.request.UpdatemeUserRequest;
+import jpa.basic.alldayprojectcommerce.domain.user.dto.response.GetUnmaskedUserResponse;
 import jpa.basic.alldayprojectcommerce.domain.user.dto.response.GetmeUserResponse;
 import jpa.basic.alldayprojectcommerce.domain.user.service.UserCommandService;
 import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
@@ -27,6 +28,14 @@ public class UserController {
     public ResponseEntity<ApiResponse<GetmeUserResponse>> getMyProfile(
             @LoginUser LoginUserInfo loginUser) {
         GetmeUserResponse response = userQueryService.getProfile(loginUser.id());
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
+    }
+
+    // 내 정보 조회 (마스킹 없음) - 주문서 작성 등
+    @GetMapping("/me/unmasked")
+    public ResponseEntity<ApiResponse<GetUnmaskedUserResponse>> getMyProfileUnmasked(
+            @LoginUser LoginUserInfo loginUser) {
+        GetUnmaskedUserResponse response = userQueryService.getUnmaskedProfile(loginUser.id());
         return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, response));
     }
 
