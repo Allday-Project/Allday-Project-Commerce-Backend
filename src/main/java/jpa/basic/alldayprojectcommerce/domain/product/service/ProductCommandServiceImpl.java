@@ -23,7 +23,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     @Override
     public void decreaseStock(Long productId, int quantity, Long orderId) {
         // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.decreaseStock(quantity);
         saveStockHistory(product, quantity, orderId);
@@ -34,7 +34,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     public void increaseStock(Long productId, int quantity, Long orderId) {
         // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.increaseStock(quantity);
         saveStockHistory(product, -quantity, orderId);

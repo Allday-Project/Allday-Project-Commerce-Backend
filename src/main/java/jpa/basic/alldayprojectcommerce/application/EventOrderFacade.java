@@ -141,8 +141,8 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 1,
-            leaseTimeSeconds = 5
+            waitTimeMillis = 300,
+            leaseTimeMillis = 3000
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopRetry(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
@@ -154,8 +154,8 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 10,
-            leaseTimeSeconds = 10
+            waitTimeMillis = 1000,
+            leaseTimeMillis = 5000
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlocking(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
@@ -174,8 +174,8 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 2,
-            leaseTimeSeconds = -1
+            waitTimeMillis = 300,
+            leaseTimeMillis = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopRetryWatchdog(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
@@ -192,8 +192,8 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 3,
-            leaseTimeSeconds = -1
+            waitTimeMillis = 1000,
+            leaseTimeMillis = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);

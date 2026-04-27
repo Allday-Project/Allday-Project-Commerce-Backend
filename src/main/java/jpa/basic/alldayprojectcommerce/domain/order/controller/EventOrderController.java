@@ -12,9 +12,95 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/events")
 public class EventOrderController {
+
     private final EventOrderFacade eventOrderFacade;
 
-    /*
+    /**
+     * v1 - 락 없음
+     */
+    @PostMapping("/v1/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v1(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithoutLock(productId, userId));
+    }
+
+    /**
+     * v2 - DB 비관락만
+     */
+    @PostMapping("/v2/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v2(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithPessimisticLock(productId, userId));
+    }
+
+    /**
+     * v3 - Redisson Retry
+     */
+    @PostMapping("/v3/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v3(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopRetry(productId, userId));
+    }
+
+    /**
+     * v4 - Retry + Watchdog
+     */
+    @PostMapping("/v4/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v4(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopRetryWatchdog(productId, userId));
+    }
+
+    /**
+     * v5 - FailFast
+     */
+    @PostMapping("/v5/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v5(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopFailFast(productId, userId));
+    }
+
+    /**
+     * v6 - Blocking
+     */
+    @PostMapping("/v6/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v6(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopBlocking(productId, userId));
+    }
+
+    /**
+     * v7 - Blocking + Watchdog
+     */
+    @PostMapping("/v7/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> v7(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopBlockingWatchdog(productId, userId));
+    }
+
+    private ResponseEntity<ApiResponse<EventOrderResponse>> ok(EventOrderResponse response) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(HttpStatus.CREATED, response));
+    }
+}
+
+
+
+/*
         동시성 확인을 위한 이벤트 티켓 무료 나눔 API
         모바일 티켓이라고 가정, 배송비 X
         이벤트 카테고리에 있는 제품들은 상세 조회를 눌렀을 때
@@ -24,13 +110,3 @@ public class EventOrderController {
         주문 성공 시 주문 목록 조회로 리다이렉트
         주문 실패 시 '주문에 실패했습니다' 문구 띄우고 이벤트 상품 목록 조회로 리다이렉트
      */
-    @PostMapping("/products/{productId}/orders")
-    public ResponseEntity<ApiResponse<EventOrderResponse>> createEventOrder(
-            @PathVariable Long productId,
-            @RequestParam Long userId
-    ){
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED, eventOrderFacade.createEventOrderWithRedissonLockAopRetry(productId, userId)));
-    }
-
-}
