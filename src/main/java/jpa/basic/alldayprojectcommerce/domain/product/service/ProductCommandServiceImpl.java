@@ -1,5 +1,10 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
+import jpa.basic.alldayprojectcommerce.domain.product.dto.request.ProductUpdateRequest;
+import jpa.basic.alldayprojectcommerce.domain.product.dto.response.ProductUpdateResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +15,7 @@ import jpa.basic.alldayprojectcommerce.domain.product.entity.Stock;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import jpa.basic.alldayprojectcommerce.domain.product.repository.StockRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -61,4 +67,26 @@ public class ProductCommandServiceImpl implements ProductCommandService {
         product.checkAvailability(quantity);
     }
 
+
+    @Override
+    @Caching(evict = {
+    @CacheEvict(value = "productDetail", key = "'product:' + #productId"),
+    @CacheEvict(value = "productSearch", allEntries = true)
+    })
+    public ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request){
+        Product product =  productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.update(
+                request.name(),
+                request.price(),
+                request.stock(),
+                request.description(),
+                request.category(),
+                request.imageUrl());
+
+        log.info("[캐시 갱신] productId: {}, name: {}", productId, request.name());
+        log.info("[캐시 삭제] productId: {}", productId);
+
+        return ProductUpdateResponse.from(product);
+    }
 }

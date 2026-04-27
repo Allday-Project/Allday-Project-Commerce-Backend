@@ -46,7 +46,8 @@ public class SecurityConfig {
                         "/api/products",
                         "/api/products/{productId}",
                         "/api/keywords/v1/top5",
-                        "/api/keywords/v2/top5"
+                        "/api/keywords/v2/top5",
+                        "/api/products/**"
                         ).permitAll()
                 .requestMatchers(
                         "/actuator/health",
