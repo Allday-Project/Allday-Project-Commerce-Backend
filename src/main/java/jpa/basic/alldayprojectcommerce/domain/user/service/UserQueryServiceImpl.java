@@ -2,6 +2,7 @@ package jpa.basic.alldayprojectcommerce.domain.user.service;
 
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
+import jpa.basic.alldayprojectcommerce.domain.user.dto.response.GetUnmaskedUserResponse;
 import jpa.basic.alldayprojectcommerce.domain.user.dto.response.GetmeUserResponse;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import jpa.basic.alldayprojectcommerce.domain.user.repository.UserRepository;
@@ -40,6 +41,12 @@ public class UserQueryServiceImpl implements UserQueryService {
     public GetmeUserResponse getProfile(Long userId) {
         User user = getById(userId);
         return GetmeUserResponse.from(user);
+    }
+
+    @Override
+    public GetUnmaskedUserResponse getUnmaskedProfile(Long userId) {
+        User user = getById(userId);
+        return GetUnmaskedUserResponse.from(user);
     }
 
     @Override

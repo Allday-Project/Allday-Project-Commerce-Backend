@@ -32,8 +32,8 @@ public class ProductQueryServiceImpl implements ProductQueryService {
 
     // 전체 조회
     @Override
-    public Page<GetAllProductResponse> getAllProduct(Pageable pageable){
-        return productRepository.findAllProducts(pageable)
+    public Page<GetAllProductResponse> getAllProduct(String category, String keyword, Pageable pageable){
+        return productRepository.findAllProducts(category, keyword, pageable)
                 .map(GetAllProductResponse::from);
     }
 

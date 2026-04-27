@@ -13,7 +13,7 @@
         <section class="mypage-section" id="mypage-section">
             <h1 class="mypage-title" id="mypage-title">내 정보</h1>
 
-            <form th:action="@{/mypage}" method="post" class="mypage-form" id="mypage-form">
+            <form class="mypage-form" id="mypage-form">
                 <!-- 개인정보 -->
                 <div class="info-section" id="info-personal">
                     <h2 class="info-section-title">개인정보</h2>
@@ -21,14 +21,14 @@
                     <div class="info-row" id="info-email">
                         <div class="info-label">이메일</div>
                         <div class="info-field">
-                            <span class="info-value" id="info-email-value" th:text="${user?.maskedEmail ?: 'gia*******@gmail.com'}">gia*******@gmail.com</span>
+                            <span class="info-value" id="info-email-value">로딩중...</span>
                         </div>
                     </div>
 
                     <div class="info-row" id="info-name">
                         <div class="info-label">이름</div>
                         <div class="info-field">
-                            <span class="info-value" id="info-name-value" th:text="${user?.name ?: '박경화'}">박경화</span>
+                            <span class="info-value" id="info-name-value">로딩중...</span>
                             <button type="button" class="info-edit-btn" id="btn-edit-name">변경</button>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                     <div class="info-row" id="info-phone">
                         <div class="info-label">전화번호</div>
                         <div class="info-field">
-                            <span class="info-value info-value-action" id="info-phone-value" th:text="${user?.phone ?: '전화번호 설정'}">전화번호 설정</span>
+                            <span class="info-value info-value-action" id="info-phone-value">로딩중...</span>
                             <button type="button" class="info-edit-btn" id="btn-edit-phone">설정</button>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                     <div class="info-row" id="info-address">
                         <div class="info-label">주소</div>
                         <div class="info-field">
-                            <span class="info-value info-value-action" id="info-address-value" th:text="${user?.address ?: '주소 설정'}">주소 설정</span>
+                            <span class="info-value info-value-action" id="info-address-value">로딩중...</span>
                             <button type="button" class="info-edit-btn" id="btn-edit-address">설정</button>
                         </div>
                     </div>

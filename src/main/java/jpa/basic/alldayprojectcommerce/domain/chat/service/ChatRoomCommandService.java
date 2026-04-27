@@ -3,6 +3,8 @@ package jpa.basic.alldayprojectcommerce.domain.chat.service;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.request.CreateChatRoomRequest;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatRoomResponse;
 
+import java.util.List;
+
 public interface ChatRoomCommandService {
 
     /**
@@ -29,4 +31,10 @@ public interface ChatRoomCommandService {
      * ADMIN 권한 필수
      */
     void joinChatRoom(Long adminId, Long roomId, String role);
+
+    /**
+     * 배치 자동 종료 - 스케쥴러 전용
+     * bulkCompleteRooms + saveAll을 하나의 트랜잭션으로 묶어 원자성 보장
+     */
+    void batchAutoCloseRooms(List<Long> roomIds, String closeMessage);
 }

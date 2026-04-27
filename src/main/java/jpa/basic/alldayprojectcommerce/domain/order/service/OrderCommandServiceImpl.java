@@ -80,11 +80,13 @@ public class OrderCommandServiceImpl implements OrderCommandService {
         Order savedOrder = orderRepository.save(order);
 
         // OrderItem 저장 - 스냅샷
+        List<OrderProduct> orderProducts = new ArrayList<>();
+
         for (int i = 0; i < request.orderItems().size(); i++) {
             OrderItemRequest itemRequest = request.orderItems().get(i);
             Product product = products.get(i);
 
-            orderProductRepository.save(OrderProduct.builder()
+            orderProducts.add(OrderProduct.builder()
                     .orderId(savedOrder.getId())
                     .productId(product.getId())
                     .productName(product.getName())
@@ -92,6 +94,8 @@ public class OrderCommandServiceImpl implements OrderCommandService {
                     .quantity(itemRequest.quantity())
                     .build());
         }
+
+        orderProductRepository.saveAll(orderProducts);
 
         log.info("[주문 생성] userId: {}, orderUid: {}, totalAmount: {}",
                 loginId, orderUid, totalAmount);
