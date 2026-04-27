@@ -30,8 +30,8 @@ public class RedissonLockAspect {
 
         return redissonLockService.executeWithLock(
                 key,
-                redissonLock.waitTimeSeconds(),
-                redissonLock.leaseTimeSeconds(),
+                redissonLock.waitTimeMillis(),
+                redissonLock.leaseTimeMillis(),
                 () -> proceed(joinPoint)
         );
     }

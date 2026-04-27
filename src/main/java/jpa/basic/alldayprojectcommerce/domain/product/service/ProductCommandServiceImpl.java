@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
+import jpa.basic.alldayprojectcommerce.domain.product.entity.ProductStatus;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.request.ProductUpdateRequest;
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.ProductUpdateResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +29,30 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     // 재고를 차감 한다.
     @Override
     public void decreaseStock(Long productId, int quantity, Long orderId) {
-        // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.decreaseStock(quantity);
         saveStockHistory(product, quantity, orderId);
+    }
+
+    // 재고를 차감 한다.
+    @Override
+    public Product decreaseStockWithPessimisticLock(Long productId, int quantity) {
+        Product product = productRepository.findByIdForUpdate(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (product.getStatus() != ProductStatus.ON_SALE) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        if (product.getStock() < quantity) {
+            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+        }
+
+        product.decreaseStock(quantity);
+        // TODO 비동기 방식으로 처리하기. 동시성 문제의 성능 개선을 위함
+//        saveStockHistory(product, quantity, orderId);
+        return product;
     }
 
     // 재고를 증가시킨다.
@@ -40,7 +60,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     public void increaseStock(Long productId, int quantity, Long orderId) {
         // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         product.increaseStock(quantity);
         saveStockHistory(product, -quantity, orderId);

@@ -1,10 +1,12 @@
 package jpa.basic.alldayprojectcommerce.common.lock.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
 public @interface RedissonLock {
 
     /**
@@ -14,15 +16,9 @@ public @interface RedissonLock {
     String key();
 
     /**
-     * 락 획득을 기다릴 최대 시간
+     * 🔥 milliseconds 기준으로 변경
      */
-    long waitTimeSeconds() default 3;
+    long waitTimeMillis() default 0;
 
-    /**
-     * 락 점유 시간
-     *
-     * - 양수: 지정 시간 후 자동 해제
-     * - -1: leaseTime 없이 watchdog 사용
-     */
-    long leaseTimeSeconds() default 5;
+    long leaseTimeMillis() default 3000;
 }

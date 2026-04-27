@@ -27,7 +27,17 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Fail Fast 전략 적용 버전
+     *  비관적 락 사용
+     * @param productId
+     * @param userId
+     * @return
+     */
+    public EventOrderResponse createEventOrderWithPessimisticLock(Long productId, Long userId) {
+        return eventOrderService.createEventOrderWithPessimisticLock(productId, userId);
+    }
+
+    /**
+     * Redis Lettuce 분산락 - Fail Fast 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -51,7 +61,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Retry 전략 적용 버전
+     * Redis Lettuce 분산락 - Retry 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -71,7 +81,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Blocking 전략 적용 버전
+     * Redis Lettuce 분산락 - Blocking 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -91,7 +101,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP FailFast 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP FailFast 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -103,7 +113,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP Retry 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP Retry 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -115,7 +125,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP Blocking 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP Blocking 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -126,36 +136,46 @@ public class EventOrderFacade {
         return eventOrderService.createEventOrder(productId, userId);
     }
 
+
     /**
-     * Redisson 분산락 - AOP 적용 버전
+     * Redisson 분산락 - FailFast
      *
-     * waitTimeSeconds:
-     * - 락 획득을 최대 몇 초까지 기다릴지.
-     * 짧으면 Retry 전략, 길면 Blocking 전략
-     *
-     * leaseTimeSeconds:
-     * - 락을 몇 초 동안 유지할지
-     * - 이 시간이 지나면 자동으로 락이 해제됨
-     *
-     * Retry + TTL
+     * 거의 기다리지 않고 락 획득 실패 시 바로 실패.
+     * 성능 비교용으로만 사용.
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 2,
-            leaseTimeSeconds = 5
+            waitTimeMillis = 0,
+            leaseTimeMillis = 3000 // TTL
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopFailFast(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redisson 분산락 - Retry + TTL
+     *
+     * 짧게 실패하지 않고 어느 정도 대기.
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeMillis = 5000,
+            leaseTimeMillis = 3000
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopRetry(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
     }
 
+
     /**
-     * Redisson 분산락 - AOP 적용 버전
-     * Blocking + TTL
+     * Redisson 분산락 - Blocking + TTL
+     *
+     * 재고 100개 완판을 목표로 충분히 기다림.
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 10,
-            leaseTimeSeconds = 10
+            waitTimeMillis = 10000,
+            leaseTimeMillis = 5000
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlocking(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
@@ -164,39 +184,48 @@ public class EventOrderFacade {
 
 
     /**
-     * Redisson 분산락 - Watchdog 적용 버전
+     * Redisson 분산락 - Retry + Watchdog
      *
-     * leaseTimeSeconds = -1
-     * - Redisson Watchdog 사용
-     * - 작업이 끝나기 전까지 락 TTL을 자동 연장
-     *
-     * Retry + Watchdog
+     * 락 획득은 최대 5초 대기,
+     * 락 획득 후에는 Watchdog이 TTL 자동 연장.
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 2,
-            leaseTimeSeconds = -1
+            waitTimeMillis = 5000,
+            leaseTimeMillis = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopRetryWatchdog(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
     }
 
     /**
-     * Redisson 분산락 - Watchdog 적용 버전
+     * Redisson 분산락 - Blocking + Watchdog
      *
-     * leaseTimeSeconds = -1
-     * - Redisson Watchdog 사용
-     * - 작업이 끝나기 전까지 락 TTL을 자동 연장
-     *
-     * Blocking + Watchdog
+     * 현재 테스트에서 가장 유력한 후보.
+     * 재고 100개를 최대한 정상 소진시키는 목적.
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 10,
-            leaseTimeSeconds = -1
+            waitTimeMillis = 10000,
+            leaseTimeMillis = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    /**
+     * Redisson 분산락 - Blocking + Watchdog + 비관락
+     *
+     * 현재 테스트에서 가장 유력한 후보.
+     * 재고 100개를 최대한 정상 소진시키는 목적.
+     */
+    @RedissonLock(
+            key = "'lock:product:' + #productId",
+            waitTimeMillis = 10000,
+            leaseTimeMillis = -1
+    )
+    public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdogWithPessimisticLock(Long productId, Long userId) {
+        return eventOrderService.createEventOrderWithPessimisticLock(productId, userId);
     }
 
 

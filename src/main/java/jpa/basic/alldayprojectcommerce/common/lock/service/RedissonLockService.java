@@ -20,10 +20,11 @@ public class RedissonLockService {
 
     public <T> T executeWithLock(
             String key,
-            long waitTimeSeconds,
-            long leaseTimeSeconds,
+            long waitTimeMillis,
+            long leaseTimeMillis,
             Supplier<T> supplier
     ) {
+
         /**
          * RLock = Redisson의 분산락 객체
          *
@@ -31,7 +32,6 @@ public class RedissonLockService {
          * - 내부적으로 Redis 사용
          */
         RLock lock = redissonClient.getLock(key);
-
         boolean locked = false;
 
         try {
@@ -45,7 +45,8 @@ public class RedissonLockService {
              * Retry -> waitTime > 0 짧게
              * Blocking -> waitTime을 크게
              */
-            if (leaseTimeSeconds < 0) {
+
+            if (leaseTimeMillis < 0) {
                 /**
                  * 🔥 watchdog 모드
                  *
@@ -54,7 +55,7 @@ public class RedissonLockService {
                  *
                  * Lettuce에서는 직접 구현 불가능
                  */
-                locked = lock.tryLock(waitTimeSeconds, TimeUnit.SECONDS);
+                locked = lock.tryLock(waitTimeMillis, TimeUnit.MILLISECONDS);
             } else {
                 /**
                  * 🔥 일반 TTL 방식
@@ -62,7 +63,7 @@ public class RedissonLockService {
                  * - leaseTime 지나면 자동 unlock
                  * - Lettuce의 TTL과 동일 개념
                  */
-                locked = lock.tryLock(waitTimeSeconds, leaseTimeSeconds, TimeUnit.SECONDS);
+                locked = lock.tryLock(waitTimeMillis, leaseTimeMillis, TimeUnit.MILLISECONDS);
             }
 
             /**

@@ -9,6 +9,7 @@ public interface ProductCommandService {
     void decreaseStock(Long productId, int quantity, Long orderId);
     void increaseStock(Long productId, int quantity, Long orderId);
     void saveStockHistory(Product product, int quantity, Long orderId);
+    Product decreaseStockWithPessimisticLock(Long productId, int quantity) ;
     void checkStock(Long productId, int quantity);
     ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request);
 
