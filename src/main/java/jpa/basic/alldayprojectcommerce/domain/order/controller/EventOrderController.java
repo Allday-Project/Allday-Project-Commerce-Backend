@@ -3,6 +3,7 @@ package jpa.basic.alldayprojectcommerce.domain.order.controller;
 import jpa.basic.alldayprojectcommerce.application.EventOrderFacade;
 import jpa.basic.alldayprojectcommerce.common.ApiResponse;
 import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderResponse;
+import jpa.basic.alldayprojectcommerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/events")
 public class EventOrderController {
     private final EventOrderFacade eventOrderFacade;
+    private final ProductRepository productRepository;
+
 
     /*
         동시성 확인을 위한 이벤트 티켓 무료 나눔 API
@@ -30,7 +33,15 @@ public class EventOrderController {
             @RequestParam Long userId
     ){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED, eventOrderFacade.createEventOrderWithRedissonLockAopRetry(productId, userId)));
+                .body(ApiResponse.success(HttpStatus.CREATED, eventOrderFacade.createEventOrderWithUpdateLock(productId, userId)));
+    }
+
+
+    @GetMapping("/products/{productId}/stock")
+    public int getStock(@PathVariable Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow()
+                .getStock();
     }
 
 }

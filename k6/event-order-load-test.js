@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import { sleep } from 'k6';
 import { Counter, Rate, Trend } from 'k6/metrics';
 
 export const options = {
@@ -34,7 +35,8 @@ export const options = {
     },
 };
 
-const BASE_URL = __ENV.BASE_URL || 'http://app:8090';
+// const BASE_URL = __ENV.BASE_URL || 'http://app:8090';
+const BASE_URL = __ENV.BASE_URL || 'http://nginx:80';
 const PRODUCT_ID = __ENV.PRODUCT_ID || '4';
 const START_USER_ID = Number(__ENV.START_USER_ID || '1');
 const SLOW_LIMIT_MS = Number(__ENV.SLOW_LIMIT_MS || '5000');
@@ -244,4 +246,42 @@ function parseJson(body) {
     } catch (e) {
         return null;
     }
+}
+
+/**
+ * teardown은 모든 VU의 요청이 끝난 뒤 1번 실행된다.
+ *
+ * 여기서 DB 기준 최종 재고 조회 API를 호출해서
+ * 실제 재고가 0인지 확인한다.
+ *
+ * 주의:
+ * Redis 재고가 아니라 DB 재고를 확인해야 최종 정합성 검증이 된다.
+ */
+export function teardown() {
+
+    /**
+     * 모든 트랜잭션이 DB 반영될 시간 확보
+     */
+    sleep(2); // 2~3초 추천
+
+    const stockUrl = `${BASE_URL}/api/events/products/${PRODUCT_ID}/stock`;
+
+    const res = http.get(stockUrl, {
+        timeout: '5s',
+    });
+
+    let finalStock = 'UNKNOWN';
+
+    if (res.status === 200) {
+        finalStock = Number(res.body);
+    }
+
+    console.log(`
+================= 최종 재고 검증 =================
+
+상품 ID: ${PRODUCT_ID}
+최종 재고: ${finalStock}
+
+==================================================
+`);
 }

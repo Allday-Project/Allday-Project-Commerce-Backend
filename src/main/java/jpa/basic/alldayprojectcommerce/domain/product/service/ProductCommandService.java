@@ -6,7 +6,8 @@ public interface ProductCommandService {
 
     void decreaseStock(Long productId, int quantity, Long orderId);
     void increaseStock(Long productId, int quantity, Long orderId);
-    void saveStockHistory(Product product, int quantity, Long orderId);
+//    void saveStockHistory(Product product, int quantity, Long orderId);
+void saveStockHistory(Long productId, int quantity, int currentStock, Long orderId);
     void checkStock(Long productId, int quantity);
 
 }

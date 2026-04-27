@@ -1,5 +1,6 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
+import jpa.basic.alldayprojectcommerce.common.lock.annotation.RedissonLock;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,36 +22,64 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     // 재고를 차감 한다.
     @Override
+//    @RedissonLock(
+//            key = "'lock:product:' + #productId",
+//            waitTimeSeconds = 1,
+//            leaseTimeSeconds = 3
+//    )
     public void decreaseStock(Long productId, int quantity, Long orderId) {
-        // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        product.decreaseStock(quantity);
-        saveStockHistory(product, quantity, orderId);
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+        int updatedRows = productRepository.decreaseStockIfAvailable(productId, quantity);
+
+        if (updatedRows == 0) {
+            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+        }
+
+//        Integer currentStock = productRepository.findStockByProductId(productId);
+//
+//        if (currentStock == null) {
+//            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+//        }
+
+        // TODO : 고트래픽 상황에서는 비동기 이벤트로 빼는 방법 고려하기. 추후 개선사항
+//        saveStockHistory(productId, -quantity, currentStock, orderId);
     }
+
+
+
 
     // 재고를 증가시킨다.
     @Override
     public void increaseStock(Long productId, int quantity, Long orderId) {
-        // TODO :  재고 증가 메서드인데 일반 조회 사용중. 추후 동시성 문제 해결 부분에서 비관적 락 적용 고려
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        product.increaseStock(quantity);
-        saveStockHistory(product, -quantity, orderId);
+        int updatedRows = productRepository.increaseStock(productId, quantity);
 
+        if (updatedRows == 0) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        Integer currentStock = productRepository.findStockByProductId(productId);
+
+        if (currentStock == null) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        saveStockHistory(productId, quantity, currentStock, orderId);
     }
 
-    // 재고를 재고 관리 테이블에 기록한다.
-    @Override
-    public void saveStockHistory(Product product, int quantity, Long orderId) {
-
+    public void saveStockHistory(Long productId, int quantity, int currentStock, Long orderId) {
         Stock stock = Stock.builder()
-                .productId(product.getId())
+                .productId(productId)
                 .changeStock(quantity)
-                .stock(product.getStock())
+                .stock(currentStock)
                 .orderId(orderId)
                 .build();
+
         stockRepository.save(stock);
     }
 

@@ -12,6 +12,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
     networks:
       - allday-project-net
     healthcheck:
@@ -38,25 +39,70 @@ services:
       retries: 20
       start_period: 5s
 
-
-  app:
+  app1:
     build: .
-    container_name: allday-project-commerce-app
+    container_name: allday-project-commerce-app1
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: prod,test
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       DB_URL: jdbc:mysql://mysql:3306/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+    networks:
+      - allday-project-net
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8090/actuator/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
+  app2:
+    build: .
+    container_name: allday-project-commerce-app2
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod,test
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      DB_URL: jdbc:mysql://mysql:3306/allday_project_commerce?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - allday-project-net
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8090/actuator/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-lb
     ports:
-      - "8090:8090"
+      - "8090:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      app1:
+        condition: service_healthy
+      app2:
+        condition: service_healthy
     networks:
       - allday-project-net
     restart: always
@@ -71,13 +117,12 @@ services:
     networks:
       - allday-project-net
     depends_on:
-      app:
+      nginx:
         condition: service_started
 
 volumes:
   mysql_data:
   redis_data:
-
 
 networks:
   allday-project-net:

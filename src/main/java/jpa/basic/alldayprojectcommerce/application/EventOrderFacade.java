@@ -192,10 +192,14 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 3,
+            waitTimeSeconds = 1,
             leaseTimeSeconds = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(Long productId, Long userId) {
+        return eventOrderService.createEventOrder(productId, userId);
+    }
+
+    public EventOrderResponse createEventOrderWithUpdateLock(Long productId, Long userId) {
         return eventOrderService.createEventOrder(productId, userId);
     }
 

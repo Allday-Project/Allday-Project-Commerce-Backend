@@ -4,11 +4,13 @@ import jpa.basic.alldayprojectcommerce.domain.user.entity.User;
 import jpa.basic.alldayprojectcommerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Profile("local")
 @Component
 @RequiredArgsConstructor
 public class DummyDataUser implements CommandLineRunner {

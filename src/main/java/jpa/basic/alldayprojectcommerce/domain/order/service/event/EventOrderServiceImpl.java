@@ -60,20 +60,21 @@ public class EventOrderServiceImpl implements EventOrderService {
 
         // 유저 한 명당 이벤트 상품은 하나만 구매 가능.
         // 이 상품에 대해서 주문 상태가 COMPLETED인 주문이 있는지 검증
+//         => TODO : 추후 개선사항. 중복 주문 검사는 조회보다 유니크 제약으로 막기
         if(orderProductRepository.existsCompletedEventOrder(productId,userId, OrderStatus.COMPLETED)){
             throw new CustomException(ErrorCode.EVENT_ORDER_ALREADY_EXISTS);
 
         }
 
-        // 판매 중인 상품인지 확인
-        if (product.getStatus() != ProductStatus.ON_SALE) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
-        }
+//        // 판매 중인 상품인지 확인 -> Update 쿼리로 적용
+//        if (product.getStatus() != ProductStatus.ON_SALE) {
+//            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+//        }
 
         // 재고 확인
-        if (product.getStock() < quantity) {
-            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
-        }
+//        if (product.getStock() < quantity) {
+//            throw new CustomException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+//        }
 
 
         // orderUid 생성
