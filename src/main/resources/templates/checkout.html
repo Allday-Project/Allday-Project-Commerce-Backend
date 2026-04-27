@@ -47,13 +47,13 @@
                         <div class="checkout-info-content" id="orderer-info">
                             <!-- 미등록 상태 -->
                             <div class="checkout-info-empty" id="orderer-empty">
-                                <p class="checkout-info-name" id="orderer-name" th:text="${orderer?.name ?: '박경화'}">박경화</p>
+                                <p class="checkout-info-name" id="orderer-name" th:text="${orderer?.name ?: '르탄이'}">르탄이</p>
                                 <p class="checkout-info-hint" id="orderer-hint">주문자를 등록해주세요.</p>
                                 <button class="checkout-register-btn" id="btn-register-orderer">등록</button>
                             </div>
                             <!-- 등록 완료 상태 (숨김) -->
                             <div class="checkout-info-filled" id="orderer-filled" style="display:none;">
-                                <p class="checkout-info-name" id="orderer-filled-name">박경화</p>
+                                <p class="checkout-info-name" id="orderer-filled-name">르탄이</p>
                                 <p class="checkout-info-detail" id="orderer-filled-email">example@gmail.com</p>
                                 <p class="checkout-info-detail" id="orderer-filled-phone">01012345678</p>
                                 <button class="checkout-change-btn" id="btn-change-orderer">변경</button>
