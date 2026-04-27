@@ -9,7 +9,18 @@ import lombok.*;
 
 @Getter
 @Entity
-@Table(name = "products")
+@Table(
+        name = "products",
+        indexes = {
+                // 단일 인덱스 : price 범위 검색 최적화
+                @Index(name = "idx_products_price", columnList = "price"),
+                // 단일 인덱스 : name 전방 검색 최적화 (LIKE '검색어%')
+                @Index(name = "idx_products_name", columnList = "name"),
+                // 복합 인덱스 : status 필터 + id 정렬 (페이징 쿼리 최적화)
+                @Index(name = "idx_products_status_id", columnList = "status, id"),
+                // 복합 인덱스 : category + status 동시 필터
+                @Index(name = "idx_products_category_status", columnList = "category, status")
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends BaseEntity {
 

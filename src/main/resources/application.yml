@@ -53,3 +53,9 @@ management:
   endpoint:
     health:
       show-details: always
+
+websocket:
+  allowed-origins: "http://localhost:3000,http://localhost:8090"
+
+chat:
+  inactivity-timeout-minutes: 10  # 비활성 기준 시간 (분)

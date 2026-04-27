@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // ArgumentResolver에서 authentication.getPrincipal()로 꺼낼 수 있도록 DTO로 감쌈
             LoginUserInfo loginUser = LoginUserInfo.builder()
                     .id(memberId)
+                    .role(role)
                     .build();
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(

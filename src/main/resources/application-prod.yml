@@ -22,9 +22,12 @@ spring:
 logging:
   level:
     root: info
-    com:
-      example:
-        alldayproject: info
+    jpa:
+      basic:
+        alldayprojectcommerce: info
     org:
       hibernate:
         SQL: info
+
+websocket:
+  allowed-origins: "https://<도메인 주소>.com"
