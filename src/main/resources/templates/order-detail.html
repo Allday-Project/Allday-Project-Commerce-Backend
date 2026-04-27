@@ -15,74 +15,25 @@
             <!-- 주문 기본 정보 -->
             <div class="order-detail-header" id="order-detail-header">
                 <div class="order-detail-meta">
-                    <p class="order-detail-date">주문 날짜 : <span id="detail-order-date" th:text="${order?.orderDate ?: '2025-03-10'}">2025-03-10</span></p>
-                    <p class="order-detail-number">주문 번호 : <span id="detail-order-number" th:text="${order?.orderNumber ?: 'ODN-20250319-a5b2c3d4'}">ODN-20250319-a5b2c3d4</span></p>
+                    <p class="order-detail-date">주문 날짜 : <span id="detail-order-date"></span></p>
+                    <p class="order-detail-number">주문 번호 : <span id="detail-order-number"></span></p>
+                    <div style="margin-top: 8px;">
+                        <span id="detail-order-status" style="background: #1a1a1a; color: white; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 500; display: inline-block;"></span>
+                    </div>
                 </div>
                 <button class="btn-cancel-order" id="btn-cancel-order">취소</button>
             </div>
 
             <!-- 배송 아이템 목록 -->
             <div class="delivery-items" id="delivery-items">
-                <!-- 서버 데이터 -->
-                <div class="delivery-item" th:each="item : ${order?.items}" th:id="'delivery-item-' + ${item.id}">
-                    <div class="delivery-item-inner">
-                        <div class="delivery-status-badge" th:text="${item.deliveryStatus}">배송 완료</div>
-                        <div class="delivery-item-content">
-                            <div class="delivery-item-img">
-                                <img th:if="${item.imageUrl}" th:src="${item.imageUrl}" th:alt="${item.productName}" class="item-img" loading="lazy">
-                                <div th:if="${item.imageUrl == null}" class="item-img-placeholder-md"></div>
-                            </div>
-                            <div class="delivery-item-info">
-                                <p>주문 상품 : <span th:text="${item.productName}">상품명</span></p>
-                                <p>수량 : <span th:text="${item.quantity}">1</span>개</p>
-                                <p>금액 : <span th:text="${#numbers.formatInteger(item.totalPrice, 1, 'COMMA')}">0</span> 원</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 더미 데이터 -->
-                <th:block th:if="${order == null}">
-                    <div class="delivery-item" id="delivery-item-demo-1">
-                        <div class="delivery-item-inner">
-                            <div class="delivery-status-badge">배송 완료</div>
-                            <div class="delivery-item-content">
-                                <div class="delivery-item-img">
-                                    <div class="item-img-placeholder-md"></div>
-                                </div>
-                                <div class="delivery-item-info">
-                                    <p>주문 상품 : <span>명서 볼캡</span></p>
-                                    <p>수량 : <span>2</span>개</p>
-                                    <p>금액 : <span>40,000</span> 원</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="delivery-item" id="delivery-item-demo-2">
-                        <div class="delivery-item-inner">
-                            <div class="delivery-status-badge">배송 완료</div>
-                            <div class="delivery-item-content">
-                                <div class="delivery-item-img">
-                                    <div class="item-img-placeholder-md"></div>
-                                </div>
-                                <div class="delivery-item-info">
-                                    <p>주문 상품 : <span>올데이프로젝트 응원봉</span></p>
-                                    <p>수량 : <span>1</span>개</p>
-                                    <p>금액 : <span>50,000</span> 원</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </th:block>
+                <!-- JS 렌더링 영역 -->
             </div>
 
             <!-- 총 주문 금액 -->
             <div class="order-total-bar" id="order-total-bar">
-                <span class="order-total-label">총 주문 금액:</span>
+                <span class="order-total-label">총 결제 금액:</span>
                 <span class="order-total-value" id="order-total-value">
-                    <span th:if="${order != null}" th:text="${#numbers.formatInteger(order.totalPrice, 1, 'COMMA')}">0</span>
-                    <span th:if="${order == null}">90,000</span>
-                    원
+                    0원
                 </span>
             </div>
 
@@ -92,19 +43,15 @@
                 <div class="detail-info-table">
                     <div class="detail-info-row">
                         <span class="detail-info-label">받는 사람</span>
-                        <span class="detail-info-value" id="recipient-name" th:text="${order?.recipientName ?: '박○희'}">박○희</span>
+                        <span class="detail-info-value" id="recipient-name"></span>
                     </div>
                     <div class="detail-info-row">
                         <span class="detail-info-label">연락처</span>
-                        <span class="detail-info-value" id="recipient-phone" th:text="${order?.recipientPhone ?: '01012345678'}">01012345678</span>
+                        <span class="detail-info-value" id="recipient-phone"></span>
                     </div>
                     <div class="detail-info-row">
                         <span class="detail-info-label">배송지</span>
-                        <span class="detail-info-value" id="recipient-address" th:text="${order?.shippingAddress ?: '서울 용산구 이태원로 95길 3층'}">서울 용산구 이태원로 95길 3층</span>
-                    </div>
-                    <div class="detail-info-row">
-                        <span class="detail-info-label">배송 요청 사항</span>
-                        <span class="detail-info-value" id="delivery-request" th:text="${order?.deliveryRequest ?: '문 앞에 두고 초인종 눌러주고 문자주고 다 해주세요 추가로 팩이도 해주세요'}">문 앞에 두고 초인종 눌러주고 문자주고 다 해주세요 추가로 팩이도 해주세요</span>
+                        <span class="detail-info-value" id="recipient-address"></span>
                     </div>
                 </div>
             </div>
@@ -115,37 +62,35 @@
                 <div class="detail-info-table">
                     <div class="detail-info-row">
                         <span class="detail-info-label">결제 수단</span>
-                        <span class="detail-info-value" id="payment-method" th:text="${order?.paymentMethod ?: '카카오뱅크 카드/일시불'}">카카오뱅크 카드/일시불</span>
+                        <span class="detail-info-value" id="payment-method">카카오페이</span>
                     </div>
                 </div>
                 <div class="payment-summary" id="payment-summary">
                     <div class="payment-summary-row">
                         <span>총 상품 가격</span>
                         <span id="payment-product-total">
-                            <span th:if="${order != null}" th:text="${#numbers.formatInteger(order.productTotal, 1, 'COMMA')}">0</span>
-                            <span th:if="${order == null}">90,000</span>
-                            원
+                            0 원
                         </span>
                     </div>
                     <div class="payment-summary-row">
                         <span>배송비</span>
                         <span id="payment-shipping-fee">
-                            <span th:if="${order != null}" th:text="${#numbers.formatInteger(order.shippingFee, 1, 'COMMA')}">0</span>
-                            <span th:if="${order == null}">3,000</span>
-                            원
+                            0 원
                         </span>
                     </div>
                     <div class="payment-summary-row payment-summary-total">
                         <span>총 결제 금액</span>
                         <span id="payment-grand-total">
-                            <span th:if="${order != null}" th:text="${#numbers.formatInteger(order.grandTotal, 1, 'COMMA')}">0</span>
-                            <span th:if="${order == null}">93,000</span>
-                            원
+                            0 원
                         </span>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+    
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/order-detail.js}"></script>
+    </th:block>
 </body>
 </html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>관리자 상담 목록</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/admin-consultation.css}">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content" class="admin-consultation-page">
+        <div class="page-header">
+            <h1 class="page-title">고객 상담 관리</h1>
+            <p class="page-subtitle">실시간으로 고객 상담을 확인하고 응대할 수 있습니다</p>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="status-tabs">
+            <button class="status-tab active" data-status="ALL" id="tab-all">
+                전체
+                <span class="tab-count" id="count-all">0</span>
+            </button>
+            <button class="status-tab" data-status="WAITING" id="tab-waiting">
+                대기중
+                <span class="tab-count" id="count-waiting">0</span>
+            </button>
+            <button class="status-tab" data-status="IN_PROGRESS" id="tab-in-progress">
+                상담중
+                <span class="tab-count" id="count-in-progress">0</span>
+            </button>
+            <button class="status-tab" data-status="COMPLETED" id="tab-completed">
+                완료
+                <span class="tab-count" id="count-completed">0</span>
+            </button>
+        </div>
+
+        <!-- Consultation List -->
+        <div class="consultation-list" id="consultation-list">
+            <!-- Consultations will be dynamically loaded here -->
+            <div class="consultation-loading">
+                <div class="loading-spinner"></div>
+                <p>상담 목록을 불러오는 중...</p>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="consultation-empty" id="consultation-empty" style="display: none;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+            <p class="empty-title">상담 내역이 없습니다</p>
+            <p class="empty-subtitle">고객이 상담을 요청하면 여기에 표시됩니다</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" id="pagination-container" style="display: none;">
+            <!-- Pagination will be rendered here -->
+        </div>
+    </main>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/admin-consultation.js}"></script>
+    </th:block>
+</body>
+</html>

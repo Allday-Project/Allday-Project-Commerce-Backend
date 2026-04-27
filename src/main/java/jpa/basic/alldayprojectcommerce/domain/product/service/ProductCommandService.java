@@ -1,5 +1,7 @@
 package jpa.basic.alldayprojectcommerce.domain.product.service;
 
+import jpa.basic.alldayprojectcommerce.domain.product.dto.request.ProductUpdateRequest;
+import jpa.basic.alldayprojectcommerce.domain.product.dto.response.ProductUpdateResponse;
 import jpa.basic.alldayprojectcommerce.domain.product.entity.Product;
 
 public interface ProductCommandService {
@@ -9,5 +11,8 @@ public interface ProductCommandService {
     void saveStockHistory(Product product, int quantity, Long orderId);
     Product decreaseStockWithPessimisticLock(Long productId, int quantity) ;
     void checkStock(Long productId, int quantity);
+    ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request);
+
+
 
 }

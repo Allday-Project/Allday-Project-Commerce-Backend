@@ -9,7 +9,15 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "order_products")
+@Table(
+        name = "order_products",
+        indexes = {
+                // findByOrderId, findByOrderIn
+                @Index(name = "idx_order_products_order_id", columnList = "order_id"),
+                // 이벤트 상품 중복 체크용
+                @Index(name = "idx_order_products_product_id", columnList = "product_id")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderProduct extends BaseEntity {
 

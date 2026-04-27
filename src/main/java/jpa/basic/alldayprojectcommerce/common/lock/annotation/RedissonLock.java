@@ -9,6 +9,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RedissonLock {
 
+    /**
+     * SpEL 기반 락 키
+     * 예: "'lock:product:' + #productId"
+     */
     String key();
 
     /**

@@ -10,7 +10,15 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "orders")
+@Table(
+        name = "orders",
+        indexes = {
+                // 커서 페이징 - WHERE user_id = ? AND id < ? ORDER BY id DESC
+                @Index(name = "idx_orders_user_id_id", columnList = "user_id, id DESC"),
+                // 상태별 조회
+                @Index(name = "idx_orders_status", columnList = "order_status")
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {
 
@@ -27,7 +35,7 @@ public class Order extends BaseEntity {
     private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "order_status", nullable = false)
+    @Column(name = "order_status", nullable = false, length = 30)
     private OrderStatus status;
 
     @Builder

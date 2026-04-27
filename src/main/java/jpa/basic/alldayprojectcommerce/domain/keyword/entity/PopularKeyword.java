@@ -27,7 +27,7 @@ public class PopularKeyword extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String keyword;         // 인기검색어 단어
 
     @Column(name = "keyword_rank", nullable = false)

@@ -10,8 +10,13 @@ import jpa.basic.alldayprojectcommerce.common.security.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import jpa.basic.alldayprojectcommerce.domain.user.service.UserQueryService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,6 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserQueryService userQueryService;
+
+    @GetMapping("/check-duplicate")
+    public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(@RequestParam String email) {
+        boolean duplicate = userQueryService.getByEmail(email).isPresent();
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK, duplicate));
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(

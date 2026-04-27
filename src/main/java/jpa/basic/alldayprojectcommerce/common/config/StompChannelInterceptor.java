@@ -59,16 +59,35 @@ public class StompChannelInterceptor implements ChannelInterceptor {
             log.info("[STOMP] 연결 성공 userId: {}, role: {}", userId, role);
         }
 
+        /**
+         * SUBSCRIBE 시점 - 구독 경로 권한 검증
+         *
+         * /sub/chat/{roomId} 구독 시 해당 방에 접근 권한이 있는지 확인
+         * 지금은 인증된 유저만 구독 가능하도록 1차 방어
+         */
+        if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            if (!(accessor.getUser() instanceof StompPrincipal)) {
+                log.warn("[STOMP] 인증되지 않은 구독 시도 차단");
+                throw new CustomException(ErrorCode.CHAT_UNAUTHORIZED);
+            }
+        }
+
         return message;
     }
 
-    // Authorization 헤더에서 Bearer 토큰 추출
+    // Authorization 헤더 및 Session Attributes에서 Bearer 토큰 추출
     private String extractToken(StompHeaderAccessor accessor) {
         String authHeader = accessor.getFirstNativeHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
+
+        java.util.Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+        if (sessionAttributes != null && sessionAttributes.containsKey("jwt_token")) {
+            return (String) sessionAttributes.get("jwt_token");
+        }
+
         return null;
     }
 }

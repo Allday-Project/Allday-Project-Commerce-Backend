@@ -30,6 +30,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/", "/login", "/signup",
+                        "/cart", "/mypage", "/orders", "/orders/**", "/checkout",
                         "/css/**", "/js/**", "/images/**",
                         "/assets/**", "/img/**", "/error", "/favicon.ico",
                         "/h2-console/**"
@@ -46,12 +47,13 @@ public class SecurityConfig {
                         "/api/products",
                         "/api/products/{productId}",
                         "/api/keywords/v1/top5",
-                        "/api/keywords/v2/top5"
+                        "/api/keywords/v2/top5",
+                        "/api/products/**"
                         ).permitAll()
                 .requestMatchers(
                         "/actuator/health",
                         "/api/events/**",
-                        "/ws-chat/**"
+                        "/ws/**", "/ws-chat/**"
                 ).permitAll()
                 .requestMatchers(
                         "/api/chat/admin/**"

@@ -15,6 +15,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompChannelInterceptor stompChannelInterceptor;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
     @Value("${websocket.allowed-origins}")
     private String allowedOrigins;
@@ -28,8 +29,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/sub");    // 구독 경로  prefix
-        registry.setApplicationDestinationPrefixes("/pub");      // 발행 경로  prefix
+        registry.enableSimpleBroker("/sub", "/queue");    // 구독 경로  prefix
+        registry.setApplicationDestinationPrefixes("/pub");                // 발행 경로  prefix
+        registry.setUserDestinationPrefix("/user");                        // 개인 세션 라우팅 prefix
     }
 
     /**
@@ -42,6 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns(allowedOrigins.split(","))      // 운영할 때는 도메인 지정
+                .addInterceptors(jwtHandshakeInterceptor)
                 .withSockJS();           // WebSocket 미지원 브라우저 fallback 처리
     }
 

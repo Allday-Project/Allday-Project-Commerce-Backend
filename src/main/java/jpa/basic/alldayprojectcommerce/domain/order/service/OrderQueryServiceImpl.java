@@ -19,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,17 +45,26 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         // size + 1개
         List<Order> orders = orderRepository.findByUserIdWithCursor(loginId, cursor, size);
 
-        return CursorResponse.of(
-                orders.stream()
-                        .map(order -> {
-                            List<OrderProduct> items = orderProductRepository.findByOrderId(order.getId());
-                            return GetAllOrdersResponse.from(order, items);
-                        }).toList(),
-                size,
-                dto -> orderRepository.findByOrderUid(dto.orderUid())
-                        .map(Order::getId)
-                        .orElse(null)
-        );
+        if (orders.isEmpty()) {
+            return CursorResponse.of(List.of(), size, dto -> null);
+        }
+
+        // 주문 ID 리스트 -> IN 쿼리 1번으로 상품 전부 조회
+        List<Long> orderIds = orders.stream().map(Order::getId).toList();
+
+        // orderId별 그룹핑 -> 메모리에서 매칭
+        Map<Long, List<OrderProduct>> productsByOrderId = orderProductRepository
+                .findByOrderIdIn(orderIds)
+                .stream()
+                .collect(Collectors.groupingBy(OrderProduct::getOrderId));
+
+        List<GetAllOrdersResponse> rawContent = orders.stream()
+                .map(order -> GetAllOrdersResponse.from(
+                        order,
+                        productsByOrderId.getOrDefault(order.getId(), Collections.emptyList())
+                )).toList();
+
+        return CursorResponse.of(rawContent, size, GetAllOrdersResponse::orderId);
     }
 
     /**

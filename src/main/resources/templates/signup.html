@@ -24,7 +24,7 @@
         <div class="signup-error" id="signup-error" th:if="${error}" th:text="${error}"></div>
 
         <!-- 회원가입 폼 -->
-        <form th:action="@{/signup}" method="post" class="signup-form" id="signup-form">
+        <form class="signup-form" id="signup-form">
             <div class="form-group" id="form-group-email">
                 <label for="email" class="form-label">이메일</label>
                 <div class="form-row">

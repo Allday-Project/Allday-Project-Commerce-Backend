@@ -87,7 +87,7 @@ public class KeywordQueryServiceImpl implements KeywordQueryService {
      * key      : 캐시 데이터 식별자
      */
     @Override
-    @Cacheable(value = "top5Keywords", key = "'top5'")
+    @Cacheable(value = "top5Keywords", key = "'top5'", unless = "#result.isEmpty()")
     public List<Top5KeywordResponse> getTop5Cached() {
         log.debug("[Top5 v2] 캐시 미스 → Redis/DB 조회");
         // 캐시가 없을 때만 실행

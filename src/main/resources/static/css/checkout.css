@@ -412,6 +412,50 @@
     background: #eede30;
 }
 
+/* Form Validation Errors */
+.modal-form-input.error {
+    border-color: #ff4444;
+    background: #fff5f5;
+}
+
+.field-error-message {
+    display: block;
+    font-size: 11px;
+    color: #ff4444;
+    margin-top: 4px;
+}
+
+/* Toast Messages */
+.toast-message {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 3000;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-message.success {
+    background: #4caf50;
+    color: #ffffff;
+}
+
+.toast-message.error {
+    background: #ff4444;
+    color: #ffffff;
+}
+
 /* ===========================
    Responsive
    =========================== */

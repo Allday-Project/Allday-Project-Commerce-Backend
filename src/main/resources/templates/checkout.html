@@ -47,13 +47,13 @@
                         <div class="checkout-info-content" id="orderer-info">
                             <!-- 미등록 상태 -->
                             <div class="checkout-info-empty" id="orderer-empty">
-                                <p class="checkout-info-name" id="orderer-name" th:text="${orderer?.name ?: '박경화'}">박경화</p>
+                                <p class="checkout-info-name" id="orderer-name" th:text="${orderer?.name ?: '르탄이'}">르탄이</p>
                                 <p class="checkout-info-hint" id="orderer-hint">주문자를 등록해주세요.</p>
                                 <button class="checkout-register-btn" id="btn-register-orderer">등록</button>
                             </div>
                             <!-- 등록 완료 상태 (숨김) -->
                             <div class="checkout-info-filled" id="orderer-filled" style="display:none;">
-                                <p class="checkout-info-name" id="orderer-filled-name">박경화</p>
+                                <p class="checkout-info-name" id="orderer-filled-name">르탄이</p>
                                 <p class="checkout-info-detail" id="orderer-filled-email">example@gmail.com</p>
                                 <p class="checkout-info-detail" id="orderer-filled-phone">01012345678</p>
                                 <button class="checkout-change-btn" id="btn-change-orderer">변경</button>
@@ -140,18 +140,6 @@
                             <input type="text" id="shipping-address-detail" class="modal-form-input" placeholder="한현면이가">
                         </div>
                     </div>
-                    <div class="modal-form-group">
-                        <label class="modal-form-label">전화번호</label>
-                        <input type="tel" id="shipping-phone" class="modal-form-input" placeholder="01012345678">
-                        <span class="modal-form-hint">( - )를 빼고 전화번호를 여러 수</span>
-                    </div>
-                    <div class="modal-form-group">
-                        <label class="modal-checkbox-label">
-                            <input type="checkbox" id="shipping-default" checked>
-                            <span class="modal-checkbox-custom"></span>
-                            <span>기본 배송지로 등록하며 해당 배송 주소를 등록합니다</span>
-                        </label>
-                    </div>
                     <button type="submit" class="modal-submit-btn" id="shipping-submit-btn">등록</button>
                 </form>
             </div>
@@ -164,15 +152,12 @@
                 <form id="orderer-form" class="shipping-form">
                     <div class="modal-form-group">
                         <label class="modal-form-label">이름</label>
-                        <input type="text" id="orderer-input-name" class="modal-form-input" placeholder="이름을 입력하세요">
-                    </div>
-                    <div class="modal-form-group">
-                        <label class="modal-form-label">이메일</label>
-                        <input type="email" id="orderer-input-email" class="modal-form-input" placeholder="example@gmail.com">
+                        <input type="text" id="orderer-input-name" class="modal-form-input" placeholder="홍길동">
                     </div>
                     <div class="modal-form-group">
                         <label class="modal-form-label">전화번호</label>
                         <input type="tel" id="orderer-input-phone" class="modal-form-input" placeholder="01012345678">
+                        <span class="modal-form-hint">연락 가능한 번호를 입력해주세요</span>
                     </div>
                     <button type="submit" class="modal-submit-btn" id="orderer-submit-btn">등록</button>
                 </form>
