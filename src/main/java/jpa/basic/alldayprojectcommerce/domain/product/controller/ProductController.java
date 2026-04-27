@@ -29,8 +29,10 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetAllProductResponse>>> getAll(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size =  10, page = 0, sort = "id",
                     direction = Sort.Direction.DESC) Pageable pageable){
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getAllProduct(pageable)));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(HttpStatus.OK, productQueryService.getAllProduct(category, keyword, pageable)));
     }
 }

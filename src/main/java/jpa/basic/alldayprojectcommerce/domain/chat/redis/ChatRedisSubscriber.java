@@ -40,6 +40,9 @@ public class ChatRedisSubscriber implements MessageListener {
             // 구독자 전체에게 브로드캐스트
             simpMessagingTemplate.convertAndSend("/sub/chat/" + roomId, response);
 
+            // 관리자 상담 목록 페이지에도 업데이트 알림 전송
+            simpMessagingTemplate.convertAndSend("/sub/admin/consultations", response);
+
             log.debug("[Redis Sub] roomId: {}, messageId: {}", roomId, response.id());
 
         } catch (Exception e) {

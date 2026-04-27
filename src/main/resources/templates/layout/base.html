@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/common.css}">
+    <!-- SockJS + STOMP for WebSocket -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <th:block layout:fragment="css"></th:block>
 </head>
 <body>
@@ -42,13 +45,29 @@
             </div>
             <div class="header-right">
                 <!-- 비로그인 상태 -->
-                <div class="auth-links" id="auth-links-guest" th:if="${session.user == null}">
+                <div class="auth-links" id="auth-links-guest" th:if="${user == null}">
                     <a th:href="@{/login}" class="auth-link" id="login-link">로그인</a>
                     <span class="auth-divider">|</span>
                     <a th:href="@{/signup}" class="auth-link" id="signup-link">회원가입</a>
                 </div>
                 <!-- 로그인 상태 -->
-                <div class="auth-links logged-in" id="auth-links-user" th:if="${session.user != null}">
+                <div class="auth-links logged-in" id="auth-links-user" th:if="${user != null}">
+                    <!-- Admin Consultation Button (only for ADMIN role) -->
+                    <a th:if="${user.role() == 'ADMIN'}" th:href="@{/admin/consultations}" class="header-icon-btn" id="admin-consultation-btn" title="상담 관리">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                            <circle cx="12" cy="11" r="2" fill="currentColor"/>
+                        </svg>
+                        <span class="badge" id="admin-chat-badge" style="display: none; background: #e53e3e; position: absolute; top: -5px; right: -5px;">0</span>
+                    </a>
+                    <span th:if="${user.role() == 'ADMIN'}" class="auth-divider">|</span>
+                    <a th:href="@{/mypage}" class="header-icon-btn" id="mypage-btn" title="마이페이지">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </a>
+                    <span class="auth-divider">|</span>
                     <a th:href="@{/cart}" class="header-icon-btn" id="cart-btn">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
@@ -58,20 +77,11 @@
                         <span class="badge" id="cart-badge">0</span>
                     </a>
                     <span class="auth-divider">|</span>
-                    <a th:href="@{/logout}" class="auth-link" id="logout-link">로그아웃</a>
+                    <a href="#" class="auth-link" id="logout-link">로그아웃</a>
                 </div>
             </div>
         </div>
-        <!-- 검색 키워드 바 (로그인 시) -->
-        <div class="search-keywords-bar" id="search-keywords-bar" th:if="${session.user != null}">
-            <div class="keywords-scroll">
-                <span class="keyword-tag">1. 한정판매</span>
-                <span class="keyword-tag">2. look at me</span>
-                <span class="keyword-tag">3. one more time</span>
-                <span class="keyword-tag">4. 리을 신상</span>
-                <span class="keyword-tag">5. 신상 앨범</span>
-            </div>
-        </div>
+        <!-- 검색 키워드 바 (제거됨 - 드롭다운으로 통합) -->
     </header>
 
     <!-- Main Content -->
@@ -84,19 +94,38 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
+            <span class="chatbot-notification-dot" id="chatbot-notification-dot" style="display: none;"></span>
         </button>
         <div class="chatbot-panel" id="chatbot-panel">
             <div class="chatbot-header">
                 <span class="chatbot-title">챗봇 상담</span>
+                <div class="chatbot-header-actions" style="display: flex; gap: 8px; align-items: center;">
+                    <button class="chatbot-end-btn" id="chatbot-end-btn" title="상담 종료" style="display: none; background: none; border: 1px solid #fff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">상담 종료</button>
+                    <button class="chatbot-close-btn" id="chatbot-close-btn" title="닫기">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="chatbot-body" id="chatbot-body">
-                <div class="chatbot-menu">
-                    <button class="chatbot-menu-btn" id="chatbot-order-btn">주문 내역 조회</button>
-                    <button class="chatbot-menu-btn" id="chatbot-cart-btn">장바구니 조회</button>
-                    <button class="chatbot-menu-btn" id="chatbot-mypage-btn">마이페이지</button>
-                    <button class="chatbot-menu-btn" id="chatbot-agent-btn">상담원 연결</button>
-                    <button class="chatbot-menu-btn chatbot-end-btn" id="chatbot-end-btn">상담 종료</button>
+                <div class="chatbot-menu" id="chatbot-menu">
+                    <!-- 일반 사용자 메뉴 -->
+                    <th:block th:if="${user == null || user.role() != 'ADMIN'}">
+                        <button class="chatbot-menu-btn" id="chatbot-order-btn">주문 내역 조회</button>
+                        <button class="chatbot-menu-btn" id="chatbot-cart-btn">장바구니 조회</button>
+                        <button class="chatbot-menu-btn" id="chatbot-mypage-btn">마이페이지</button>
+                        <button class="chatbot-menu-btn" id="chatbot-agent-btn">상담원 연결</button>
+                    </th:block>
+                    <!-- 관리자 전용 메뉴 -->
+                    <th:block th:if="${user != null && user.role() == 'ADMIN'}">
+                        <button class="chatbot-menu-btn" id="chatbot-admin-consultation-btn">상담 채팅 관리</button>
+                        <button class="chatbot-menu-btn" id="chatbot-admin-order-btn">전체 주문 관리</button>
+                        <button class="chatbot-menu-btn" id="chatbot-admin-product-btn">상품 관리</button>
+                    </th:block>
                 </div>
+                <!-- Messages will be dynamically rendered here -->
             </div>
             <div class="chatbot-footer">
                 <input type="text" class="chatbot-input" id="chatbot-input" placeholder="메시지를 입력하세요">
@@ -111,6 +140,12 @@
     </div>
 
     <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/chatbot.js}"></script>
+    <script th:inline="javascript">
+        // Pass user info to JS modules
+        window.isLoggedIn = /*[[${user != null}]]*/ false;
+        window.chatbotUserInfo = /*[[${user}]]*/ null;
+    </script>
     <th:block layout:fragment="scripts"></th:block>
 </body>
 </html>
