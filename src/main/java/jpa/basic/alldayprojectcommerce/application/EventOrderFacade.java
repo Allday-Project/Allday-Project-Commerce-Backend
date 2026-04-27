@@ -27,7 +27,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Fail Fast 전략 적용 버전
+     * Redis Lettuce 분산락 - Fail Fast 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -51,7 +51,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Retry 전략 적용 버전
+     * Redis Lettuce 분산락 - Retry 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -71,7 +71,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - Blocking 전략 적용 버전
+     * Redis Lettuce 분산락 - Blocking 전략 적용 버전
      *
      * 상품 기준으로 락을 걸어
      * 동일 상품에 대한 동시 주문을 직렬화한다.
@@ -91,7 +91,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP FailFast 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP FailFast 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -103,7 +103,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP Retry 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP Retry 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -115,7 +115,7 @@ public class EventOrderFacade {
     }
 
     /**
-     * Redis 분산락 - AOP Blocking 전략 적용 버전
+     * Redis Lettuce 분산락 - AOP Blocking 전략 적용 버전
      */
     @RedisLock(
             key = "'lock:product:' + #productId",
@@ -141,7 +141,7 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 2,
+            waitTimeSeconds = 1,
             leaseTimeSeconds = 5
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopRetry(Long productId, Long userId) {
@@ -192,7 +192,7 @@ public class EventOrderFacade {
      */
     @RedissonLock(
             key = "'lock:product:' + #productId",
-            waitTimeSeconds = 10,
+            waitTimeSeconds = 3,
             leaseTimeSeconds = -1
     )
     public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(Long productId, Long userId) {

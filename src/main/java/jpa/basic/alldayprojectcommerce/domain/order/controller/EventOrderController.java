@@ -30,7 +30,7 @@ public class EventOrderController {
             @RequestParam Long userId
     ){
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(HttpStatus.CREATED, eventOrderFacade.createEventOrderWithoutLock(productId, userId)));
+                .body(ApiResponse.success(HttpStatus.CREATED, eventOrderFacade.createEventOrderWithRedissonLockAopRetry(productId, userId)));
     }
 
 }

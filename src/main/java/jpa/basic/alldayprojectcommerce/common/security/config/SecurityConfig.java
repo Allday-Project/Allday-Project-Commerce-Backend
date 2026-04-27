@@ -38,7 +38,8 @@ public class SecurityConfig {
                         "/api/auth/login",
                         "/api/auth/signup",
                         "/api/auth/reissue",
-                        "/api/keywords/search"
+                        "/api/keywords/search",
+                        "/api/events/products/*/orders"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,
                         "/api/auth/check-duplicate",
