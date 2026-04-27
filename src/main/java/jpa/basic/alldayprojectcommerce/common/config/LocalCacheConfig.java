@@ -6,7 +6,7 @@ import jpa.basic.alldayprojectcommerce.common.cache.CacheName;
 import jpa.basic.alldayprojectcommerce.common.cache.CacheType;
 import jpa.basic.alldayprojectcommerce.common.cache.LocalCacheManager;
 import org.springframework.cache.Cache;
-import org.springframework.cache.annotation.EnableCaching;
+
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-@EnableCaching
 @Configuration
 public class LocalCacheConfig {
     // 로컬 캐시 설정 클래스

@@ -263,7 +263,7 @@ public class ProductCommandServiceImplTest {
                         .name(KEYWORD + i)
                         .price(10000L)
                         .description("테스트 설명 " + i)
-                        .category(Category.MERCHANDISE)  // 본인 프로젝트 enum 값으로
+                        .category(Category.MERCH)  // 본인 프로젝트 enum 값으로
                         .imageUrl("http://test.com/image" + i + ".jpg")
                         .stock(100)         // ← stock도 NOT NULL이면 추가
                         .status(ProductStatus.ON_SALE)

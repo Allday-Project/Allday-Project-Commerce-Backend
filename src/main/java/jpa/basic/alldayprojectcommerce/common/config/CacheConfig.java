@@ -1,11 +1,8 @@
 package jpa.basic.alldayprojectcommerce.common.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,13 +10,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@EnableCaching
 @Configuration
 public class CacheConfig {
 
     // 동시성 맵 캐시 관리자
     @Bean
-    public CacheManager cacheManager(){
+    public CacheManager caffeineCacheManager(){
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 "productSearchCache",
                 "top5Keywords"
@@ -36,17 +32,17 @@ public class CacheConfig {
         return cacheManager;
     }
 
-    public void logCacheStatus(CacheManager cacheManager) {
-        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("top5Keywords");
-
-        if (caffeineCache == null) {
-            log.warn("[캐시 통계] top5Keywords 캐시를 찾을 수 없습니다.");
-            return;
-        }
-
-        Cache<Object, Object> cache = caffeineCache.getNativeCache();
-
-        log.info("[캐시 통계] hit: {}, miss: {}, hitRate: {}",
-                cache.stats().hitCount(), cache.stats().missCount(), cache.stats().hitRate());
-    }
+//    public void logCacheStatus(CacheManager cacheManager) {
+//        CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache("top5Keywords");
+//
+//        if (caffeineCache == null) {
+//            log.warn("[캐시 통계] top5Keywords 캐시를 찾을 수 없습니다.");
+//            return;
+//        }
+//
+//        Cache<Object, Object> cache = caffeineCache.getNativeCache();
+//
+//        log.info("[캐시 통계] hit: {}, miss: {}, hitRate: {}",
+//                cache.stats().hitCount(), cache.stats().missCount(), cache.stats().hitRate());
+//    }
 }

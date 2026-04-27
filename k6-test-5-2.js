@@ -27,7 +27,7 @@ export default function () {
                     price: 20000,
                     stock: 100,
                     description: '수정된 볼캡',
-                    category: 'MERCHANDISE',
+                    category: 'MERCH',
                     imageUrl: 'image.jpg'
                 }),
                 { headers: { 'Content-Type': 'application/json' } }

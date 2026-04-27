@@ -13,7 +13,8 @@ public enum CacheName {
     // 캐시 이름, TTL, 캐시타입을 관리하는 이넘
 
     PRODUCT_SEARCH("productSearch", Duration.ofMinutes(5), CacheType.COMPOSITE, 500L),
-    PRODUCT_DETAIL("productDetail", Duration.ofMinutes(5), CacheType.COMPOSITE, 500L);
+    PRODUCT_DETAIL("productDetail", Duration.ofMinutes(5), CacheType.COMPOSITE, 500L),
+    TOP5_KEYWORDS("top5Keywords", Duration.ofMinutes(1), CacheType.LOCAL, 10L);
 
     private final String cacheName;
     private final Duration ttl;

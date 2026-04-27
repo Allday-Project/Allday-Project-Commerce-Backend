@@ -70,7 +70,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     @Override
     @Caching(evict = {
-    @CacheEvict(value = "productDetail", key = "'product:' + #productId", cacheManager = "cacheManager"),
+    @CacheEvict(value = "productDetail", key = "'product:' + #productId"),
     @CacheEvict(value = "productSearch", allEntries = true)
     })
     public ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request){

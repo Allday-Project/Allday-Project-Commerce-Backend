@@ -10,7 +10,7 @@ public record ProductUpdateRequest(
         String name,
         @NotNull @Min(0)
         Long price,
-        @NotNull @Min(0)
+        @Min(0)
         int stock,
         @NotBlank
         String description,
