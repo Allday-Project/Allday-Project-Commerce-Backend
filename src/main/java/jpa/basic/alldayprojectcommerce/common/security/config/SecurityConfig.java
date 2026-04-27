@@ -40,6 +40,9 @@ public class SecurityConfig {
                         "/api/auth/reissue",
                         "/api/keywords/search"
                 ).permitAll()
+                    .requestMatchers(HttpMethod.PUT,
+                            "/api/products/**")
+                    .permitAll()
                 .requestMatchers(HttpMethod.GET,
                         "/api/auth/check-duplicate",
                         "/api/products",

@@ -12,8 +12,8 @@ import java.util.List;
 public enum CacheName {
     // 캐시 이름, TTL, 캐시타입을 관리하는 이넘
 
-    PRODUCT_SEARCH("productSearch", Duration.ofMinutes(5), CacheType.COMPOSITE, 10L),
-    PRODUCT_DETAIL("productDetail", Duration.ofMinutes(5), CacheType.COMPOSITE, 10L);
+    PRODUCT_SEARCH("productSearch", Duration.ofMinutes(5), CacheType.COMPOSITE, 500L),
+    PRODUCT_DETAIL("productDetail", Duration.ofMinutes(5), CacheType.COMPOSITE, 500L);
 
     private final String cacheName;
     private final Duration ttl;

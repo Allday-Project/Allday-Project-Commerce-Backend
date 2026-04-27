@@ -4,7 +4,7 @@ import jpa.basic.alldayprojectcommerce.domain.product.dto.request.ProductUpdateR
 import jpa.basic.alldayprojectcommerce.domain.product.dto.response.ProductUpdateResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -69,8 +69,10 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
 
     @Override
-    @CachePut(value = "productDetail", key = "'product:' + #productId", cacheManager = "cacheManager")
+    @Caching(evict = {
+    @CacheEvict(value = "productDetail", key = "'product:' + #productId", cacheManager = "cacheManager"),
     @CacheEvict(value = "productSearch", allEntries = true)
+    })
     public ProductUpdateResponse updateProduct(Long productId, ProductUpdateRequest request){
         Product product =  productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
