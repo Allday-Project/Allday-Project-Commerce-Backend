@@ -58,8 +58,9 @@ public class OrderPaymentFacade {
             // 1. 재고 차감
             List<OrderProductInfo> orderProducts = orderQueryService.getOrderProducts(order.getId());
 
+            // 기본 주문에서는 분산락 적용 X, 비관락만 사용
             for (OrderProductInfo orderProduct : orderProducts) {
-                productCommandService.decreaseStock(orderProduct.productId(), orderProduct.quantity(), order.getId());
+                productCommandService.decreaseStockWithPessimisticLock(orderProduct.productId(), orderProduct.quantity());
             }
 
             // 2. OrderUser 스냅샷 저장

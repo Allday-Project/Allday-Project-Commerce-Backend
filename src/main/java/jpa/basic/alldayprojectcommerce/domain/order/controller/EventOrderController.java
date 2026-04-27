@@ -16,7 +16,16 @@ public class EventOrderController {
     private final EventOrderFacade eventOrderFacade;
 
     // 최종 선택
-
+    /**
+     * Redisson Blocking + Watchdog
+     */
+    @PostMapping("/products/{productId}/orders")
+    public ResponseEntity<ApiResponse<EventOrderResponse>> createEventOrder(
+            @PathVariable Long productId,
+            @RequestParam Long userId
+    ) {
+        return ok(eventOrderFacade.createEventOrderWithRedissonLockAopBlockingWatchdog(productId, userId));
+    }
 
 
 
