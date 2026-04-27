@@ -25,6 +25,10 @@ public class AdminInterceptor implements HandlerInterceptor {
         LoginUserInfo userInfo = (LoginUserInfo) authentication.getPrincipal();
         
         if (!"ADMIN".equals(userInfo.role())) {
+            if (request.getRequestURI().startsWith("/api/")) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                return false;
+            }
             response.sendRedirect("/");
             return false;
         }
