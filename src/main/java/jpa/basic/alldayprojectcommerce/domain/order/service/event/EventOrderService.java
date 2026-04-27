@@ -4,5 +4,6 @@ import jpa.basic.alldayprojectcommerce.domain.order.dto.response.EventOrderRespo
 
 public interface EventOrderService {
     EventOrderResponse createEventOrder(Long productId, Long userId);
+    EventOrderResponse createEventOrderWithPessimisticLock(Long productId, Long userId);
 
 }

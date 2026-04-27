@@ -112,4 +112,60 @@ public class EventOrderServiceImpl implements EventOrderService {
         return EventOrderResponse.from(orderUid, savedOrder.getStatus());
 
     }
+
+    @Override
+    public EventOrderResponse createEventOrderWithPessimisticLock(Long productId, Long userId) {
+
+        // 이벤트 아이템은 항상 유저 한명당 1개만 가능
+        int quantity = 1;
+
+        // 유저 검증
+        // 유저 정보를 사전에 미리 등록해놨어어야 주문 가능하도록 설계
+        User user = userQueryService.getById(userId);
+        if (!user.hasRequiredInfo()) {
+            throw new CustomException(ErrorCode.USER_ORDERER_INFO_REQUIRED);
+        }
+
+        // 유저 한 명당 이벤트 상품은 하나만 구매 가능.
+        // 이 상품에 대해서 주문 상태가 COMPLETED인 주문이 있는지 검증
+        if(orderProductRepository.existsCompletedEventOrder(productId,userId, OrderStatus.COMPLETED)){
+            throw new CustomException(ErrorCode.EVENT_ORDER_ALREADY_EXISTS);
+
+        }
+
+        // TODO :  비관적 락
+        Product product = productCommandService.decreaseStockWithPessimisticLock(productId, quantity);
+
+        // orderUid 생성
+        String orderUid = IdFactory.generateWithDate("ORD", 8);
+
+        // Order 저장 - orderId 발급
+        Order order = Order.builder()
+                .userId(userId)
+                .orderUid(orderUid)
+                .totalAmount(product.getPrice())
+                .status(OrderStatus.COMPLETED)
+                .build();
+
+        Order savedOrder = orderRepository.save(order);
+
+        // OrderItem 저장 - 스냅샷
+        orderProductRepository.save(OrderProduct.builder()
+                .orderId(savedOrder.getId())
+                .productId(product.getId())
+                .productName(product.getName())
+                .productPrice(product.getPrice())
+                .quantity(quantity)
+                .build());
+
+        // OrderUser 저장 - 스냅샷
+        orderCommandService.saveOrderUser(savedOrder.getId(), user.getName(), user.getPhone(), user.getAddress());
+
+
+        log.info("[이벤트 주문 생성] userId: {}, orderUid: {}, productId: {}",
+                userId, orderUid, product.getId());
+
+        return EventOrderResponse.from(orderUid, savedOrder.getStatus());
+
+    }
 }
