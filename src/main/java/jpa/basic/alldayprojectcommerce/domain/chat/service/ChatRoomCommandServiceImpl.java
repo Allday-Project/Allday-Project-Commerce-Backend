@@ -3,10 +3,12 @@ package jpa.basic.alldayprojectcommerce.domain.chat.service;
 import jpa.basic.alldayprojectcommerce.common.exception.CustomException;
 import jpa.basic.alldayprojectcommerce.common.exception.ErrorCode;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.request.CreateChatRoomRequest;
+import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatMessageResponse;
 import jpa.basic.alldayprojectcommerce.domain.chat.dto.response.ChatRoomResponse;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatMessage;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoom;
 import jpa.basic.alldayprojectcommerce.domain.chat.entity.ChatRoomStatus;
+import jpa.basic.alldayprojectcommerce.domain.chat.redis.ChatRedisPublisher;
 import jpa.basic.alldayprojectcommerce.domain.chat.repository.ChatMessageRepository;
 import jpa.basic.alldayprojectcommerce.domain.chat.repository.ChatRoomRepository;
 import jpa.basic.alldayprojectcommerce.domain.user.entity.UserRole;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,6 +30,8 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRedisPublisher chatRedisPublisher;
+    private final ChatRoomCreator chatRoomCreator;
 
     // 매직 넘버 방지
     private static final Integer ACTIVE_FLAG = 1;
@@ -43,33 +48,25 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
         return chatRoomRepository.findByUserIdAndActiveFlag(userId, ACTIVE_FLAG)
                 .map(existing -> {
                     log.info("[채팅방 기존 활성 방 반환 userId: {}, roomId: {}",
-                                                userId, existing.getId());
+                            userId, existing.getId());
                     return ChatRoomResponse.from(existing);
-                }).orElseGet(() -> createNewRoom(userId, request.title()));
-    }
-
-    private ChatRoomResponse createNewRoom(Long userId, String title) {
-        try {
-            ChatRoom newRoom = ChatRoom.builder()
-                    .userId(userId)
-                    .title(title)
-                    .build();
-
-            ChatRoom savedChatRoom = chatRoomRepository.save(newRoom);
-
-            chatMessageRepository.save(
-                    ChatMessage.systemMessage(savedChatRoom.getId(), "상담원을 연결 중입니다...")
-            );
-
-            log.info("[채팅방] 신규 생성 userId: {}, roomId: {}", userId, savedChatRoom.getId());
-            return ChatRoomResponse.from(savedChatRoom);
-        } catch (DataIntegrityViolationException e) {
-            // 동시 요청 경합
-            log.warn("[채팅방] 동시 생성 감지 -> 재조회 userId: {}", userId);
-            return chatRoomRepository.findByUserIdAndActiveFlag(userId, ACTIVE_FLAG)
-                    .map(ChatRoomResponse::from)
-                    .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS));
-        }
+                })
+                .orElseGet(() -> {
+                    try {
+                        // REQUIRES_NEW 별도 트랜잭션으로 실행
+                        return chatRoomCreator.createNewRoom(userId, request.title());
+                    } catch (DataIntegrityViolationException e) {
+                        /**
+                         * REQUIRES_NEW 트랜잭션이 롤백되고 세션도 폐기됨
+                         * 여기(부모 트랜잭션)의 세션은 오염되지 않은 상태
+                         * 깨끗한 세션으로 안전하게 재조회 가능
+                         */
+                        log.warn("[채팅방] 동시 생성 감지 -> 재조회 userId: {}", userId);
+                        return chatRoomRepository.findByUserIdAndActiveFlag(userId, ACTIVE_FLAG)
+                                .map(ChatRoomResponse::from)
+                                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS));
+                    }
+                });
     }
 
     @Override
@@ -85,9 +82,10 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
          */
         chatRoom.changeStatus(ChatRoomStatus.COMPLETED);
 
-        chatMessageRepository.save(
+        ChatMessage closeMsg = chatMessageRepository.save(
                 ChatMessage.systemMessage(roomId, "상담이 종료되었습니다.")
         );
+        chatRedisPublisher.publish(roomId, ChatMessageResponse.from(closeMsg));
 
         log.info("[채팅방] 종료 userId: {}, roomId: {}, by: {}", userId, roomId, role);
     }
@@ -103,9 +101,10 @@ public class ChatRoomCommandServiceImpl implements ChatRoomCommandService {
 
         chatRoom.changeStatus(ChatRoomStatus.IN_PROGRESS);
 
-        chatMessageRepository.save(
+        ChatMessage joinMsg = chatMessageRepository.save(
                 ChatMessage.systemMessage(roomId, "상담원이 연결되었습니다.")
         );
+        chatRedisPublisher.publish(roomId, ChatMessageResponse.from(joinMsg));
 
         log.info("[채팅방] 상담 시작 adminId: {}, roomId: {}", adminId, roomId);
     }

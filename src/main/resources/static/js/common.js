@@ -5,8 +5,42 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initSearch();
-    initChatbot();
+    initPopularKeywords();
+    initCartBadge();
+    initLogout();
 });
+
+function initLogout() {
+    const logoutBtn = document.getElementById('logout-link');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/';
+                })
+                .catch(() => {
+                    window.location.href = '/';
+                });
+        });
+    }
+}
+
+function initCartBadge() {
+    // 로그인한 유저만 카트 뱃지 업데이트
+    if (window.isLoggedIn) {
+        fetch('/api/cart')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data && data.data.content) {
+                    const count = data.data.content.length;
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) badge.textContent = count;
+                }
+            })
+            .catch(() => {});
+    }
+}
 
 /* ===========================
    Search
@@ -35,11 +69,10 @@ function initSearch() {
     if (keywordList) {
         keywordList.addEventListener('click', (e) => {
             const li = e.target.closest('li');
-            if (li) {
+            if (li && !li.classList.contains('empty-keyword')) {
                 const text = li.textContent.replace(/^\d+\.\s*/, '').trim();
                 searchInput.value = text;
                 searchDropdown.classList.remove('active');
-                // 검색 실행 (추후 연동)
                 performSearch(text);
             }
         });
@@ -69,107 +102,88 @@ function initSearch() {
 }
 
 function performSearch(query) {
-    console.log('검색:', query);
-    // TODO: 서버 검색 API 연동
+    // 검색어 기록 API 호출 (비동기, 결과 무시)
+    fetch('/api/keywords/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query })
+    }).catch(() => {});
+
+    // 검색 결과 페이지로 이동 (URL 파라미터로 검색어 전달)
+    window.location.href = `/?search=${encodeURIComponent(query)}`;
 }
 
 /* ===========================
-   Chatbot
+   Popular Keywords
    =========================== */
-function initChatbot() {
-    const toggleBtn = document.getElementById('chatbot-toggle');
-    const panel = document.getElementById('chatbot-panel');
-    const chatInput = document.getElementById('chatbot-input');
-    const sendBtn = document.getElementById('chatbot-send-btn');
-    const endBtn = document.getElementById('chatbot-end-btn');
-
-    if (!toggleBtn || !panel) return;
-
-    // 토글
-    toggleBtn.addEventListener('click', () => {
-        panel.classList.toggle('active');
-    });
-
-    // 외부 클릭으로 닫기
-    document.addEventListener('click', (e) => {
-        const container = document.getElementById('chatbot-container');
-        if (container && !container.contains(e.target)) {
-            panel.classList.remove('active');
-        }
-    });
-
-    // 상담 종료
-    if (endBtn) {
-        endBtn.addEventListener('click', () => {
-            panel.classList.remove('active');
-        });
+class PopularKeywords {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+        
+        this.loadKeywords();
     }
 
-    // 메시지 전송
-    if (sendBtn && chatInput) {
-        sendBtn.addEventListener('click', () => {
-            sendChatMessage(chatInput);
-        });
-
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendChatMessage(chatInput);
+    async loadKeywords() {
+        try {
+            const response = await fetch('/api/keywords/v2/top5');
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                this.renderKeywords(data.data);
+            } else {
+                this.renderEmptyState();
             }
+        } catch (error) {
+            console.error('인기 검색어 로드 실패:', error);
+            this.renderEmptyState();
+        }
+    }
+
+    renderKeywords(keywords) {
+        if (!keywords || keywords.length === 0) {
+            this.renderEmptyState();
+            return;
+        }
+
+        // Clear container
+        this.container.innerHTML = '';
+
+        // Render into dropdown list
+        keywords.forEach(keyword => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="keyword-rank">${keyword.rank}.</span> ${keyword.keyword}`;
+            
+            li.addEventListener('click', () => {
+                const searchInput = document.getElementById('search-input');
+                const searchDropdown = document.getElementById('search-dropdown');
+                if (searchInput) {
+                    searchInput.value = keyword.keyword;
+                    if (searchDropdown) searchDropdown.classList.remove('active');
+                    performSearch(keyword.keyword);
+                }
+            });
+            this.container.appendChild(li);
         });
     }
 
-    // 메뉴 버튼 클릭
-    const orderBtn = document.getElementById('chatbot-order-btn');
-    const cartBtn = document.getElementById('chatbot-cart-btn');
-    const mypageBtn = document.getElementById('chatbot-mypage-btn');
-    const agentBtn = document.getElementById('chatbot-agent-btn');
-
-    if (orderBtn) orderBtn.addEventListener('click', () => { window.location.href = '/orders'; });
-    if (cartBtn) cartBtn.addEventListener('click', () => { window.location.href = '/cart'; });
-    if (mypageBtn) mypageBtn.addEventListener('click', () => { window.location.href = '/mypage'; });
-    if (agentBtn) agentBtn.addEventListener('click', () => { addChatbotMessage('상담원을 연결 중입니다...'); });
-}
-
-function sendChatMessage(input) {
-    const message = input.value.trim();
-    if (!message) return;
-
-    addChatbotMessage(message, true);
-    input.value = '';
-
-    // TODO: 챗봇 API 연동
-    setTimeout(() => {
-        addChatbotMessage('죄송합니다, 현재 자동 응답 기능을 준비 중입니다.');
-    }, 800);
-}
-
-function addChatbotMessage(text, isUser = false) {
-    const body = document.getElementById('chatbot-body');
-    if (!body) return;
-
-    const msgEl = document.createElement('div');
-    msgEl.className = 'chatbot-message' + (isUser ? ' chatbot-message-user' : ' chatbot-message-bot');
-    msgEl.textContent = text;
-
-    // 스타일 인라인 (간단한 메시지)
-    msgEl.style.padding = '8px 12px';
-    msgEl.style.marginTop = '8px';
-    msgEl.style.borderRadius = '8px';
-    msgEl.style.fontSize = '13px';
-    msgEl.style.lineHeight = '1.5';
-    msgEl.style.maxWidth = '80%';
-
-    if (isUser) {
-        msgEl.style.background = '#1a1a1a';
-        msgEl.style.color = '#fff';
-        msgEl.style.marginLeft = 'auto';
-        msgEl.style.textAlign = 'right';
-    } else {
-        msgEl.style.background = '#f0f0f0';
-        msgEl.style.color = '#333';
+    renderEmptyState() {
+        this.container.innerHTML = '<li class="empty-keyword"><span style="color:#999;font-size:13px;">현재 인기 검색어가 없습니다</span></li>';
     }
 
-    body.appendChild(msgEl);
-    body.scrollTop = body.scrollHeight;
+    handleKeywordClick(keyword) {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = keyword;
+            performSearch(keyword);
+        }
+    }
+}
+
+function initPopularKeywords() {
+    // Initialize popular keywords component for all users inside the dropdown
+    const keywordList = document.getElementById('search-keyword-list');
+    if (keywordList) {
+        new PopularKeywords('search-keyword-list');
+    }
 }

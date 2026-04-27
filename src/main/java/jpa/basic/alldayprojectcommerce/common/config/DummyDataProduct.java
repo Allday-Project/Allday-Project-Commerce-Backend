@@ -26,11 +26,11 @@ public class DummyDataProduct implements CommandLineRunner {
             return;
         }
 
-        // 기존 더미데이터 3개 + 티켓
-        create("볼캡", 36000L, 100, "발렌타인 코듀로이 볼캡", ProductStatus.ON_SALE, Category.MERCHANDISE, "cap.png");
+        // 기존 더미데이터 3개 + 이벤트
+        create("볼캡", 36000L, 100, "발렌타인 코듀로이 볼캡", ProductStatus.ON_SALE, Category.MERCH, "cap.png");
         create("바이닐", 70000L, 50, "한정판 LP", ProductStatus.ON_SALE, Category.ALBUM,"vinyl.png");
-        create("슬로건", 15000L, 200, "공식 슬로건", ProductStatus.SOLD_OUT, Category.MERCHANDISE,"slogan.png");
-        create("티켓", 0L, 100, "티켓 구매권", ProductStatus.ON_SALE, Category.TICKET,"ticket.png");
+        create("슬로건", 15000L, 200, "공식 슬로건", ProductStatus.SOLD_OUT, Category.MERCH,"slogan.png");
+        create("이벤트 티켓", 0L, 100, "이벤트 티켓 구매권", ProductStatus.ON_SALE, Category.EVENT,"ticket.png");
 
         // 더미데이터 50,000건 추가
         Category[] categories = Category.values();

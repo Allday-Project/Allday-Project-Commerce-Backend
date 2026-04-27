@@ -43,6 +43,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns(allowedOrigins.split(","))      // 운영할 때는 도메인 지정
+                .addInterceptors(new JwtHandshakeInterceptor())
                 .withSockJS();           // WebSocket 미지원 브라우저 fallback 처리
     }
 

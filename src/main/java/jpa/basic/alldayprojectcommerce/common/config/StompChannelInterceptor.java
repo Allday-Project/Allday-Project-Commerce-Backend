@@ -75,13 +75,19 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         return message;
     }
 
-    // Authorization 헤더에서 Bearer 토큰 추출
+    // Authorization 헤더 및 Session Attributes에서 Bearer 토큰 추출
     private String extractToken(StompHeaderAccessor accessor) {
         String authHeader = accessor.getFirstNativeHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
+
+        java.util.Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+        if (sessionAttributes != null && sessionAttributes.containsKey("jwt_token")) {
+            return (String) sessionAttributes.get("jwt_token");
+        }
+
         return null;
     }
 }
