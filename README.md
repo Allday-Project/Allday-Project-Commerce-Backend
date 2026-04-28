@@ -31,9 +31,9 @@
 
 | 역할 | 이름 | 담당 업무                                                  |
 |------|------|--------------------------------------------------------|
-| 👑 리더·개발 | 이재민 | 마일스톤, 인증/인가(JWT), 공통 코드, 주문 도메인, 프론트엔드, 실시간 채팅, 인기 검색어 |
-| 💳 개발·기록 | 문혜린 | 사용자 도메인, 회의록·SA 문서, API 명세서, ERD                       |
-| 📦 개발 | 박경화 | 상품 도메인, 프론트엔드                                          |
+| 👑 리더·개발 | 이재민 | 마일스톤, 인증/인가(JWT), 공통 코드, 주문 도메인, 실시간 채팅, 인기 검색어 |
+| 💳 개발·기록 | 문혜린 | 사용자 도메인, 장바구니 상품 도메인, 회의록·SA 문서, API 명세서, ERD, 인덱싱                       |
+| 📦 개발 | 박경화 | 상품 도메인, 재고 관리, 상품 검색 캐싱                                          |
 | 💰 개발 | 박소영 | 결제 도메인, 주문 및 재고차감 상태 전이, API 명세서, ERD, Docker-Compose , 동시성       
 
 ---
@@ -405,10 +405,10 @@ k6 성능 테스트 결과 — v1(DB) vs v2(캐시) 응답 시간 비교표
 | TPS | 266.72req/s | 470.44req/s | 76.3% 향상 |
 
 v1 성능 테스트 결과 사진
-<img width="1878" height="1181" alt="1-1v1" src="https://github.com/user-attachments/assets/e207e32d-82f3-4ccc-bf34-7ff031d4b9d9" />
+<img width="800" height="450" alt="1-1v1" src="https://github.com/user-attachments/assets/e207e32d-82f3-4ccc-bf34-7ff031d4b9d9" />
 
 v2 성능 테스트 결과 사진
-<img width="1869" height="1241" alt="1-1v2" src="https://github.com/user-attachments/assets/ea4ab649-2777-4377-9e18-51c33e056738" />
+<img width="800" height="450" alt="1-1v2" src="https://github.com/user-attachments/assets/ea4ab649-2777-4377-9e18-51c33e056738" />
 
 
 ### 캐시 무효화 (`@CacheEvict`)
@@ -579,56 +579,25 @@ CREATE INDEX idx_products_status_id ON products (status, id);
 -- category + status 동시 필터링
 CREATE INDEX idx_products_category_status ON products (category, status);
 ```
-
-#### orders 테이블
-
-```sql
--- 유저별 주문 커서 페이징: WHERE user_id = ? AND id < ? ORDER BY id DESC
-CREATE INDEX idx_orders_user_id_id ON orders (user_id, id DESC);
-
--- 상태별 조회
-CREATE INDEX idx_orders_status ON orders (order_status);
-```
-
-#### order_products 테이블
-
-```sql
--- findByOrderId, findByOrderIdIn 최적화
-CREATE INDEX idx_order_products_order_id ON order_products (order_id);
-
--- 이벤트 상품 중복 체크
-CREATE INDEX idx_order_products_product_id ON order_products (product_id);
-```
-
-#### search_keywords 테이블
-
-```sql
--- 날짜별 검색 횟수 순위 조회
-CREATE INDEX idx_search_date_count ON search_keywords (search_date, search_count);
-CREATE INDEX idx_keyword ON search_keywords (keyword);
-```
-
-#### chat_messages 테이블
-
-```sql
--- 커서 기반 페이징: WHERE room_id = ? AND id < ? ORDER BY id DESC
-CREATE INDEX idx_chat_messages_room_cursor ON chat_messages (room_id, id);
-```
+<img width="1619" height="266" alt="인덱스 적용" src="https://github.com/user-attachments/assets/0a1025db-9153-45b3-b64d-c3d551be65f4" />
 
 ### EXPLAIN 분석 결과
 
-<<EXPLAIN 실행 계획 Before 사진 (Full Table Scan — type=ALL, key=NULL)>>
+<<EXPLAIN 실행 계획 Before 사진>>
+<img width="1514" height="458" alt="스크린샷 2026-04-23 192149" src="https://github.com/user-attachments/assets/b4cbe01d-5076-459a-8355-9207133e85cb" />
 
-<<EXPLAIN 실행 계획 After 사진 (Index 사용 — type=ref, key=인덱스명)>>
+<<EXPLAIN 실행 계획 After 사진>>
+<img width="1552" height="680" alt="적용했지만 실패" src="https://github.com/user-attachments/assets/502f7fa8-b05e-43b3-a6e0-acbf26ab31bf" />
+
+<<EXPLAIN 실행 계획 best 사진>>
+<img width="1641" height="446" alt="최적의 쿼리" src="https://github.com/user-attachments/assets/bcf47538-5734-476c-820f-9bffe8f0f731" />
 
 | 지표 | 인덱스 적용 전 | 인덱스 적용 후 |
 |------|---------------|---------------|
 | type | ALL (Full Table Scan) | ref / range |
 | key | NULL | 해당 인덱스명 |
-| rows | <<전체 행 수>> | <<스캔 행 수>> |
+| rows | 49680 | 18170 |
 | Extra | Using filesort | - |
-
-<<쿼리 응답시간 Before/After 비교 그래프 (5만건 데이터 기준)>>
 
 ---
 
