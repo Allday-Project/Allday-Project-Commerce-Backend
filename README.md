@@ -395,17 +395,21 @@ public RestPage<SearchProductResponse> searchProductsV2(
 
 **테스트 조건:** VU 50명, 30초, 동일 키워드(`apple`) 반복 요청
 
-<<k6 성능 테스트 결과 — v1(DB) vs v2(캐시) 응답 시간 비교 그래프>>
+k6 성능 테스트 결과 — v1(DB) vs v2(캐시) 응답 시간 비교표
+<img width="819" height="538" alt="image" src="https://github.com/user-attachments/assets/b77bfd6c-6046-4ce7-9953-75cab2f68b0a" />
 
 | 지표 | v1 (DB) | v2 (캐시) | 개선율 |
 |------|---------|-----------|--------|
-| 평균 응답시간 | <<v1 평균 응답시간>> ms | <<v2 평균 응답시간>> ms | <<개선율>>% |
-| p95 응답시간 | <<v1 p95>> ms | <<v2 p95>> ms | - |
-| TPS | <<v1 TPS>> | <<v2 TPS>> | - |
+| 평균 응답시간 | 91.54 ms | 9.29 ms | 89.8% 향상 |
+| p95 응답시간 | 126.61 ms | 15.83 ms | 87.5% 향상 |
+| TPS | 266.72req/s | 470.44req/s | 76.3% 향상 |
 
-<<v1 성능 테스트 결과 사진>>
+v1 성능 테스트 결과 사진
+<img width="1878" height="1181" alt="1-1v1" src="https://github.com/user-attachments/assets/e207e32d-82f3-4ccc-bf34-7ff031d4b9d9" />
 
-<<v2 성능 테스트 결과 사진>>
+v2 성능 테스트 결과 사진
+<img width="1869" height="1241" alt="1-1v2" src="https://github.com/user-attachments/assets/ea4ab649-2777-4377-9e18-51c33e056738" />
+
 
 ### 캐시 무효화 (`@CacheEvict`)
 
