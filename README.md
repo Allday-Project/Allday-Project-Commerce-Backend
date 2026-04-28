@@ -1,7 +1,7 @@
 # 🛒 Allday Project Commerce
 
 > **Allday Project** 아티스트의 공식 굿즈·앨범·이벤트 티켓을 판매하는 커머스 플랫폼  
-> 회원가입·로그인부터 상품 조회, 장바구니, 주문, 결제 확정, 환불, 실시간 채팅 상담까지  
+> 회원가입·로그인부터 상품 조회, 장바구니, 주문, 결제 확정, 실시간 채팅 상담까지  
 > 커머스의 전체 흐름을 직접 설계하고 구현한 프로젝트입니다.
 
 **프로젝트 기간:** 2026.04.08 ~ 2026.04.28  
@@ -14,11 +14,11 @@
 
 1. [팀원별 역할](#-팀원별-역할)
 2. [기술 스택](#-기술-스택)
-3. [핵심 설계 결정사항](#-핵심-설계-결정사항)
+3. [핵심 설계 결정 사항](#-핵심-설계-결정사항)
 4. [ERD 설계](#-erd-설계)
 5. [패키지 구조](#-패키지-구조)
 6. [API 명세](#-api-명세)
-7. [필수 구현 — 동시성 제어](#-필수-구현--동시성-제어)
+7. [도전 구현 — 동시성 제어](#-필수-구현--동시성-제어)
 8. [필수 구현 — 캐싱 및 인기 검색어](#-필수-구현--캐싱-및-인기-검색어)
 9. [도전 구현 — 실시간 채팅](#-도전-구현--실시간-채팅)
 10. [도전 구현 — 인덱스 최적화](#-도전-구현--인덱스-최적화)
@@ -27,15 +27,14 @@
 13. [로컬 실행 방법](#-로컬-실행-방법)
 
 ---
-
 ## 👥 팀원별 역할
 
-| 역할 | 이름 | 담당 업무 |
-|------|------|-----------|
-| 👑 리더·개발 | 이재민 | 마일스톤, 인증/인가(JWT), 공통 코드, 주문 도메인, 프론트엔드 |
-| 💳 개발·기록 | 문혜린 | 사용자 도메인, 회의록·SA 문서, API 명세서, ERD |
-| 📦 개발 | 박경화 | 상품 도메인, 프론트엔드 |
-| 💰 개발 | 박소영 | 결제·환불 도메인, API 명세서, ERD |
+| 역할 | 이름 | 담당 업무                                                  |
+|------|------|--------------------------------------------------------|
+| 👑 리더·개발 | 이재민 | 마일스톤, 인증/인가(JWT), 공통 코드, 주문 도메인, 프론트엔드, 실시간 채팅, 인기 검색어 |
+| 💳 개발·기록 | 문혜린 | 사용자 도메인, 회의록·SA 문서, API 명세서, ERD                       |
+| 📦 개발 | 박경화 | 상품 도메인, 프론트엔드                                          |
+| 💰 개발 | 박소영 | 결제 도메인, 주문 및 재고차감 상태 전이, API 명세서, ERD, Docker-Compose , 동시성       
 
 ---
 
@@ -59,96 +58,26 @@
 
 ## 🔑 핵심 설계 결정사항
 
-| 항목 | 결정 내용 |
-|------|-----------|
-| 인증 방식 | JWT Access Token(30분) + Refresh Token(7일), HttpOnly 쿠키 저장 |
+| 항목 | 결정 내용                                                                   |
+|------|-------------------------------------------------------------------------|
+| 인증 방식 | JWT Access Token(30분) + Refresh Token(7일), HttpOnly 쿠키 저장               |
 | 주문 식별자 | NanoId 기반 날짜 포함 UID — `ORD-YYYYMMDD-XXXXXXXX` / `PAY-YYYYMMDD-XXXXXXXX` |
-| 재고 차감 시점 | 결제 확정(서버 검증 완료) 후 차감. 변경 이력은 `product_stock_logs`에 기록 |
-| 동시성 처리 | Lettuce 기반 Redis 분산 락 (FAIL_FAST / RETRY / BLOCKING) + Redisson (Watchdog) + AOP |
-| 주문 스냅샷 | 결제 완료 시 `order_products`(상품명·가격) + `order_users`(주문자 정보) 별도 저장 |
-| 페이징 방식 | 주문·장바구니: 커서 기반 무한 스크롤 / 상품 목록: Offset 페이징 (QueryDSL) |
-| 인기 검색어 | Redis ZSet 실시간 집계 → 1시간마다 DB Write-back → 자정 Top5 스냅샷. Caffeine L1 캐시 |
-| 실시간 채팅 | WebSocket + STOMP + Redis Pub/Sub (다중 서버 브로드캐스트 지원) |
-| 캐시 구조 | L1(Caffeine 로컬) + L2(Redis) CompositeCacheManager 이중 적용 |
-| 환불 범위 | 전액 환불만 구현 (부분 환불 미지원) |
-| 배송비 | 3,000원 고정 (50,000원 이상 구매 시 무료) |
-| 채팅방 제한 | 유저당 활성 채팅방 1개. `UNIQUE(user_id, active_flag)` NULL 트릭 |
+| 재고 차감 시점 | 결제 확정(서버 검증 완료) 후 차감. 변경 이력은 `product_stock_logs`에 기록                   |
+| 동시성 처리 | Redisson 기반 Redis 분산락 - BLOCKING Watchdog + AOP ,Pessimistic Lock       |
+| 주문 스냅샷 | 결제 완료 시 `order_products`(상품명·가격) + `order_users`(주문자 정보) 별도 저장          |
+| 페이징 방식 | 주문·장바구니: 커서 기반 무한 스크롤 / 상품 목록: Offset 페이징 (QueryDSL)                    |
+| 인기 검색어 | Redis ZSet 실시간 집계 → 1시간마다 DB Write-back → 자정 Top5 스냅샷. Caffeine L1 캐시   |
+| 실시간 채팅 | WebSocket + STOMP + Redis Pub/Sub (다중 서버 브로드캐스트 지원)                     |
+| 캐시 구조 | L1(Caffeine 로컬) + L2(Redis) CompositeCacheManager 이중 적용                 |
+| 배송비 | 3,000원 고정 (50,000원 이상 구매 시 무료)                                          |
+| 채팅방 제한 | 유저당 활성 채팅방 1개. `UNIQUE(user_id, active_flag)` NULL 트릭                   |
 
 ---
 
 ## 🗂️ ERD 설계
 
 <<ERD 전체 다이어그램 이미지>>
-
-### 주요 테이블 설명
-
-<details>
-<summary><b>users — 사용자</b></summary>
-
-| 컬럼 | 타입 | 설명 |
-|------|------|------|
-| id | BIGINT PK | AUTO_INCREMENT |
-| name | VARCHAR(20) | NULL 허용 |
-| email | VARCHAR(100) | UNIQUE NOT NULL |
-| password | VARCHAR(255) | BCrypt 암호화 |
-| phone | VARCHAR(100) | NULL 허용 |
-| address | VARCHAR(250) | NULL 허용 |
-| role | ENUM(ADMIN, USER) | NOT NULL DEFAULT USER |
-
-</details>
-
-<details>
-<summary><b>products — 상품</b></summary>
-
-| 컬럼 | 타입 | 설명 |
-|------|------|------|
-| id | BIGINT PK | AUTO_INCREMENT |
-| name | VARCHAR(100) | NOT NULL |
-| price | BIGINT | NOT NULL (≥0) |
-| stock | INT | NOT NULL (≥0) |
-| status | ENUM | ON_SALE / SOLD_OUT / DISCONTINUED |
-| category | ENUM | ALBUM / MERCH / EVENT |
-
-> **INDEX:** `price` / `name` / `(status, id)` / `(category, status)`
-
-</details>
-
-<details>
-<summary><b>orders — 주문 / order_products — 주문 스냅샷 / order_users — 주문자 스냅샷</b></summary>
-
-- `orders`: `order_uid`(NanoId 기반 비즈니스 식별자) 사용, 내부 PK 외부 노출 방지
-- `order_products`: 결제 완료 시 상품명·가격 스냅샷 저장 (상품 수정 후에도 주문 당시 정보 보존)
-- `order_users`: 결제 완료 시 주문자 정보 스냅샷 저장
-
-> **INDEX:** `(user_id, id DESC)` — 커서 기반 페이징 최적화
-
-</details>
-
-<details>
-<summary><b>payments — 결제 / refunds — 환불</b></summary>
-
-- `payments`: `payment_uid`(PAY-YYYYMMDD-XXXXXXXX), `expires_at`(생성 후 5분) 관리
-- `refunds`: 환불 요청(REQUESTED) → 완료(SUCCESS) / 실패(FAILED) 상태 관리
-
-</details>
-
-<details>
-<summary><b>search_keywords / popular_keywords — 인기 검색어</b></summary>
-
-- `search_keywords`: `UNIQUE(keyword, search_date)` — 날짜별 검색 횟수 집계
-- `popular_keywords`: 자정 Top5 스냅샷. `is_fallback=true`는 대체 키워드
-
-</details>
-
-<details>
-<summary><b>chat_rooms / chat_messages — 실시간 채팅</b></summary>
-
-- `chat_rooms`: `UNIQUE(user_id, active_flag)` + NULL 트릭으로 활성 방 1개 제한
-- `chat_messages`: `INDEX(room_id, id)` — 커서 기반 페이징 최적화
-
-</details>
-
----
+![img.png](images/ERD.png)
 
 ## 📁 패키지 구조
 
@@ -167,7 +96,7 @@ src/main/java/jpa/basic/alldayprojectcommerce/
 │   ├── exception/               # GlobalExceptionHandler, ErrorCode, CustomException
 │   ├── lock/
 │   │   ├── annotation/          # @RedisLock, @RedissonLock
-│   │   ├── aspect/              # RedisLockAspect, RedissonLockAspect (SpEL 키 파싱)
+│   │   ├── aspect/              # RedisLockAspect, RedissonLockAspect
 │   │   ├── enums/               # RedisLockStrategy (FAIL_FAST, RETRY, BLOCKING)
 │   │   ├── repository/          # RedisLockRepository (SET NX + Lua Script 해제)
 │   │   └── service/             # RedisLockService, RedissonLockService
@@ -184,7 +113,6 @@ src/main/java/jpa/basic/alldayprojectcommerce/
     ├── order/                   # 주문 (주문서 생성·조회·상세·이벤트 주문)
     │   └── service/event/       # EventOrderService (이벤트 전용 주문 로직)
     ├── payment/                 # 결제 (생성·확정·멱등성 보장)
-    ├── refund/                  # 환불 (요청·상태 관리)
     ├── keyword/                 # 인기 검색어 (Redis ZSet + Write-back + Caffeine)
     │   └── scheduler/           # KeywordScheduler (Write-back·자정 초기화)
     ├── chat/                    # 실시간 채팅
@@ -238,14 +166,14 @@ src/main/java/jpa/basic/alldayprojectcommerce/
 
 ### 주문 / 결제
 
-| Method | 경로 | 설명 | 인증 |
-|--------|------|------|------|
-| POST | `/api/orders` | 주문서 생성 | ✅ |
-| GET | `/api/orders` | 주문 목록 (커서 페이징) | ✅ |
-| GET | `/api/orders/{orderUid}` | 주문서 조회 (결제 전) | ✅ |
+| Method | 경로 | 설명              | 인증 |
+|--------|------|-----------------|------|
+| POST | `/api/orders` | 주문서 생성          | ✅ |
+| GET | `/api/orders` | 주문 목록 조회        | ✅ |
+| GET | `/api/orders/{orderUid}` | 주문서 조회 (결제 전)   | ✅ |
 | GET | `/api/orders/{orderUid}/details` | 주문 상세 조회 (결제 후) | ✅ |
-| POST | `/api/orders/{orderUid}/payments` | 결제 생성 | ✅ |
-| POST | `/api/orders/{orderUid}/payments/{paymentUid}/confirm` | 결제 확정 | ✅ |
+| POST | `/api/orders/{orderUid}/payments` | 결제 생성           | ✅ |
+| POST | `/api/orders/{orderUid}/payments/{paymentUid}/confirm` | 결제 확정           | ✅ |
 
 ### 이벤트 / 검색어 / 채팅
 
@@ -279,11 +207,15 @@ src/main/java/jpa/basic/alldayprojectcommerce/
 ```java
 // 100개 스레드가 동시에 출발
 CyclicBarrier startBarrier = new CyclicBarrier(100);
-// 락 없는 버전은 정합성이 깨지는 것을 테스트로 증명
-assertThat(isExactlyCorrect).isFalse(); // 락 없음 → 테스트 의도적 실패
-```
+// 락 없는 버전은 정합성이 깨지는 것이 목적, 즉 정상 기대값(10/90/10/0)과 달라야 한다.
+boolean isExactlyCorrect =
+        result.successCount() == 10 &&
+                result.failCount() == 90 &&
+                orderCount == 10 &&
+                product.getStock() == 0;
 
-<<동시성 테스트 실패 결과 사진 (락 없음 - 재고 정합성 깨짐)>>
+assertThat(isExactlyCorrect).isFalse();
+```
 
 ### Redis 분산 락 구현
 
@@ -312,6 +244,24 @@ String script = """
 | **RETRY** | 최대 15회, 100ms 간격 재시도 | 재시도가 의미 있는 경우 |
 | **BLOCKING** | 최대 5초, 50ms 간격 대기 | 처리량보다 정합성 우선 |
 
+
+### Redisson 기반 분산 락 구현
+```java
+if (leaseTimeMillis < 0) {
+    locked = lock.tryLock(waitTimeMillis, TimeUnit.MILLISECONDS);
+} else {
+    locked = lock.tryLock(waitTimeMillis, leaseTimeMillis, TimeUnit.MILLISECONDS);
+}
+```
+
+```java
+if (locked && lock.isHeldByCurrentThread()) {
+    lock.unlock();
+    log.info("[RedissonLock] 락 해제 성공 key={}", key);
+}
+```
+
+
 #### AOP 기반 락 적용 (`@RedisLock`, `@RedissonLock`)
 
 비즈니스 코드에서 락 처리 로직을 완전히 분리했습니다.
@@ -325,7 +275,9 @@ String script = """
 public EventOrderResponse createEventOrderWithRedissonLockAopBlockingWatchdog(
         Long productId, Long userId) {
     return eventOrderService.createEventOrder(productId, userId);
-}
+}```
+
+
 ```
 
 SpEL 표현식으로 동적 키 생성:
@@ -350,27 +302,24 @@ Optional<Product> findByIdForUpdate(@Param("productId") Long productId);
 
 ### 락 버전별 비교 테스트 (v1 ~ v8)
 
-| 버전 | 전략 | 성공 수 | 실패 수 | 정합성 |
-|------|------|---------|---------|--------|
-| v1 | 락 없음 | - | - | ❌ 깨짐 |
-| v2 | DB 비관적 락만 | 10 | 90 | ✅ |
-| v3 | Redisson Retry + TTL | 10 | 90 | ✅ |
-| v4 | Redisson Retry + Watchdog | 10 | 90 | ✅ |
-| v5 | Redisson FailFast | 0~1 | 99~100 | ✅ |
-| v6 | Redisson Blocking + TTL | 10 | 90 | ✅ |
-| **v7** | **Redisson Blocking + Watchdog** | **10** | **90** | **✅ 최종 선택** |
-| v8 | Redisson Blocking + Watchdog + 비관락 | 10 | 90 | ✅ |
+| 방식 | 성공 수 | 최종 재고 | 초과 판매 | p95 | TPS | timeout | lock_fail_count | waitTime | leaseTime | 병목 위치 | 평가 |
+|------|--------|----------|----------|------|------|---------|-----------------|----------|-----------|------------|------|
+| v1 락 없음 | 998 | ❌ 초과 판매 | ❌ 발생 | 8.31s | 116 req/s | 0 | 0 | - | - | DB 정합성 | ❌ 탈락 |
+| v2 DB 비관락 | 100 | 0 | 0 | 2.21s | 413 req/s | 0 | 0 | - | - | DB row lock | ✅ 매우 우수 |
+| v3 Redis Retry (TTL) | 100 | 0 | 0 | 7.97s | 119 req/s | 0 | 4 | 5s | 3s | Redis 대기 | ⚠️ 느림 |
+| v4 Redis Blocking (TTL) | 100 | 0 | 0 | 5.50s | 169 req/s | 0 | 0 | 10s | 5s | Redis 대기 | △ 경계 |
+| v5 Redis FailFast | 6 | ❌ 재고 남음 | 0 | 1.14s | 567 req/s | 0 | 994 | 0 | 3s | lock fail | ❌ 탈락 |
+| v6 Redis Retry (Watchdog) | 100 | 0 | 0 | 5.06s | 191 req/s | 0 | 0 | 5s | -1 | Redis 대기 | △ 경계 |
+| v7 Redis Blocking (Watchdog) | 100 | 0 | 0 | 3.91s | 226 req/s | 0 | 0 | 10s | -1 | Redis 직렬화 | 🔥 최고 |
+| v8 Redis + DB 비관락 | 100 | 0 | 0 | 5.83s | 164 req/s | 0 | 0 | 10s | -1 | Redis + DB | ✅ 안정 but 느림 |
 
 #### 최종 선택: **v7 — Redisson Blocking + Watchdog**
 
 **선택 이유:**
-- Blocking 전략으로 재고 100개(티켓 10개 기준)를 최대한 소진
+- Blocking 전략으로 재고 100개(티켓 10개 기준)를 모두 소진
 - Watchdog으로 비즈니스 로직이 길어져도 TTL 자동 연장 → 안전
 - 비관락 중첩(v8) 대비 불필요한 DB 락 오버헤드 없음
-
-<<동시성 테스트 성공 결과 사진 (락 적용 후 — 재고 10개 정확히 소진)>>
-
-<<k6 부하 테스트 결과 그래프 — 100명 동시 요청 시 정합성 검증>>
+- 비관락 대비 DB 부하 분산 가능
 
 ---
 
@@ -758,7 +707,6 @@ Long nextCursor = hasNext ? getId.apply(content.getLast()) : null;
 ### 사전 요구사항
 
 - Docker & Docker Compose
-- Java 21
 
 ### 환경변수 설정
 
@@ -786,10 +734,7 @@ docker compose up -d
 
 ```bash
 # 이벤트 선착순 주문 부하 테스트
-docker compose --profile test run k6 run /scripts/event-order-load-test.js
-
-# 버전별 비교 테스트 (v1~v8)
-bash run-event-order-compare.sh
+PRODUCT_ID=4 VUS=1000 BASE_URL=http://app:8090 DB_PASSWORD=12345678 ./run-event-order-compare.sh
 ```
 
 서버 실행 후 `http://localhost:8090` 접속
